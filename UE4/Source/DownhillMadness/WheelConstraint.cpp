@@ -7,114 +7,79 @@
 UWheelConstraint::UWheelConstraint(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	this->bWantsInitializeComponent = true;
-	this->parentConstraint = (UPhysicsConstraintComponent*)(this->GetAttachParent());
+	this->steeringDegree = 0.0f;
 }
 
 
-void UWheelConstraint::UpdateWheel()
+// ----------------------------------------------------------------------------
+
+
+void UWheelConstraint::UpdateWheel(UPhysicsConstraintComponent* constraint, UPrimitiveComponent* wheel, float steeringDegree)
 {
-	if (this->parentConstraint == nullptr)
+	if (constraint == nullptr || wheel == nullptr)
 		return;
 
-	if (GEngine)
+	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor(1.0f, 0.0f, 0.0f, 1.0f), TEXT("Blah"));
-	}
+		// Destroy old constraint so that wheel can be rotated freely
+		constraint->ConstraintInstance.TermConstraint();
 
-	FBodyInstance* Body1 = GetBodyInstance(EConstraintFrame::Frame1);
-	FBodyInstance* Body2 = GetBodyInstance(EConstraintFrame::Frame2);
-	this->parentConstraint->ConstraintInstance.InitConstraint(this, Body1, Body2, 1.0f);
-}
+		// Backup linear and angular direction and velocity
+		float angularVelocity = wheel->GetPhysicsAngularVelocity().Size();
+		FVector angularDirection = wheel->GetPhysicsAngularVelocity();
+		//float linearVelocity = wheel->GetPhysicsLinearVelocity().Size();
+		FVector linearDirection = wheel->GetPhysicsLinearVelocity();
 
+		// Get axes of PhysicsConstraint before rotation
+		FVector constraintRight = constraint->GetRightVector();
+		FVector constraintForward = constraint->GetForwardVector();
 
-FBodyInstance* UWheelConstraint::GetBodyInstance(EConstraintFrame::Type Frame) const
-{
-	if (this->parentConstraint == nullptr)
-		return nullptr;
+		// Calculate new rotation of PhysicsConstraint
+		FRotator newRotation = this->GetComponenTransform().GetRotationV().Rotator();
+		FTransform rotationTransform(newRotation);
+		rotationTransform = FTransform(rotationTransform.GetUnitAxis(EAxis::X).RotateAngleAxis(steeringDegree, rotationTransform.GetUnitAxis(EAxis::Z)), rotationTransform.GetUnitAxis(EAxis::Y).RotateAngleAxis(steeringDegree, rotationTransform.GetUnitAxis(EAxis::Z)), rotationTransform.GetUnitAxis(EAxis::Z), FVector::ZeroVector);
+		newRotation = rotationTransform.Rotator();
+		constraint->SetWorldRotation(newRotation, true);
 
-	FBodyInstance* Instance = NULL;
-	UPrimitiveComponent* PrimComp = GetComponentInternal(Frame);
-	if (PrimComp != NULL)
-	{
-		if (Frame == EConstraintFrame::Frame1)
-		{
-			Instance = PrimComp->GetBodyInstance(this->parentConstraint->ConstraintInstance.ConstraintBone1);
-		}
+		// Set new angular velocity depending on new PhysicsConstraint rotation and old angular velocity
+		if (FVector::DotProduct(constraintRight, angularDirection) < 0.0f)
+			angularDirection = -rotationTransform.GetUnitAxis(EAxis::Y);
 		else
-		{
-			Instance = PrimComp->GetBodyInstance(this->parentConstraint->ConstraintInstance.ConstraintBone2);
-		}
+			angularDirection = rotationTransform.GetUnitAxis(EAxis::Y);
+
+		angularDirection.Normalize();
+		angularDirection *= angularVelocity;
+
+		// Set new linear velocity depending on new PhysicsConstraint rotation and old linear velocity
+		//if (FVector::DotProduct(constraintForward, linearDirection) < 0.0f)
+		//	linearDirection = -rotationTransform.GetUnitAxis(EAxis::X);
+		//else
+		//	linearDirection = rotationTransform.GetUnitAxis(EAxis::X);
+
+		//linearDirection.Normalize();
+		//linearDirection *= linearVelocity;
+
+		// Calculate new wheel rotation
+		FVector wheelForward = wheel->GetForwardVector() - wheel->GetForwardVector().ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
+		FVector wheelRight = wheel->GetRightVector() - wheel->GetRightVector().ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
+		FMatrix rotMatrix(wheelForward, wheelRight, -rotationTransform.GetUnitAxis(EAxis::Y), FVector::ZeroVector);
+		FRotator wheelRotation = rotMatrix.Rotator();
+		
+		// Nullify wheel movement before rotating to prevent jumping
+		wheel->SetPhysicsAngularVelocity(FVector::ZeroVector, false);
+		wheel->SetPhysicsLinearVelocity(FVector::ZeroVector, false);
+
+		// Set wheel rotation and location
+		wheel->SetWorldRotation(wheelRotation);
+		wheel->SetWorldLocation(constraint->GetComponenTransform().GetLocation());
+
+		// Reactivate wheel constraint to lock wheel rotation
+		constraint->InitializeComponent();
+
+		// Set wheel's new angular and linear velocity
+		wheel->SetPhysicsLinearVelocity(linearDirection, false);
+		wheel->SetPhysicsAngularVelocity(angularDirection, false);
+
+		this->steeringDegree = steeringDegree;
 	}
-	return Instance;
-}
-
-
-
-UPrimitiveComponent* UWheelConstraint::GetComponentInternal(EConstraintFrame::Type Frame) const
-{
-	if (this->parentConstraint == nullptr)
-		return nullptr;
-
-	UPrimitiveComponent* PrimComp = NULL;
-
-	FName ComponentName = NAME_None;
-	AActor* Actor = NULL;
-
-	// Frame 1
-	if (Frame == EConstraintFrame::Frame1)
-	{
-		// Use override component if specified
-		if (this->parentConstraint->OverrideComponent1.IsValid())
-		{
-			return this->parentConstraint->OverrideComponent1.Get();
-		}
-
-		ComponentName = this->parentConstraint->ComponentName1.ComponentName;
-		Actor = this->parentConstraint->ConstraintActor1;
-	}
-	// Frame 2
-	else
-	{
-		// Use override component if specified
-		if (this->parentConstraint->OverrideComponent2.IsValid())
-		{
-			return this->parentConstraint->OverrideComponent2.Get();
-		}
-
-		ComponentName = this->parentConstraint->ComponentName2.ComponentName;
-		Actor = this->parentConstraint->ConstraintActor2;
-	}
-
-	// If neither actor nor component name specified, joint to 'world'
-	if (Actor != NULL || ComponentName != NAME_None)
-	{
-		// If no actor specified, but component name is - use Owner
-		if (Actor == NULL)
-		{
-			Actor = GetOwner();
-		}
-
-		// If we now have an Actor, lets find a component
-		if (Actor != NULL)
-		{
-			// No name specified, use the root component
-			if (ComponentName == NAME_None)
-			{
-				PrimComp = Actor->GetRootPrimitiveComponent();
-			}
-			// Name specified, see if we can find that property..
-			else
-			{
-				UObjectPropertyBase* ObjProp = FindField<UObjectPropertyBase>(Actor->GetClass(), ComponentName);
-				if (ObjProp != NULL)
-				{
-					// .. and return the component that is there
-					PrimComp = Cast<UPrimitiveComponent>(ObjProp->GetObjectPropertyValue_InContainer(Actor));
-				}
-			}
-		}
-	}
-
-	return PrimComp;
 }
