@@ -23,6 +23,26 @@ class UWheelConstraint : public USceneComponent
 	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
 	void UpdateWheel(UPhysicsConstraintComponent* constraint, UPrimitiveComponent* wheel, float steeringDegree);
 
+	/**
+	* @brief	Stop body physics - call on a single WheelConstraint before steering
+	* @param	body	Body component
+	*/
+	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
+	void StopBody(UPrimitiveComponent* body);
+
+	/**
+	* @brief	Reenable body physics - call on a single WheelConstraint after steering
+	* @param	body	Body component
+	*/
+	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
+	void MoveBody(UPrimitiveComponent* body);
+
 	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
 	float steeringDegree;	/**< Last steering degree, used to prevent problems with constraint */
+
+	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
+	FVector bodyAngularVelocity;	/**< Angular velocity of body before steering */
+
+	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
+	FVector bodyLinearVelocity;		/**< Linear velocity of body before steering */
 };
