@@ -9,7 +9,7 @@
  * @brief	Class for turning a PhysicsConstraint into a WheelConstraint
  * Use seperate WheelConstraint instance for each wheel
  */
-UCLASS(ClassGroup = Physics, dependson(ConstraintInstance), MinimalAPI, meta = (BlueprintSpawnableComponent), HideCategories = (Activation, "Components|Activation", Physics, Mobility), ShowCategories = ("Physics|Components|WheelConstraint"))
+UCLASS(HeaderGroup = Component, EditInlineNew, ClassGroup = Physics, Meta = (BlueprintSpawnableComponent), HideCategories = (Activation, "Components|Activation", Physics, Mobility, Rendering, LOD), ShowCategories = ("Physics|Components|WheelConstraint"))
 class UWheelConstraint : public USceneComponent
 {
 	GENERATED_UCLASS_BODY()
@@ -20,29 +20,10 @@ class UWheelConstraint : public USceneComponent
 	  * @param	wheel		The wheel component (should be rigid body)
 	  * @param	steeringDegree	The steering degree, relative to this WheelConstraint
 	  */
-	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
+	UFUNCTION(BlueprintCallable, Category = "Physics,Component,WheelConstraint")
 	void UpdateWheel(UPhysicsConstraintComponent* constraint, UPrimitiveComponent* wheel, float steeringDegree);
 
-	/**
-	* @brief	Stop body physics - call on a single WheelConstraint before steering
-	* @param	body	Body component
-	*/
-	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
-	void StopBody(UPrimitiveComponent* body);
-
-	/**
-	* @brief	Reenable body physics - call on a single WheelConstraint after steering
-	* @param	body	Body component
-	*/
-	UFUNCTION(BlueprintCallable, Category = WheelConstraint)
-	void MoveBody(UPrimitiveComponent* body);
-
+	/** Last steering degree, used to prevent problems with constraint */
 	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
-	float steeringDegree;	/**< Last steering degree, used to prevent problems with constraint */
-
-	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
-	FVector bodyAngularVelocity;	/**< Angular velocity of body before steering */
-
-	UPROPERTY(VisibleAnywhere, Category = WheelConstraint)
-	FVector bodyLinearVelocity;		/**< Linear velocity of body before steering */
+	float steeringDegree;
 };
