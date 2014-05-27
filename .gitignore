@@ -45,6 +45,13 @@ UE4/*.sdf
 UE4/*.suo
 UE4/*.sln
 
+UE4_Menu/DerivedDataCache
+UE4_Menu/Intermediate
+UE4_Menu/Saved
+UE4_Menu/*.sdf
+UE4_Menu/*.suo
+UE4_Menu/*.sln
+
 # ====== #
 # Custom #
 # ====== #
