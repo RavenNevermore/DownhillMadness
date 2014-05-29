@@ -17,7 +17,7 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->Body->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	this->Body->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	this->Body->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	this->Body->SetSimulatePhysics(true);
+	this->Body->SetSimulatePhysics(false);
 	this->Body->SetNotifyRigidBodyCollision(true);
 	this->Body->bGenerateOverlapEvents = true;
 	this->Body->AttachTo(this->FrontArrow);
@@ -40,16 +40,29 @@ void AVehicleBodyBase::BeginPlay()
 
 void AVehicleBodyBase::AttachWheel(AVehicleWheelBase* wheel)
 {
+	if (wheel == nullptr)
+		return;
+
 	UPrimitiveComponent* rigidBody = wheel->GetRigidBody();
 
-	wheel->PhysicsConstraint->SetConstrainedComponents(rigidBody, FName(), this->Body, FName());
+	if (rigidBody == nullptr)
+		return;
+
+	if (this->attachedWheels.Find(wheel) != INDEX_NONE)
+		return;
+
+	wheel->PrepareAttach();
+
+	wheel->PhysicsConstraint->SetConstrainedComponents(rigidBody, NAME_None, this->Body, NAME_None);
 	wheel->PhysicsConstraint->bWantsInitializeComponent = true;
 	wheel->PhysicsConstraint->InitializeComponent();
 
-	wheel->PhysicsConstraint->AttachTo(this->Body);
-	wheel->WheelConstraint->AttachTo(this->Body);
+	wheel->PhysicsConstraint->AttachTo(this->Body, NAME_None, EAttachLocation::KeepWorldPosition);
+	wheel->WheelConstraint->AttachTo(this->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
 	rigidBody->SetSimulatePhysics(true);
+
+	this->attachedWheels.Add(wheel);
 }
 
 
@@ -58,16 +71,50 @@ void AVehicleBodyBase::AttachWheel(AVehicleWheelBase* wheel)
 
 void AVehicleBodyBase::DetachWheel(AVehicleWheelBase* wheel)
 {
+	if (wheel == nullptr)
+		return;
+
 	UPrimitiveComponent* rigidBody = wheel->GetRigidBody();
+
+	if (rigidBody == nullptr)
+		return;
+
+	int32 wheelIndex = this->attachedWheels.Find(wheel);
+	if (wheelIndex == INDEX_NONE)
+		return;
 
 	wheel->PhysicsConstraint->ConstraintInstance.TermConstraint();
 
 	rigidBody->SetSimulatePhysics(false);
+	rigidBody->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+	rigidBody->bAbsoluteLocation = false;
+	rigidBody->bAbsoluteRotation = false;
 
-	wheel->PhysicsConstraint->DetachFromParent();
-	wheel->WheelConstraint->DetachFromParent();
-	wheel->PhysicsConstraint->AttachTo(this->FrontArrow);
-	wheel->WheelConstraint->AttachTo(this->FrontArrow);
+	wheel->PhysicsConstraint->DetachFromParent(true);
+	wheel->WheelConstraint->DetachFromParent(true);
+	wheel->FrontArrow->SetWorldTransform(wheel->PhysicsConstraint->GetComponenTransform());
+	wheel->WheelConstraint->SetWorldTransform(wheel->PhysicsConstraint->GetComponenTransform());
+	wheel->PhysicsConstraint->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+	wheel->WheelConstraint->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+	rigidBody->SetRelativeTransform(wheel->relativeWheelTransform);
+
+	this->attachedWheels.RemoveAt(wheelIndex);
 }
 
 
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::EnablePhysics()
+{
+	this->Body->SetSimulatePhysics(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::DisablePhysics()
+{
+	this->Body->SetSimulatePhysics(false);
+}

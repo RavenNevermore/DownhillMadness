@@ -20,7 +20,7 @@ class UWheelConstraint : public USceneComponent
 	  * @param	wheel		The wheel component (should be rigid body)
 	  * @param	steeringDegree	The steering degree, relative to this WheelConstraint
 	  */
-	UFUNCTION(BlueprintCallable, Category = "Physics,Component,WheelConstraint")
+	UFUNCTION(BlueprintCallable, Category = "Physics|Component|WheelConstraint")
 	void UpdateWheel(UPhysicsConstraintComponent* constraint, UPrimitiveComponent* wheel, float steeringDegree);
 
 	/** Last steering degree, used to prevent problems with constraint */
