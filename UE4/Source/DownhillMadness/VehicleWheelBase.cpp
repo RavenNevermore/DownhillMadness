@@ -39,7 +39,7 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->AxisMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	this->AxisMesh->SetSimulatePhysics(false);
 	this->AxisMesh->bAbsoluteScale = true;
-	this->AxisMesh->AttachTo(this->PhysicsConstraint);
+	this->AxisMesh->AttachTo(this->WheelConstraint);
 
 	this->SetActorTickEnabled(true);
 

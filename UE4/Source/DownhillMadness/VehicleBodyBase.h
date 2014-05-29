@@ -16,6 +16,7 @@ class AVehicleBodyBase : public AActor
 	GENERATED_UCLASS_BODY()
 
 	void BeginPlay() OVERRIDE;
+	void Tick(float DeltaSeconds) OVERRIDE;
 
 	/**
 	* @brief	Attach wheel to vehicle body

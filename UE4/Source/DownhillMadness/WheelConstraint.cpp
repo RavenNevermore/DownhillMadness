@@ -14,9 +14,9 @@ UWheelConstraint::UWheelConstraint(const class FPostConstructInitializePropertie
 // ----------------------------------------------------------------------------
 
 
-void UWheelConstraint::UpdateWheel(UPhysicsConstraintComponent* constraint, UPrimitiveComponent* wheel, float steeringDegree)
+void UWheelConstraint::UpdateWheel(UPrimitiveComponent* rigidBody, UPhysicsConstraintComponent* constraint, const FTransform& relativeWheelTransform, float steeringDegree)
 {
-	if (constraint == nullptr || wheel == nullptr)
+	if (rigidBody == nullptr || constraint == nullptr)
 		return;
 
 	// Destroy old constraint so that wheel can be rotated freely
@@ -26,8 +26,8 @@ void UWheelConstraint::UpdateWheel(UPhysicsConstraintComponent* constraint, UPri
 	}
 
 	// Backup angular direction and velocity
-	float angularVelocity = wheel->GetPhysicsAngularVelocity().Size();
-	FVector angularDirection = wheel->GetPhysicsAngularVelocity();
+	float angularVelocity = rigidBody->GetPhysicsAngularVelocity().Size();
+	FVector angularDirection = rigidBody->GetPhysicsAngularVelocity();
 
 	// Get axis of PhysicsConstraint before rotation
 	FVector constraintRight = constraint->GetRightVector();
@@ -49,27 +49,49 @@ void UWheelConstraint::UpdateWheel(UPhysicsConstraintComponent* constraint, UPri
 	angularDirection *= angularVelocity;
 
 	// Calculate new wheel rotation
-	FVector wheelForward = wheel->GetForwardVector() - wheel->GetForwardVector().ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
-	FVector wheelRight = wheel->GetRightVector() - wheel->GetRightVector().ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
-	wheelForward.Normalize();
-	wheelRight.Normalize();
-	FMatrix rotMatrix(wheelForward, wheelRight, -rotationTransform.GetUnitAxis(EAxis::Y), FVector::ZeroVector);
+	FMatrix relativeWheelMatrix(relativeWheelTransform.GetUnitAxis(EAxis::X), relativeWheelTransform.GetUnitAxis(EAxis::Y), relativeWheelTransform.GetUnitAxis(EAxis::Z), FVector::ZeroVector);
+	relativeWheelMatrix = relativeWheelMatrix.Inverse();
+
+	FVector constraintRotatedForward = (relativeWheelMatrix.GetUnitAxis(EAxis::X).X * rigidBody->GetForwardVector())
+		+ (relativeWheelMatrix.GetUnitAxis(EAxis::X).Y * rigidBody->GetRightVector())
+		+ (relativeWheelMatrix.GetUnitAxis(EAxis::X).Z * rigidBody->GetUpVector());
+	FVector constraintRotatedRight = rotationTransform.GetUnitAxis(EAxis::Y);
+	FVector constraintRotatedUp = (relativeWheelMatrix.GetUnitAxis(EAxis::Z).X * rigidBody->GetForwardVector())
+		+ (relativeWheelMatrix.GetUnitAxis(EAxis::Z).Y * rigidBody->GetRightVector())
+		+ (relativeWheelMatrix.GetUnitAxis(EAxis::Z).Z * rigidBody->GetUpVector());
+
+	constraintRotatedForward = constraintRotatedForward - constraintRotatedForward.ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
+	constraintRotatedUp = constraintRotatedUp - constraintRotatedUp.ProjectOnTo(rotationTransform.GetUnitAxis(EAxis::Y));
+	constraintRotatedForward.Normalize();
+	constraintRotatedUp.Normalize();
+
+	FVector wheelForward = (relativeWheelTransform.GetUnitAxis(EAxis::X).X * constraintRotatedForward)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::X).Y * constraintRotatedRight)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::X).Z * constraintRotatedUp);
+	FVector wheelRight = (relativeWheelTransform.GetUnitAxis(EAxis::Y).X * constraintRotatedForward)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::Y).Y * constraintRotatedRight)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::Y).Z * constraintRotatedUp);
+	FVector wheelUp = (relativeWheelTransform.GetUnitAxis(EAxis::Z).X * constraintRotatedForward)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::Z).Y * constraintRotatedRight)
+		+ (relativeWheelTransform.GetUnitAxis(EAxis::Z).Z * constraintRotatedUp);
+
+	FMatrix rotMatrix(wheelForward, wheelRight, wheelUp, FVector::ZeroVector);
 	FRotator wheelRotation = rotMatrix.Rotator();
 
 	// Nullify wheel rotation before rotating to prevent jumping
-	wheel->SetPhysicsAngularVelocity(FVector::ZeroVector, false);
+	rigidBody->SetPhysicsAngularVelocity(FVector::ZeroVector, false);
 
 	// Set wheel rotation and location
-	wheel->SetWorldLocationAndRotation(constraint->GetComponenTransform().GetLocation(), wheelRotation, false);
-	wheel->BodyInstance.SetBodyTransform(wheel->ComponentToWorld, true);
-	wheel->BodyInstance.UpdateBodyScale(wheel->ComponentToWorld.GetScale3D());
+	rigidBody->SetWorldLocationAndRotation(constraint->GetComponenTransform().GetLocation(), wheelRotation, false);
+	rigidBody->BodyInstance.SetBodyTransform(rigidBody->ComponentToWorld, true);
+	rigidBody->BodyInstance.UpdateBodyScale(rigidBody->ComponentToWorld.GetScale3D());
 
 	// Reactivate wheel constraint to lock wheel rotation
 	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f)
 		constraint->InitializeComponent();
 
 	// Set wheel's new angular velocity
-	wheel->SetPhysicsAngularVelocity(angularDirection, false);
+	rigidBody->SetPhysicsAngularVelocity(angularDirection, false);
 
 	// Backup steering degree to prevent constraint from breaking every frame
 	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f)

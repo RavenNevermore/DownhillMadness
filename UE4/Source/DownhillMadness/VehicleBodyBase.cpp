@@ -22,6 +22,7 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->Body->bGenerateOverlapEvents = true;
 	this->Body->AttachTo(this->FrontArrow);
 
+	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
 }
 
@@ -31,7 +32,20 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 
 void AVehicleBodyBase::BeginPlay()
 {
+}
 
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::Tick(float DeltaSeconds)
+{
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		if (currentWheel->bIsSteerable)
+			currentWheel->WheelConstraint->UpdateWheel(currentWheel->GetRigidBody(), currentWheel->PhysicsConstraint, currentWheel->relativeWheelTransform, 30.0f);
+	}
 }
 
 
@@ -92,13 +106,13 @@ void AVehicleBodyBase::DetachWheel(AVehicleWheelBase* wheel)
 
 	wheel->PhysicsConstraint->DetachFromParent(true);
 	wheel->WheelConstraint->DetachFromParent(true);
-	wheel->FrontArrow->SetWorldTransform(wheel->PhysicsConstraint->GetComponenTransform());
-	wheel->WheelConstraint->SetWorldTransform(wheel->PhysicsConstraint->GetComponenTransform());
+	wheel->FrontArrow->SetWorldTransform(wheel->WheelConstraint->GetComponenTransform());
+	wheel->PhysicsConstraint->SetWorldTransform(wheel->WheelConstraint->GetComponenTransform());
 	wheel->PhysicsConstraint->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
 	wheel->WheelConstraint->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
 	rigidBody->SetRelativeTransform(wheel->relativeWheelTransform);
 
-	this->attachedWheels.RemoveAt(wheelIndex);
+	this->attachedWheels.RemoveAtSwap(wheelIndex);
 }
 
 
