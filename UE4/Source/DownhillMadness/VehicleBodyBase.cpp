@@ -32,6 +32,7 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 
 void AVehicleBodyBase::BeginPlay()
 {
+	//Super::BeginPlay();
 }
 
 
@@ -40,6 +41,8 @@ void AVehicleBodyBase::BeginPlay()
 
 void AVehicleBodyBase::Tick(float DeltaSeconds)
 {
+	//Super::Tick(DeltaSeconds);
+
 	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
 	{
 		AVehicleWheelBase* currentWheel = *wheelIter;
