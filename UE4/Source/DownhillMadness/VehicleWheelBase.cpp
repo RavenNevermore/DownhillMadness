@@ -41,9 +41,17 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->AxisMesh->bAbsoluteScale = true;
 	this->AxisMesh->AttachTo(this->WheelConstraint);
 
-	this->SetActorTickEnabled(true);
+	this->BrakeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("BrakeMesh")));
+	this->BrakeMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->BrakeMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->BrakeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	this->BrakeMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->BrakeMesh->SetSimulatePhysics(false);
+	this->BrakeMesh->bAbsoluteScale = true;
+	this->BrakeMesh->AttachTo(this->WheelConstraint);
 
 	this->bIsSteerable = false;
+	this->bHasBrake = true;
 }
 
 
