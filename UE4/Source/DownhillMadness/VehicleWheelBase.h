@@ -4,13 +4,14 @@
 
 #include "GameFramework/Actor.h"
 #include "WheelConstraint.h"
+#include "VehiclePartBase.h"
 #include "VehicleWheelBase.generated.h"
 
 /**
  * @brief	Base class for vehicle wheels to be used on vehicle bodies
  */
-UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, DependsOn = (UWheelConstraint), DefaultToInstanced, HideCategories = (Transform), ShowCategories = ("Actors|CustomVehicle|VehicleWheel"))
-class AVehicleWheelBase : public AActor
+UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, DependsOn = (UWheelConstraint, AVehiclePartBase), DefaultToInstanced, ShowCategories = ("Actors|CustomVehicle|VehicleWheel"))
+class AVehicleWheelBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
@@ -33,9 +34,17 @@ class AVehicleWheelBase : public AActor
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> AxisMesh;
 
+	/** Brake mesh */
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UStaticMeshComponent> BrakeMesh;
+
 	/** Indicates whether this wheel can be steered or not */
 	UPROPERTY(Category = VehicleWheel, EditInstanceOnly, BlueprintReadWrite)
-	uint32 bIsSteerable: 1;
+	uint32 bIsSteerable : 1;
+
+	/** Indicates whether this wheel has a brake or not */
+	UPROPERTY(Category = VehicleWheel, EditInstanceOnly, BlueprintReadWrite)
+	uint32 bHasBrake : 1;
 
 	/** Wheel's physics constraint */
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
