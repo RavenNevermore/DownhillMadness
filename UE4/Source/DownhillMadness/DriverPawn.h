@@ -56,9 +56,21 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	float steeringAxisInput;
 
+	/** Camera stiffness */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
+	float cameraStiffness;
+
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
+
+	/** Spring arm for camera */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USpringArmComponent> CameraSpringArm;
+
+	/** Camera observing character */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UCameraComponent> CharacterCamera;
 
 	/** Driver's physics constraint */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)

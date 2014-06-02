@@ -31,8 +31,20 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverMesh->bAbsoluteScale = true;
 	this->DriverMesh->AttachTo(this->RootComponent);
 
+	this->CameraSpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, FName(TEXT("CameraSpringArm")));
+	this->CameraSpringArm->bUseControllerViewRotation = true;
+	this->CameraSpringArm->TargetArmLength = 200.0f;
+	this->CameraSpringArm->SocketOffset = FVector(0, 0, 70);
+	this->CameraSpringArm->bDoCollisionTest = false;
+	this->CameraSpringArm->AttachTo(this->DriverMesh);
+
+	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
+	this->CharacterCamera->AttachTo(this->CameraSpringArm, USpringArmComponent::SocketName);
+	this->CharacterCamera->bUseControllerViewRotation = false;
+
 	this->driverState = EDriverPawnState::PushingVehicle;
 	this->steeringAxisInput = 0.0f;
+	this->cameraStiffness = 36.0f;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -54,6 +66,24 @@ void ADriverPawn::BeginPlay()
 void ADriverPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	FRotator rootRotation = this->DriverMesh->GetComponentRotation();
+	FRotator springArmRotation = this->CameraSpringArm->GetComponentRotation();
+	float rootYaw = rootRotation.Yaw < 0.0f ? rootRotation.Yaw + 360.0f : rootRotation.Yaw;
+	float springArmYaw = springArmRotation.Yaw < 0.0f ? springArmRotation.Yaw + 360.0f : springArmRotation.Yaw;
+	float dist = rootYaw > springArmYaw ? rootYaw - springArmYaw : springArmYaw - rootYaw;
+
+	float factor = 0.0f;
+
+	if (dist > 180.0f)
+	{
+		factor = (rootYaw > springArmYaw) ? -(360.0f - dist) : (360.0f - dist);
+	}
+	else
+	{
+		factor = (rootYaw - springArmYaw);
+	}
+	this->AddControllerYawInput(factor / this->cameraStiffness);
 
 	if (this->controlledVehicle != nullptr)
 	{
