@@ -20,6 +20,13 @@ class AVehicleBodyBase : public AVehiclePartBase
 	void Tick(float DeltaSeconds) OVERRIDE;
 
 	/**
+	* @brief	Update controls of this vehicle
+	* @param	DeltaSeconds		Delta time since previous frame
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	void UpdateControls(float DeltaSeconds);
+
+	/**
 	* @brief	Attach wheel to vehicle body
 	* @param	wheel		Wheel to attach body
 	*/

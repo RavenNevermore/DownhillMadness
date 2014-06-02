@@ -30,11 +30,11 @@ class AVehicleSteeringBase : public AVehiclePartBase
 	virtual float UpdateSteering(float DeltaSeconds);
 
 	/** Arrow component for easier orientation */
-	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
 	/** Steering mesh */
-	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> SteeringMesh;
 
 	/** The current axis input */

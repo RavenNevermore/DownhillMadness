@@ -54,6 +54,23 @@ void AVehicleBodyBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+
+		if (currentWheel->bHasBrake)
+			currentWheel->BrakeMesh->SetHiddenInGame(false);
+		else
+			currentWheel->BrakeMesh->SetHiddenInGame(true);
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
+{
 	float steeringDegree = 0.0f;
 	if (this->attachedSteering != nullptr)
 	{
@@ -63,12 +80,9 @@ void AVehicleBodyBase::Tick(float DeltaSeconds)
 	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
 	{
 		AVehicleWheelBase* currentWheel = *wheelIter;
+
 		if (currentWheel->bIsSteerable)
 			currentWheel->WheelConstraint->UpdateWheel(currentWheel->GetRigidBody(), currentWheel->PhysicsConstraint, currentWheel->relativeWheelTransform, steeringDegree);
-		if (currentWheel->bHasBrake)
-			currentWheel->BrakeMesh->SetHiddenInGame(false);
-		else
-			currentWheel->BrakeMesh->SetHiddenInGame(true);
 	}
 }
 

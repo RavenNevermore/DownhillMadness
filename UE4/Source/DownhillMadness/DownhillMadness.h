@@ -14,3 +14,4 @@
 #include "VehicleBrakeBase.h"
 #include "VehicleWeightBase.h"
 #include "VehicleBodyBase.h"
+#include "DriverPawn.h"
