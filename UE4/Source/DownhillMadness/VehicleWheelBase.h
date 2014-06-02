@@ -58,7 +58,16 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleAnywhere)
 	FTransform relativeWheelTransform;
 
-	/** Prepare wheel for attaching to body */
+	/** 
+	* @brief	Prepare wheel for attaching to body
+	*/
 	UFUNCTION(Category = "Physics|CustomVehicle|VehicleWheel")
 	void PrepareAttach();
+
+	/**
+	* @brief	Use brake on this wheel
+	* @param	brakeValue	Brake value to apply
+	*/
+	UFUNCTION(Category = "Physics|CustomVehicle|VehicleWheel")
+	void BrakeWheel(float brakeValue);
 };

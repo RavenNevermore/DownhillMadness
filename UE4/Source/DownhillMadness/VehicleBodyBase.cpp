@@ -77,12 +77,21 @@ void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 		steeringDegree = this->attachedSteering->UpdateSteering(DeltaSeconds);
 	}
 
+	float brakeValue = 0.0f;
+	if (this->attachedBrake != nullptr)
+	{
+		brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds);
+	}
+
 	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
 	{
 		AVehicleWheelBase* currentWheel = *wheelIter;
 
 		if (currentWheel->bIsSteerable)
 			currentWheel->WheelConstraint->UpdateWheel(currentWheel->GetRigidBody(), currentWheel->PhysicsConstraint, currentWheel->relativeWheelTransform, steeringDegree);
+
+		if (currentWheel->bHasBrake)
+			currentWheel->BrakeWheel(brakeValue);
 	}
 }
 
@@ -253,6 +262,34 @@ bool AVehicleBodyBase::DetachSteering(AVehicleSteeringBase* steering)
 // ----------------------------------------------------------------------------
 
 
+bool AVehicleBodyBase::AttachBrake(AVehicleBrakeBase* brake)
+{
+	if (brake == nullptr || this->attachedBrake != nullptr)
+		return false;
+
+	this->attachedBrake = brake;
+
+	return true;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::DetachBrake(AVehicleBrakeBase* brake)
+{
+	if (brake == nullptr || this->attachedBrake == nullptr)
+		return false;
+
+	this->attachedBrake = nullptr;
+
+	return true;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleBodyBase::SetSteeringInput(float input)
 {
 	if (this->attachedSteering != nullptr)
@@ -265,7 +302,8 @@ void AVehicleBodyBase::SetSteeringInput(float input)
 
 void AVehicleBodyBase::SetBrakeInput(float input)
 {
-
+	if (this->attachedBrake != nullptr)
+		this->attachedBrake->SetInput(input);
 }
 
 

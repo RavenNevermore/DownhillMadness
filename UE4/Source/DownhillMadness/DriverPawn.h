@@ -43,10 +43,18 @@ class ADriverPawn : public APawn
 	void StartRace();
 
 	/**
-	* @brief	Get input from axis
+	* @brief	Get input for steering
+	* @float	Axis value
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|DriverPawn")
-	void OnGetAxisInput(float axisInput);
+	void OnGetSteeringInput(float axisInput);
+
+	/**
+	* @brief	Get input for brakes
+	* @float	Axis value
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|DriverPawn")
+	void OnGetBrakeInput(float axisInput);
 
 	/** The vehicle controlled by this driver */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
@@ -55,6 +63,10 @@ class ADriverPawn : public APawn
 	/** Input of steering axis */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	float steeringAxisInput;
+
+	/** Input of brake axis */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
+	float brakeAxisInput;
 
 	/** Camera stiffness */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)

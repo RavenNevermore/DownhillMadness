@@ -69,6 +69,20 @@ class AVehicleBodyBase : public AVehiclePartBase
 	bool DetachSteering(AVehicleSteeringBase* steering);
 
 	/**
+	* @brief	Attach brake system to vehicle body
+	* @param	brake		Brake system to attach body
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool AttachBrake(AVehicleBrakeBase* brake);
+
+	/**
+	* @brief	Detach brake system from vehicle body
+	* @param	brake		Brake system to detach from body
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool DetachBrake(AVehicleBrakeBase* brake);
+
+	/**
 	* @brief	Set input for steering system
 	* @param	input		Input value
 	*/

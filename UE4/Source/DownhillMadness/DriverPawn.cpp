@@ -109,6 +109,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		if (this->driverState == EDriverPawnState::SteeringVehicle)
 		{
 			this->controlledVehicle->SetSteeringInput(this->steeringAxisInput);
+			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);
 		}
 	}
@@ -121,16 +122,26 @@ void ADriverPawn::Tick(float DeltaSeconds)
 void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	check(InputComponent);
-	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetAxisInput);
+	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput);
+	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput);
 }
 
 
 // ----------------------------------------------------------------------------
 
 
-void ADriverPawn::OnGetAxisInput(float axisInput)
+void ADriverPawn::OnGetSteeringInput(float axisInput)
 {
 	this->steeringAxisInput = axisInput;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::OnGetBrakeInput(float axisInput)
+{
+	this->brakeAxisInput = axisInput;
 }
 
 

@@ -67,3 +67,25 @@ void AVehicleWheelBase::PrepareAttach()
 	if (wheelCollider != nullptr)
 		this->relativeWheelTransform = wheelCollider->GetRelativeTransform();
 }
+
+
+// ----------------------------------------------------------------------------
+
+void AVehicleWheelBase::BrakeWheel(float brakeValue)
+{
+	UPrimitiveComponent* rigidBody = this->GetRigidBody();
+
+	if (rigidBody == nullptr)
+		return;
+
+	float currentMaxAngularVelocity = brakeValue * rigidBody->BodyInstance.MaxAngularVelocity;
+	float currentAngularVelocity = rigidBody->GetPhysicsAngularVelocity().Size();
+
+	if (currentAngularVelocity > currentMaxAngularVelocity)
+	{
+		FVector newAngularVelocity = rigidBody->GetPhysicsAngularVelocity();
+		newAngularVelocity.Normalize();
+		newAngularVelocity *= currentMaxAngularVelocity;
+		rigidBody->SetPhysicsAngularVelocity(newAngularVelocity);
+	}
+}
