@@ -30,7 +30,7 @@ class AVehicleBrakeBase : public AVehiclePartBase
 	virtual float UpdateBrake(float DeltaSeconds);
 
 	/** The current axis input */
-	UPROPERTY(VisibleAnywhere, Category = VehicleSteering, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, Category = VehicleBrake, BlueprintReadOnly)
 	float currentInput;
 
 	/** The current brake value */
@@ -38,10 +38,10 @@ class AVehicleBrakeBase : public AVehiclePartBase
 	float currentBrake;
 
 	/** The maximum brake value */
-	UPROPERTY(EditDefaultsOnly, Category = VehicleSteering, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, Category = VehicleBrake, BlueprintReadOnly)
 	float maxBrake;
 
 	/** Brake speed */
-	UPROPERTY(EditDefaultsOnly, Category = VehicleSteering, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, Category = VehicleBrake, BlueprintReadOnly)
 	float brakeSpeed;
 };
