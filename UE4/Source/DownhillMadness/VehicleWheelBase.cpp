@@ -50,7 +50,7 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->BrakeMesh->bAbsoluteScale = true;
 	this->BrakeMesh->AttachTo(this->WheelConstraint);
 
-	this->maxWheelVelocity = 1000.0f;
+	this->maxWheelVelocity = 5000.0f;
 
 	this->bIsSteerable = false;
 	this->bHasBrake = true;
@@ -77,6 +77,9 @@ void AVehicleWheelBase::PrepareAttach()
 
 void AVehicleWheelBase::BrakeWheel(float brakeValue)
 {
+	return;		// Do nothing
+	// TODO: Bessere Bremse-Funktion finden
+
 	UPrimitiveComponent* rigidBody = this->GetRigidBody();
 
 	if (rigidBody == nullptr)
