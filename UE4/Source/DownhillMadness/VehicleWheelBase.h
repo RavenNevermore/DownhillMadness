@@ -58,6 +58,10 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleAnywhere)
 	FTransform relativeWheelTransform;
 
+	/** Wheel's maximum angular velocity */
+	UPROPERTY(EditDefaultsOnly, Category = VehicleWheel, BlueprintReadOnly)
+	float maxAngularVelocity;
+
 	/** 
 	* @brief	Prepare wheel for attaching to body
 	*/
