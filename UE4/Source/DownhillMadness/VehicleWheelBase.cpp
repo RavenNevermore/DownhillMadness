@@ -50,6 +50,8 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->BrakeMesh->bAbsoluteScale = true;
 	this->BrakeMesh->AttachTo(this->WheelConstraint);
 
+	this->maxWheelVelocity = 1000.0f;
+
 	this->bIsSteerable = false;
 	this->bHasBrake = true;
 }
@@ -67,7 +69,6 @@ void AVehicleWheelBase::PrepareAttach()
 	if (wheelCollider != nullptr)
 	{
 		this->relativeWheelTransform = wheelCollider->GetRelativeTransform();
-		this->maxAngularVelocity = wheelCollider->BodyInstance.MaxAngularVelocity;
 	}
 }
 
@@ -81,6 +82,14 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 	if (rigidBody == nullptr)
 		return;
 
-	float currentMaxAngularVelocity = (1.0f - brakeValue) * this->maxAngularVelocity;
-	rigidBody->SetPhysicsMaxAngularVelocity(currentMaxAngularVelocity);
+	float currentMaxVelocity = (1.0f - brakeValue) * this->maxWheelVelocity;
+	float currentVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity().Size();
+
+	if (currentVelocity > currentMaxVelocity)
+	{
+		FVector newVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity();
+		newVelocity.Normalize();
+		newVelocity *= currentMaxVelocity;
+		rigidBody->BodyInstance.SetLinearVelocity(newVelocity, false);
+	}
 }

@@ -60,7 +60,7 @@ class AVehicleWheelBase : public AVehiclePartBase
 
 	/** Wheel's maximum angular velocity */
 	UPROPERTY(EditDefaultsOnly, Category = VehicleWheel, BlueprintReadOnly)
-	float maxAngularVelocity;
+	float maxWheelVelocity;
 
 	/** 
 	* @brief	Prepare wheel for attaching to body
