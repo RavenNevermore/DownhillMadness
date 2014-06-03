@@ -78,7 +78,7 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 	if (rigidBody == nullptr)
 		return;
 
-	float currentMaxAngularVelocity = brakeValue * rigidBody->BodyInstance.MaxAngularVelocity;
+	float currentMaxAngularVelocity = (1.0f - brakeValue) * rigidBody->BodyInstance.MaxAngularVelocity;
 	float currentAngularVelocity = rigidBody->GetPhysicsAngularVelocity().Size();
 
 	if (currentAngularVelocity > currentMaxAngularVelocity)
