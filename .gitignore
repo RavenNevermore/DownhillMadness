@@ -50,3 +50,4 @@ UE4/*.sln
 # ====== #
 DownhillMadness/Assets/Downloads/
 *.meta
+*.xcodeproj
