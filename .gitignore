@@ -40,11 +40,9 @@ Thumbs.db
 
 UE4/DerivedDataCache
 UE4/Intermediate
-/UE4/Saved/**
-!/UE4/Saved/Config/CleanSourceConfigs/**
-!/UE4/Saved/Config/Windows/**
-!/UE4/Saved/Config/CleanSourceConfigs/Input.ini
-!/UE4/Saved/Config/Windows/Input.ini
+/UE4/Saved/*
+!/UE4/Saved/Config/CleanSourceConfigs/*
+!/UE4/Saved/Config/Windows/*
 UE4/*.sdf
 UE4/*.suo
 UE4/*.sln
