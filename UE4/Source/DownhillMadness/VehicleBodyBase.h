@@ -8,6 +8,36 @@
 #include "VehicleWheelBase.h"
 #include "VehicleBodyBase.generated.h"
 
+
+/**
+* @brief	Struct for vehicle error checking
+*/
+USTRUCT(BlueprintType)
+struct FVehicleErrorCheck
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool hasNoWheels;
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool hasNoSteerableWheels;
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool hasNoBrakesOnWheels;
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool hasNoBrakes;
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool hasNoSteeringSystem;
+
+	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
+	bool noErrors;
+
+	FVehicleErrorCheck();
+};
+
 /**
  * @brief	Base class for vehicle bodies that manages and communicates with all other vehicle components
  */
@@ -29,6 +59,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Attach wheel to vehicle body
 	* @param	wheel		Wheel to attach body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool AttachWheel(AVehicleWheelBase* wheel);
@@ -36,6 +67,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Detach wheel from vehicle body
 	* @param	wheel		Wheel to detach from body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool DetachWheel(AVehicleWheelBase* wheel);
@@ -43,6 +75,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Attach weight to vehicle body
 	* @param	weight		Weight to attach body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool AttachWeight(AVehicleWeightBase* weight);
@@ -50,6 +83,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Detach weight from vehicle body
 	* @param	weight		Weight to detach from body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool DetachWeight(AVehicleWeightBase* weight);
@@ -57,6 +91,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Attach steering system to vehicle body
 	* @param	steering		Steering system to attach body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool AttachSteering(AVehicleSteeringBase* steering);
@@ -64,6 +99,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Detach steering system from vehicle body
 	* @param	steering		Steering system to detach from body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool DetachSteering(AVehicleSteeringBase* steering);
@@ -71,6 +107,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Attach brake system to vehicle body
 	* @param	brake		Brake system to attach body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool AttachBrake(AVehicleBrakeBase* brake);
@@ -78,6 +115,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Detach brake system from vehicle body
 	* @param	brake		Brake system to detach from body
+	* @returns	True if successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	bool DetachBrake(AVehicleBrakeBase* brake);
@@ -108,13 +146,42 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	void DisablePhysics();
 
+	/**
+	* @brief	Align wheel to vehicle's bounding box and check if wheel can be attached
+	* @param	wheel	Wheel to test
+	* @param	minDistance	Minimum distance of wheel from bounding box
+	* @param	maxDistance	Maximum distance of wheel from bounding box
+	* @param	newTransform	New projected wheel transform
+	* @returns	True if wheel can be placed
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool AlignWheel(AVehicleWheelBase* wheel, float minDistance, float maxDistance, FTransform& newTransform);
+
+	/**
+	* @brief	Align weight to vehicle's bounding box and check if weight can be attached
+	* @param	weight	Weight to test
+	* @param	minDistance	Minimum distance of weight from bounding box
+	* @param	maxDistance	Maximum distance of weight from bounding box
+	* @param	newTransform	New projected weight transform
+	* @returns	True if weight can be placed
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool AlignWeight(AVehicleWeightBase* weight, float minDistance, float maxDistance, FTransform& newTransform);
+
+	/**
+	* @brief	Check this vehicle for errors
+	* @returns	All errors found
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	FVehicleErrorCheck CheckVehicleForErrors();
+
 	/** Body's mesh */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> Body;
 
-	/** Base for connecting wheels through raycast */
+	/** Base for attach parts by raycast */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class UBoxComponent> WheelRaycastBase;
+	TSubobjectPtr<class UBoxComponent> RaycastBase;
 
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
