@@ -21,20 +21,36 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->Body->bGenerateOverlapEvents = true;
 	this->Body->AttachTo(this->FrontArrow);
 
-	this->WheelRaycastBase = PCIP.CreateDefaultSubobject<UBoxComponent>(this, FName(TEXT("WheelRaycastBase")));
-	this->WheelRaycastBase->SetCollisionProfileName(FName(TEXT("Vehicle")));
-	this->WheelRaycastBase->SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
-	this->WheelRaycastBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	this->WheelRaycastBase->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	this->WheelRaycastBase->SetSimulatePhysics(false);
-	this->WheelRaycastBase->InitBoxExtent(FVector(100.0f, 100.0f, 100.0f));
-	this->WheelRaycastBase->AttachTo(this->Body);
+	this->RaycastBase = PCIP.CreateDefaultSubobject<UBoxComponent>(this, FName(TEXT("RaycastBase")));
+	this->RaycastBase->SetCollisionProfileName(FName(TEXT("Vehicle")));
+	this->RaycastBase->SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
+	this->RaycastBase->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	this->RaycastBase->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	this->RaycastBase->SetSimulatePhysics(false);
+	this->RaycastBase->SetNotifyRigidBodyCollision(true);
+	this->RaycastBase->bGenerateOverlapEvents = true;
+	this->RaycastBase->InitBoxExtent(FVector(100.0f, 100.0f, 100.0f));
+	this->RaycastBase->AttachTo(this->Body);
 
 	this->attachedSteering = nullptr;
 	this->attachedBrake = nullptr;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+FVehicleErrorCheck::FVehicleErrorCheck()
+{
+	this->hasNoWheels = false;
+	this->hasNoSteerableWheels = false;
+	this->hasNoBrakesOnWheels = false;
+	this->hasNoBrakes = false;
+	this->hasNoSteeringSystem = false;
+	this->noErrors = true;
 }
 
 
@@ -327,4 +343,174 @@ void AVehicleBodyBase::EnablePhysics()
 void AVehicleBodyBase::DisablePhysics()
 {
 	this->Body->SetSimulatePhysics(false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::AlignWheel(AVehicleWheelBase* wheel, float minDistance, float maxDistance, FTransform& newTransform)
+{
+	newTransform = wheel->FrontArrow->GetComponenTransform();
+
+	TArray<FHitResult> hitResults;
+
+	FVector rayStart = wheel->FrontArrow->GetComponentLocation();
+	FVector rayEnd = this->RaycastBase->GetComponentLocation();
+
+	FCollisionQueryParams queryParams(false);
+	queryParams.bFindInitialOverlaps = true;
+
+	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
+
+	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+	
+	// Outer loop
+	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter; ++hitResultIter)
+	{
+		FHitResult currentHitResult = *hitResultIter;
+
+		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+		{
+			rayEnd = rayStart + maxDistance * -(currentHitResult.ImpactNormal);
+			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+			// Inner loop
+			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
+			{
+				currentHitResult = *innerHitResultIter;
+
+				if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+				{
+					if ((rayStart - currentHitResult.ImpactPoint).Size() < minDistance || (rayStart - rayEnd).Size() < (currentHitResult.ImpactPoint - rayEnd).Size())
+						return false;
+					
+					// Get new transform
+					FVector forwardVector;
+					FVector rightVector = -currentHitResult.ImpactNormal;
+					FVector upVector = this->RaycastBase->GetUpVector();
+					float dotProduct = FVector::DotProduct(upVector, rightVector);
+
+					if (dotProduct < -0.75f)
+						upVector = this->RaycastBase->GetForwardVector();
+					else if (dotProduct > 0.75f)
+						upVector = -this->RaycastBase->GetForwardVector();
+
+					forwardVector = FVector::CrossProduct(rightVector, upVector);
+
+					newTransform = FTransform(forwardVector, rightVector, upVector, rayStart);
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance, float maxDistance, FTransform& newTransform)
+{
+	newTransform = weight->FrontArrow->GetComponenTransform();
+
+	TArray<FHitResult> hitResults;
+
+	FVector rayStart = weight->FrontArrow->GetComponentLocation();
+	FVector rayEnd = this->RaycastBase->GetComponentLocation();
+
+	FCollisionQueryParams queryParams(false);
+	queryParams.bFindInitialOverlaps = true;
+
+	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
+
+	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+	// Outer loop
+	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter; ++hitResultIter)
+	{
+		FHitResult currentHitResult = *hitResultIter;
+
+		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+		{
+			rayEnd = rayStart + maxDistance * -(currentHitResult.ImpactNormal);
+			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+			// Inner loop
+			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
+			{
+				currentHitResult = *innerHitResultIter;
+
+				if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+				{
+					if ((rayStart - currentHitResult.ImpactPoint).Size() < minDistance || (rayStart - rayEnd).Size() < (currentHitResult.ImpactPoint - rayEnd).Size())
+						return false;
+
+					// Get new transform
+					FVector forwardVector;
+					FVector rightVector = -currentHitResult.ImpactNormal;
+					FVector upVector = this->RaycastBase->GetUpVector();
+					float dotProduct = FVector::DotProduct(upVector, rightVector);
+
+					if (dotProduct < -0.75f)
+						upVector = this->RaycastBase->GetForwardVector();
+					else if (dotProduct > 0.75f)
+						upVector = -this->RaycastBase->GetForwardVector();
+
+					forwardVector = FVector::CrossProduct(rightVector, upVector);
+
+					newTransform = FTransform(forwardVector, rightVector, upVector, rayStart);
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+FVehicleErrorCheck AVehicleBodyBase::CheckVehicleForErrors()
+{
+	FVehicleErrorCheck foundErrors;
+	foundErrors.noErrors = true;
+
+	if (this->attachedWheels.Num() <= 0)
+		foundErrors.hasNoWheels = true;
+
+	foundErrors.hasNoBrakesOnWheels = true;
+	foundErrors.hasNoSteerableWheels = true;
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+
+		if (currentWheel->bHasBrake)
+			foundErrors.hasNoBrakesOnWheels = false;
+
+		if (currentWheel->bIsSteerable)
+			foundErrors.hasNoSteerableWheels = false;
+	}
+
+	if (this->attachedBrake == nullptr)
+		foundErrors.hasNoBrakes = true;
+
+	if (this->attachedSteering == nullptr)
+		foundErrors.hasNoSteeringSystem = true;
+
+	if (foundErrors.hasNoWheels || foundErrors.hasNoBrakesOnWheels || foundErrors.hasNoSteerableWheels || foundErrors.hasNoBrakes || foundErrors.hasNoSteeringSystem)
+		foundErrors.noErrors = false;
+
+	return foundErrors;
 }
