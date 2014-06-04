@@ -19,6 +19,7 @@ AVehicleWheelCapsuleBase::AVehicleWheelCapsuleBase(const class FPostConstructIni
 	this->WheelCapsule->SetCapsuleHalfHeight(40.0f);
 	this->WheelCapsule->SetCapsuleRadius(22.0f);
 	this->WheelCapsule->RelativeRotation.Roll = 90.0f;
+	this->WheelCapsule->BodyInstance.bUpdateMassWhenScaleChanges = true;
 	this->WheelCapsule->AttachTo(this->RootComponent);
 
 	this->WheelMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("WheelMesh")));
@@ -29,6 +30,26 @@ AVehicleWheelCapsuleBase::AVehicleWheelCapsuleBase(const class FPostConstructIni
 	this->WheelMesh->SetSimulatePhysics(false);
 	this->WheelMesh->RelativeRotation.Roll = -90.0f;
 	this->WheelMesh->AttachTo(this->WheelCapsule);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelCapsuleBase::BeginPlay()
+{
+	Super::BeginPlay();
+	UPhysicalMaterial* PhysMaterial = this->WheelMesh->GetBodySetup()->PhysMaterial;
+	if (PhysMaterial == NULL && GEngine != NULL)
+	{
+		PhysMaterial = GEngine->DefaultPhysMaterial;
+	}
+
+	this->WheelCapsule->SetPhysMaterialOverride(PhysMaterial);
+	this->WheelCapsule->BodyInstance.UpdateMassProperties();
+	float massDifference = this->WheelMesh->CalculateMass() / (this->WheelCapsule->CalculateMass() / this->WheelCapsule->BodyInstance.MassScale);
+	this->WheelCapsule->BodyInstance.MassScale = massDifference;
+	this->WheelCapsule->BodyInstance.UpdateMassProperties();
 }
 
 

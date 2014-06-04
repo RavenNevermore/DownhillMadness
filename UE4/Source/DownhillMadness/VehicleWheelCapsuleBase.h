@@ -13,6 +13,7 @@ class AVehicleWheelCapsuleBase : public AVehicleWheelBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void BeginPlay() OVERRIDE;
 	UPrimitiveComponent* GetRigidBody() OVERRIDE;
 
 	/** Wheel's rigid body */
