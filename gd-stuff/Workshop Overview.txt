@@ -1,0 +1,214 @@
+Die wichtigsten Klassen für den Kart-Workshop im Überblick:
+
+
+Hierarchie:
+
+-VehiclePartBase
+--VehicleWheelBase
+---VehicleCapsuleWheelBase
+---VehicleMeshWheelBase
+--VehicleBrakeBase
+--VehicleSteeringBase
+--VehicleWeightBase
+--VehicleBodyBase
+
+-Pawn
+--DriverPawn
+
+
+Alle Klassen, die für das Zusammenbauen von Karts wichtig sind,
+sind von der Klasse "VehiclePartBase" abgeleitet. Verwendet werden
+sie, indem man in der Unreal Engine im Blueprints-Menü
+"New Class Blueprint" auswählt und die entsprechende Klasse auswählt,
+von der man ein neues Bautel erstellen will. Das geht mit allen
+Vehicle*Base-Klassen mit Ausnahme von "VehiclePartBase" und
+"VehicleWheelBase", die lediglich als abstrakte Basisklassen
+intern vorgesehen sind.
+
+Die DriverPawn-Klasse steht nicht mit dem Workshop direkt in
+Verbindung, sondern ist die Basis-Klasse für Charaktere im Spiel.
+Sie ist das Bindeglied zwischen Kart und Spieler und dient der
+Kommunikation, indem sie beispielsweise den Input des Spielers
+entgegennimmt und diesen an das entsprechende Kart weiterleitet.
+
+Hier jetzt die einzelnen Klassen im Detail:
+
+
+
+
+***VehicleCapsuleWheelBase/VehicleMeshWheelBase***
+
+Basis-Klassen für Räder im Spiel. Die erste Variante verwendet
+für die Physik einen Capsule Collider, die zweite Variante einen
+Mesh Collider. In der Regel sollte die Capsule-Variante verwendet
+werden, da nur Kapseln in der UE-Physik-Engine einigermaßen gut
+als Räder funktionieren. Die zweite Variante ist lediglich für
+Spaß-Räder und ähnliches gedacht und kann erstmal ignoriert werden.
+
+Blueprints von Rädern enthalten im Großen und Ganzen vier wichtige
+Komponenten:
+
+-Das Mesh des Rades selbst (WheelMesh)
+-Den Collider des Rades (ist bei der zweiten Variante identisch
+ mit dem Mesh)
+-Das Mesh der Rad-Aufhängung (AxisMesh)
+-Das Mesh der Bremse (BrakeMesh)
+
+All diese Komponenten können im Tab "Components" des Blueprints
+eingestellt werden. Die Rad-Aufhängung sollte dabei in Richtung
+des grünen Pfeils zeigen und das Rad selbst in Richtung des
+roten Pfeils ausgerichtet sein. Bei Kapsel-Rädern ist außerdem
+noch wichtig, dass Kapseln ja automatisch größer sind, als die zu
+Grunde liegenden Räder und dadurch die automatisch berechnete
+Masse nicht mehr stimmt. Das plane ich in einer späteren Version
+zu beheben (indem die richtige Masse automatisch berechnet wird),
+aber fürs erste muss man die Masse über Mass Scale noch manuell
+korrigieren. Damit das leichter fällt ist es wichtig, dass
+Kapsel und Rad-Mesh dasselbe Physics Material zugewiesen ist, da
+dieses die Masse beeinflusst.
+
+Zusätzlich zu diesen Blueprint-spezifischen Einstellungen hat
+noch jede einzelne Instanz eines Rades die zwei Einstellungen
+"is steerable" und "has brakes", die bestimmen, ob ein Rad lenkbar
+und/oder bremsbar ist.
+
+
+
+
+
+***VehicleWeightBase***
+
+Basis-Klasse für Gewichte. Hier gibt es nicht wirklich viel zu
+sagen. Die einzige wichtige Komponente hier ist das Mesh des
+Gewichts. Die Masse lässt sich hier durch Physics Materials und
+ähnliches wieder beliebig beeinflussen.
+
+
+
+
+
+***VehicleBrakeBase***
+
+Basis-Klasse für Bremsen. Auch hier gibt es nicht viel zu sagen,
+da Bremsen momentan weder eine sichtbare Komponente (außer an den
+Reifen) haben, noch besonders ausgearbeitet sind. Deswegen können
+eigentlich sämtliche Einstellungsmöglichkeiten komplett ignoriert
+werden.
+
+
+
+
+
+***VehicleSteeringBase***
+
+Basis-Klasse für Lenksysteme. Einzige wichtige Komponente hier ist
+das Mesh des Lenksystems. Zu beachten ist, dass Lenksysteme nicht
+frei positionierbar im Kart sind, sondern automatisch fest
+positioniert werden. Das wird hier bewerkstelligt, indem das
+Lenksystem immer genau auf den Ursprung der Karosserie gesetzt
+wird. Das sollte beim Bau von Lenksystemen berücksichtigt werden,
+damit diese nachher im Spiel beim Kart auch an der richtigen Stelle
+sitzen.
+
+
+
+
+
+
+***VehicleBodyBase***
+
+Basis-Klasse für die Karosserie und gleichzeitig wichtigstes
+Bauteil. Stellt die Basis jedes Karts dar, über die auch die
+Kommunikation mit allen anderen Bauteilen abläuft. Die zwei
+wichtigsten Komponenten hier sind das Mesh der Karosserie, so
+wie die Komponente "RaycastBase", welche eine Box darstellt, deren
+Größe ungefähr an die Karosserie angepasst werden sollte, da über
+sie festgelegt wird, wo an der Karosserie Räder und ähnliche Bauteile
+angebracht werden können.
+Die Body-Klasse bietet für jede Art von Bauteil je eine Funktion
+zum An- und Abbau des Teils ans bzw. vom Kart. Die Funktionen sehen
+folgendermaßen aus:
+
+AttachWheel(VehicleWheelBase) / DetachWheel(VehicleWheelBase)
+AttachWeight(VehicleWeightBase) / DetachWeight(VehicleWeightBase)
+AttachBrake(VehicleBrakeBase) / DetachBrake(VehicleBrakeBase)
+AttachSteering(VehicleSteeringBase) / DetachSteering(VehicleSteeringBase)
+
+All diese Funktionen geben jeweils einen bool zurück, der angibt,
+ob der Vorgang erfolgreich war. Bei Bremsen und Lenksystemen gibt
+es nicht viel zu beachten, da diese ja nicht frei positionierbar
+sind, sondern eine feste Position im Kart haben. Wichtig ist hier
+nur, dass es jeweils nur eines pro Kart gibt und Attach fehlschlägt,
+wenn bereits ein entsprechendes Bauteil verbaut ist. Beide
+Bauteile haben keine Physik, die das Kart beeinflusst.
+
+Anders sieht es mit Gewichten und Rädern aus. Hier lassen sich
+beliebig viele pro Kart verbauen, sie lassen sich beliebig um
+das Kart herum positionieren und sie beeinflussen die Physik des
+Karts. Um zu ermitteln, wo am Kart Räder und Gewichte angebracht
+werden können, dienen die Komponente "RaycastBase" und die zwei
+Funktionen "AlignWheel" und "AlignWeight". Diesen Funktionen
+wird das entsprechende, zu überprüfende Bauteil übergeben, sowie
+eine minimale und eine maximale Entfernung des Bauteils zum Kart.
+Befindet sich das Bauteil an einer ungültigen Stelle, gibt die
+Funktion false zurück, andernfalls gibt sie true zurück und speichert
+in "newTransform" die neue Transformation des Bauteils. Diese
+muss anschließend nur noch manuell auf das Bauteil angewandt werden
+(über "SetWorldTransform" oder ähnliche Funktionen) damit es
+richtig zum Kart positioniert wird und über die jeweilige
+Attach-Funktion befestigt werden kann.
+
+Als kleine Hilfestellung bietet die Body-Klasse noch die Funktion
+"CheckVehicleForErrors", die das Kart auf Fehler überprüft
+und diese Informationen in einem struct zurückggibt. So lässt
+sich beispielsweise überprüfen, ob keine Räder vorhanden sind,
+keine Lenkung etc.
+
+Sind alle Bauteile angebracht, kann über die Funktion "EnablePhysics"
+die Physik des Karts eingeschaltet werden. Das Kart ist jetzt für
+das Spiel bereit. Über "DisablePhysics" kann die Physik gegebenfalls
+wieder deaktiviert werden.
+
+
+
+
+
+***DriverPawn***
+
+Die DriverPawn-Klasse stellt die Charaktere im Spiel da. Sie
+ist unter anderem dafür zuständig, den Input vom Spieler
+entgegenzunehmen und an das Kart weiterzuleiten. Ohne einen Fahrer
+wäre ein Kart zwar an und für sich voll funktionsfähig, würde aber
+nur geradeaus rollen und sonst nichts tun, da keinerlei Input beim
+Kart ankommen würde. Die Driver-Klasse ist bisher noch nicht
+sonderlich ausgearbeitet und in ihr gibt es auch noch keine
+großartigen Einstellungsmöglichkeiten bis auf ein statisches Mesh.
+Die einzigen zwei wichtigen Funktionen in der DriverPawn-Klasse sind
+"SetVehicle", mit der man einem Charakter sein Fahrzeug zuweist
+und "StartRace", mit der man einem Charakter sagt, dass das Rennen
+beginnt. Erst nach dem Aufruf von StartRace wird der Fahrer ins
+Kart gesetzt und das Kart beginnt, den Input des Fahrers
+entgegenzunehmen. Das Fahrermesh wirkt sich außerdem auf die Physik
+des Karts aus.
+
+
+
+
+
+***Schnelldurchlauf***
+
+Das war jetzt ziemlich, ziemlich viel Text, aber im Grunde genommen
+ist es gar nicht so kompliziert. Hier jetzt mal im Schnelldurchlauf
+alle Funktionsaufrufe, die notwendig sind, um von Bauteilen ins
+laufende Spiel zu kommen (ich liste nur die wirklich notwendigen
+Schritte auf und ignoriere mal alles optionale):
+
+-AttachWheel mit beliebig vielen Rädern
+-AttachSteering mit einem Lenksystem
+-AttachBrake mit einem Bremssystem
+-EnablePhysis beim Body
+-SetVehicle beim Driver
+-StartRace beim Driver
+
+Und schon kann das Spiel beginnen. Ich hoffe mal, ich habe jetzt
+nichts vergessen. ;)
