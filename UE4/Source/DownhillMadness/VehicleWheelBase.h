@@ -15,8 +15,7 @@ class AVehicleWheelBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
-	void BeginPlay() OVERRIDE;
-	void BeginDestroy() OVERRIDE;
+	void Tick(float DeltaSeconds) OVERRIDE;
 	void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) OVERRIDE;
 
 	/**
@@ -25,9 +24,6 @@ class AVehicleWheelBase : public AVehiclePartBase
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleWheel")
 	virtual UPrimitiveComponent* GetRigidBody() PURE_VIRTUAL(AVehicleWheelBase::GetRigidBody, return nullptr;);
-
-	UFUNCTION()
-	void InputFunction(float axisInput);
 
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
@@ -81,4 +77,7 @@ class AVehicleWheelBase : public AVehiclePartBase
 	*/
 	UFUNCTION(Category = "Physics|CustomVehicle|VehicleWheel")
 	void BrakeWheel(float brakeValue);
+
+private:
+	bool isGroundedInternal;
 };

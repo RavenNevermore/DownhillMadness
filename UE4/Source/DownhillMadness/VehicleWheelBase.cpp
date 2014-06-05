@@ -52,36 +52,25 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 
 	this->bIsSteerable = false;
 	this->bHasBrake = true;
-}
-
-
-// ----------------------------------------------------------------------------
-
-
-void AVehicleWheelBase::BeginPlay()
-{
-	//this->bBlockInput = false;
-	//this->EnableInput(this->GetWorld()->GetFirstPlayerController());
-	//check(this->InputComponent);
-	//this->InputComponent->BindAxis("Dummy", this, &AVehicleWheelBase::InputFunction);
-}
-
-
-// ----------------------------------------------------------------------------
-
-
-void AVehicleWheelBase::BeginDestroy()
-{
-	//this->DisableInput(this->GetWorld()->GetFirstPlayerController());
-}
-
-
-// ----------------------------------------------------------------------------
-
-
-void AVehicleWheelBase::InputFunction(float axisInput)
-{
 	this->isGrounded = false;
+	this->isGroundedInternal = false;
+
+	this->PrimaryActorTick.bCanEverTick = true;
+	this->SetActorTickEnabled(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (this->isGroundedInternal)
+		this->isGroundedInternal = false;
+	else
+		this->isGrounded = false;
 }
 
 
@@ -105,24 +94,16 @@ void AVehicleWheelBase::PrepareAttach()
 
 void AVehicleWheelBase::BrakeWheel(float brakeValue)
 {
-	return;		// Do nothing
-	// TODO: Bessere Bremse-Funktion finden
+	if (this->isGrounded)
+	{
+		UPrimitiveComponent* rigidBody = this->GetRigidBody();
 
-	//UPrimitiveComponent* rigidBody = this->GetRigidBody();
+		if (rigidBody == nullptr)
+			return;
 
-	//if (rigidBody == nullptr)
-	//	return;
-
-	//float currentMaxVelocity = (1.0f - brakeValue) * this->maxWheelVelocity;
-	//float currentVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity().Size();
-
-	//if (currentVelocity > currentMaxVelocity)
-	//{
-	//	FVector newVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity();
-	//	newVelocity.Normalize();
-	//	newVelocity *= currentMaxVelocity;
-	//	rigidBody->BodyInstance.SetLinearVelocity(newVelocity, false);
-	//}
+		FVector negativeVelocity = -(brakeValue * rigidBody->BodyInstance.GetUnrealWorldVelocity());
+		rigidBody->AddImpulse(negativeVelocity, NAME_None, true);
+	}
 }
 
 
@@ -136,5 +117,6 @@ void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AAct
 	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
 	{
 		this->isGrounded = true;
+		this->isGroundedInternal = true;
 	}
 }

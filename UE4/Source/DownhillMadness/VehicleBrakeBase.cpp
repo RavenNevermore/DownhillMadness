@@ -10,7 +10,7 @@ AVehicleBrakeBase::AVehicleBrakeBase(const class FPostConstructInitializePropert
 	this->currentBrake = 0.0f;
 	this->currentInput = 0.0f;
 	this->maxBrake = 1.0f;
-	this->brakeSpeed = 5.0f;
+	this->brakeSpeed = 1.0f;
 }
 
 
