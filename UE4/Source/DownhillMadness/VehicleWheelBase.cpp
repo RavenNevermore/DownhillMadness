@@ -50,10 +50,38 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->BrakeMesh->bAbsoluteScale = true;
 	this->BrakeMesh->AttachTo(this->WheelConstraint);
 
-	this->maxWheelVelocity = 5000.0f;
-
 	this->bIsSteerable = false;
 	this->bHasBrake = true;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::BeginPlay()
+{
+	//this->bBlockInput = false;
+	//this->EnableInput(this->GetWorld()->GetFirstPlayerController());
+	//check(this->InputComponent);
+	//this->InputComponent->BindAxis("Dummy", this, &AVehicleWheelBase::InputFunction);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::BeginDestroy()
+{
+	//this->DisableInput(this->GetWorld()->GetFirstPlayerController());
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::InputFunction(float axisInput)
+{
+	this->isGrounded = false;
 }
 
 
@@ -80,19 +108,33 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 	return;		// Do nothing
 	// TODO: Bessere Bremse-Funktion finden
 
-	UPrimitiveComponent* rigidBody = this->GetRigidBody();
+	//UPrimitiveComponent* rigidBody = this->GetRigidBody();
 
-	if (rigidBody == nullptr)
-		return;
+	//if (rigidBody == nullptr)
+	//	return;
 
-	float currentMaxVelocity = (1.0f - brakeValue) * this->maxWheelVelocity;
-	float currentVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity().Size();
+	//float currentMaxVelocity = (1.0f - brakeValue) * this->maxWheelVelocity;
+	//float currentVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity().Size();
 
-	if (currentVelocity > currentMaxVelocity)
+	//if (currentVelocity > currentMaxVelocity)
+	//{
+	//	FVector newVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity();
+	//	newVelocity.Normalize();
+	//	newVelocity *= currentMaxVelocity;
+	//	rigidBody->BodyInstance.SetLinearVelocity(newVelocity, false);
+	//}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
 	{
-		FVector newVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity();
-		newVelocity.Normalize();
-		newVelocity *= currentMaxVelocity;
-		rigidBody->BodyInstance.SetLinearVelocity(newVelocity, false);
+		this->isGrounded = true;
 	}
 }
