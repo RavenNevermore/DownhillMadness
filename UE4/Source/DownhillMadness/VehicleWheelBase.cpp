@@ -54,6 +54,7 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->bHasBrake = true;
 	this->isGrounded = false;
 	this->isGroundedInternal = false;
+	this->currentBrake = 0.0f;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -70,7 +71,10 @@ void AVehicleWheelBase::Tick(float DeltaSeconds)
 	if (this->isGroundedInternal)
 		this->isGroundedInternal = false;
 	else
+	{
 		this->isGrounded = false;
+		this->currentBrake = 0.0f;
+	}
 }
 
 
@@ -94,6 +98,8 @@ void AVehicleWheelBase::PrepareAttach()
 
 void AVehicleWheelBase::BrakeWheel(float brakeValue)
 {
+	this->currentBrake = brakeValue;
+
 	if (this->isGrounded)
 	{
 		UPrimitiveComponent* rigidBody = this->GetRigidBody();

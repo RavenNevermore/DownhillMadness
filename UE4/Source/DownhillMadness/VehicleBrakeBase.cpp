@@ -7,7 +7,6 @@
 AVehicleBrakeBase::AVehicleBrakeBase(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	this->currentBrake = 0.0f;
 	this->currentInput = 0.0f;
 	this->maxBrake = 1.0f;
 	this->brakeSpeed = 1.0f;
@@ -26,21 +25,21 @@ void AVehicleBrakeBase::SetInput(float input)
 // ----------------------------------------------------------------------------
 
 
-float AVehicleBrakeBase::UpdateBrake(float DeltaSeconds)
+float AVehicleBrakeBase::UpdateBrake(float DeltaSeconds, float currentBrake)
 {
-	if (this->currentInput > this->currentBrake)
+	if (this->currentInput > currentBrake)
 	{
-		this->currentBrake += DeltaSeconds * this->brakeSpeed;
+		currentBrake += DeltaSeconds * this->brakeSpeed;
 
-		if (this->currentBrake > this->currentInput)
-			this->currentBrake = this->currentInput;
+		if (currentBrake > this->currentInput)
+			currentBrake = this->currentInput;
 	}
 	else
 	{
-		this->currentBrake = this->currentInput;
+		currentBrake = this->currentInput;
 	}
 
-	return this->currentBrake;
+	return currentBrake;
 }
 
 

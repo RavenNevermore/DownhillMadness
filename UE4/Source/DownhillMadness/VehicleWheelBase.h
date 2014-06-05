@@ -65,6 +65,10 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWheel, VisibleAnywhere, BlueprintReadOnly)
 	bool isGrounded;
 
+	/** Wheel's current brake value */
+	UPROPERTY(VisibleAnywhere, Category = VehicleWheel, BlueprintReadOnly)
+	float currentBrake;
+
 	/** 
 	* @brief	Prepare wheel for attaching to body
 	*/

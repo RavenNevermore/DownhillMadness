@@ -93,12 +93,6 @@ void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 		steeringDegree = this->attachedSteering->UpdateSteering(DeltaSeconds);
 	}
 
-	float brakeValue = 0.0f;
-	if (this->attachedBrake != nullptr)
-	{
-		brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds);
-	}
-
 	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
 	{
 		AVehicleWheelBase* currentWheel = *wheelIter;
@@ -109,7 +103,15 @@ void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 			currentWheel->WheelConstraint->UpdateWheel(currentWheel->GetRigidBody(), currentWheel->PhysicsConstraint, currentWheel->relativeWheelTransform, 0.0f);
 
 		if (currentWheel->bHasBrake)
+		{
+			float brakeValue = 0.0f;
+			if (this->attachedBrake != nullptr)
+			{
+				brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds, currentWheel->currentBrake);
+			}
+			currentWheel->currentBrake = brakeValue;
 			currentWheel->BrakeWheel(brakeValue);
+		}
 	}
 }
 
