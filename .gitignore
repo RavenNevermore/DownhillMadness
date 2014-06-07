@@ -40,10 +40,9 @@ Thumbs.db
 
 UE4/DerivedDataCache
 UE4/Intermediate
-/UE4/Saved/*
-!/UE4/Saved/Config
-!/UE4/Saved/Config/*
-!/UE4/Saved/Config/**/*Input*
+UE4/Saved
+UE4/Binaries/Win64/*.pdb
+UE4/Binaries/Win64/*.PDB
 UE4/*.sdf
 UE4/*.suo
 UE4/*.sln

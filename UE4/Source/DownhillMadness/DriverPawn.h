@@ -46,14 +46,14 @@ class ADriverPawn : public APawn
 	* @brief	Get input for steering
 	* @float	Axis value
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|DriverPawn")
+	UFUNCTION()
 	void OnGetSteeringInput(float axisInput);
 
 	/**
 	* @brief	Get input for brakes
 	* @float	Axis value
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|DriverPawn")
+	UFUNCTION()
 	void OnGetBrakeInput(float axisInput);
 
 	/** The vehicle controlled by this driver */

@@ -15,6 +15,9 @@ class AVehicleWheelBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void Tick(float DeltaSeconds) OVERRIDE;
+	void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) OVERRIDE;
+
 	/**
 	* @brief	Returns UPrimitiveComponent to serve as wheel's base to attach to vehicle body
 	* @returns	Wheel's base primitive component
@@ -58,9 +61,13 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleAnywhere)
 	FTransform relativeWheelTransform;
 
-	/** Wheel's maximum angular velocity */
-	UPROPERTY(EditDefaultsOnly, Category = VehicleWheel, BlueprintReadOnly)
-	float maxWheelVelocity;
+	/** Whether wheel is grounded or not */
+	UPROPERTY(Category = VehicleWheel, VisibleAnywhere, BlueprintReadOnly)
+	bool isGrounded;
+
+	/** Wheel's current brake value */
+	UPROPERTY(VisibleAnywhere, Category = VehicleWheel, BlueprintReadOnly)
+	float currentBrake;
 
 	/** 
 	* @brief	Prepare wheel for attaching to body
@@ -74,4 +81,7 @@ class AVehicleWheelBase : public AVehiclePartBase
 	*/
 	UFUNCTION(Category = "Physics|CustomVehicle|VehicleWheel")
 	void BrakeWheel(float brakeValue);
+
+private:
+	bool isGroundedInternal;
 };

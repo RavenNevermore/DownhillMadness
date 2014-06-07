@@ -122,8 +122,9 @@ void ADriverPawn::Tick(float DeltaSeconds)
 void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	check(InputComponent);
-	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput);
-	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput);
+	FInputAxisBinding binding;
+	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
+	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
 }
 
 

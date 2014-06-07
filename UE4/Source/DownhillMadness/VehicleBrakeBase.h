@@ -27,15 +27,11 @@ class AVehicleBrakeBase : public AVehiclePartBase
 	* @returns	Returns current brake value
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBrake")
-	virtual float UpdateBrake(float DeltaSeconds);
+	virtual float UpdateBrake(float DeltaSeconds, float currentBrake);
 
 	/** The current axis input */
 	UPROPERTY(VisibleAnywhere, Category = VehicleBrake, BlueprintReadOnly)
 	float currentInput;
-
-	/** The current brake value */
-	UPROPERTY(VisibleAnywhere, Category = VehicleBrake, BlueprintReadWrite)
-	float currentBrake;
 
 	/** The maximum brake value */
 	UPROPERTY(EditDefaultsOnly, Category = VehicleBrake, BlueprintReadOnly)

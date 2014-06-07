@@ -8,26 +8,21 @@ UWheelConstraint::UWheelConstraint(const class FPostConstructInitializePropertie
 	: Super(PCIP)
 {
 	this->steeringDegree = 0.0f;
-	this->bIsUsingBrakes = false;
 }
 
 
 // ----------------------------------------------------------------------------
 
 
-void UWheelConstraint::UpdateWheel(UPrimitiveComponent* rigidBody, UPhysicsConstraintComponent* constraint, const FTransform& relativeWheelTransform, float steeringDegree, bool usingBrakes)
+void UWheelConstraint::UpdateWheel(UPrimitiveComponent* rigidBody, UPhysicsConstraintComponent* constraint, const FTransform& relativeWheelTransform, float steeringDegree)
 {
 	if (rigidBody == nullptr || constraint == nullptr)
 		return;
 
 	// Destroy old constraint so that wheel can be rotated freely
-	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f || this->bIsUsingBrakes != usingBrakes)
+	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f)
 	{
 		constraint->ConstraintInstance.TermConstraint();
-		if (!usingBrakes)
-			constraint->ConstraintInstance.AngularSwing2Motion = EAngularConstraintMotion::ACM_Free;
-		else
-			constraint->ConstraintInstance.AngularSwing2Motion = EAngularConstraintMotion::ACM_Locked;
 	}
 
 	// Backup angular direction and velocity
@@ -92,10 +87,9 @@ void UWheelConstraint::UpdateWheel(UPrimitiveComponent* rigidBody, UPhysicsConst
 	rigidBody->BodyInstance.UpdateBodyScale(rigidBody->ComponentToWorld.GetScale3D());
 
 	// Reactivate wheel constraint to lock wheel rotation
-	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f || this->bIsUsingBrakes != usingBrakes)
+	if (FMath::Abs(steeringDegree - this->steeringDegree) >= 0.25f)
 	{
 		constraint->InitializeComponent();
-		this->bIsUsingBrakes = usingBrakes;
 	}
 
 	// Set wheel's new angular velocity

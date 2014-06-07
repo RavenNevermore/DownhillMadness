@@ -50,10 +50,31 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->BrakeMesh->bAbsoluteScale = true;
 	this->BrakeMesh->AttachTo(this->WheelConstraint);
 
-	this->maxWheelVelocity = 5000.0f;
-
 	this->bIsSteerable = false;
 	this->bHasBrake = true;
+	this->isGrounded = false;
+	this->isGroundedInternal = false;
+	this->currentBrake = 0.0f;
+
+	this->PrimaryActorTick.bCanEverTick = true;
+	this->SetActorTickEnabled(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (this->isGroundedInternal)
+		this->isGroundedInternal = false;
+	else
+	{
+		this->isGrounded = false;
+		this->currentBrake = 0.0f;
+	}
 }
 
 
@@ -77,22 +98,31 @@ void AVehicleWheelBase::PrepareAttach()
 
 void AVehicleWheelBase::BrakeWheel(float brakeValue)
 {
-	return;		// Do nothing
-	// TODO: Bessere Bremse-Funktion finden
+	this->currentBrake = brakeValue;
 
-	UPrimitiveComponent* rigidBody = this->GetRigidBody();
-
-	if (rigidBody == nullptr)
-		return;
-
-	float currentMaxVelocity = (1.0f - brakeValue) * this->maxWheelVelocity;
-	float currentVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity().Size();
-
-	if (currentVelocity > currentMaxVelocity)
+	if (this->isGrounded)
 	{
-		FVector newVelocity = rigidBody->BodyInstance.GetUnrealWorldVelocity();
-		newVelocity.Normalize();
-		newVelocity *= currentMaxVelocity;
-		rigidBody->BodyInstance.SetLinearVelocity(newVelocity, false);
+		UPrimitiveComponent* rigidBody = this->GetRigidBody();
+
+		if (rigidBody == nullptr)
+			return;
+
+		FVector negativeVelocity = -(brakeValue * rigidBody->BodyInstance.GetUnrealWorldVelocity());
+		rigidBody->AddImpulse(negativeVelocity, NAME_None, true);
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
+	{
+		this->isGrounded = true;
+		this->isGroundedInternal = true;
 	}
 }
