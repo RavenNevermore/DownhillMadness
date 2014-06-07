@@ -11,10 +11,10 @@ FBXHeaderExtension:  {
 		Year: 2014
 		Month: 6
 		Day: 7
-		Hour: 15
-		Minute: 29
-		Second: 6
-		Millisecond: 164
+		Hour: 16
+		Minute: 56
+		Second: 0
+		Millisecond: 782
 	}
 	Creator: "FBX SDK/FBX Plugins version 2014.0.1"
 	SceneInfo: "SceneInfo::GlobalInfo", "UserData" {
@@ -36,28 +36,28 @@ FBXHeaderExtension:  {
 			P: "Original|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "Original|ApplicationName", "KString", "", "", "3ds Max"
 			P: "Original|ApplicationVersion", "KString", "", "", "2014"
-			P: "Original|DateTime_GMT", "DateTime", "", "", "07/06/2014 13:29:06.163"
+			P: "Original|DateTime_GMT", "DateTime", "", "", "07/06/2014 14:56:00.781"
 			P: "Original|FileName", "KString", "", "", "C:\Git\Art\Character\Emily\Idun\Idun_T-Pose.FBX"
 			P: "LastSaved", "Compound", "", ""
 			P: "LastSaved|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "LastSaved|ApplicationName", "KString", "", "", "3ds Max"
 			P: "LastSaved|ApplicationVersion", "KString", "", "", "2014"
-			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "07/06/2014 13:29:06.163"
+			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "07/06/2014 14:56:00.781"
 		}
 	}
 }
 GlobalSettings:  {
 	Version: 1000
 	Properties70:  {
-		P: "UpAxis", "int", "Integer", "",1
+		P: "UpAxis", "int", "Integer", "",2
 		P: "UpAxisSign", "int", "Integer", "",1
-		P: "FrontAxis", "int", "Integer", "",2
-		P: "FrontAxisSign", "int", "Integer", "",1
+		P: "FrontAxis", "int", "Integer", "",1
+		P: "FrontAxisSign", "int", "Integer", "",-1
 		P: "CoordAxis", "int", "Integer", "",0
 		P: "CoordAxisSign", "int", "Integer", "",1
 		P: "OriginalUpAxis", "int", "Integer", "",2
 		P: "OriginalUpAxisSign", "int", "Integer", "",1
-		P: "UnitScaleFactor", "double", "Number", "",2.54
+		P: "UnitScaleFactor", "double", "Number", "",1
 		P: "OriginalUnitScaleFactor", "double", "Number", "",2.54
 		P: "AmbientColor", "ColorRGB", "Color", "",0,0,0
 		P: "DefaultCamera", "KString", "", "", "Producer Perspective"
@@ -77,7 +77,7 @@ GlobalSettings:  {
 
 Documents:  {
 	Count: 1
-	Document: 1147879280, "", "Scene" {
+	Document: 1147880944, "", "Scene" {
 		Properties70:  {
 			P: "SourceObject", "object", "", ""
 			P: "ActiveAnimStackName", "KString", "", "", ""
@@ -311,7 +311,7 @@ Definitions:  {
 ;------------------------------------------------------------------
 
 Objects:  {
-	Geometry: 1303198384, "Geometry::", "Mesh" {
+	Geometry: 1303197696, "Geometry::", "Mesh" {
 		Properties70:  {
 			P: "Color", "ColorRGB", "Color", "",0.87843137254902,0.776470588235294,0.341176470588235
 		}
@@ -1477,24 +1477,23 @@ Objects:  {
 			}
 		}
 	}
-	Model: 1824182848, "Model::Idun", "Mesh" {
+	Model: 1829139776, "Model::Idun", "Mesh" {
 		Version: 232
 		Properties70:  {
-			P: "PreRotation", "Vector3D", "Vector", "",-90,-0,0
-			P: "RotationActive", "bool", "", "",1
+			P: "RotationPivot", "Vector3D", "Vector", "",0,0,-7.105427357601e-015
 			P: "InheritType", "enum", "", "",1
 			P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
 			P: "GeometricTranslation", "Vector3D", "Vector", "",-0.290949821472168,1.60614967346191,-55.6040496826172
 			P: "DefaultAttributeIndex", "int", "Integer", "",0
-			P: "Lcl Translation", "Lcl Translation", "", "A",0,22.4367713928223,-0
-			P: "Lcl Scaling", "Lcl Scaling", "", "A",0.401179790496826,0.401179790496826,0.401179790496826
+			P: "Lcl Translation", "Lcl Translation", "", "A",0,0,56.9893993377686
+			P: "Lcl Scaling", "Lcl Scaling", "", "A",1.01899666786194,1.01899666786194,1.01899666786194
 			P: "UDP3DSMAX", "KString", "", "U", "MapChannel:1 = UVChannel_1&cr;&lf;"
 			P: "MaxHandle", "int", "Integer", "UH",56
 		}
 		Shading: T
 		Culling: "CullingOff"
 	}
-	Material: 1699237216, "Material::08___Default", "" {
+	Material: 1699243776, "Material::08___Default", "" {
 		Version: 102
 		ShadingModel: "phong"
 		MultiLayer: 0
@@ -1516,14 +1515,14 @@ Objects:  {
 			P: "Reflectivity", "double", "Number", "",0
 		}
 	}
-	Video: 1699232624, "Video::Map #0", "Clip" {
+	Video: 1699243120, "Video::Map #0", "Clip" {
 		Type: "Clip"
 		Properties70:  {
-			P: "Path", "KString", "XRefUrl", "", "C:\Git\Art\Character\Emily\Idun\IdunDiffuse - Kopie.png"
+			P: "Path", "KString", "XRefUrl", "", "C:\Git\Art\Character\Emily\Idun\Idundiff.tga"
 		}
 		UseMipMap: 0
-		Filename: "C:\Git\Art\Character\Emily\Idun\IdunDiffuse - Kopie.png"
-		RelativeFilename: "IdunDiffuse - Kopie.png"
+		Filename: "C:\Git\Art\Character\Emily\Idun\Idundiff.tga"
+		RelativeFilename: "Idundiff.tga"
 	}
 	Texture: 1698944240, "Texture::Map #0", "" {
 		Type: "TextureVideoClip"
@@ -1534,19 +1533,19 @@ Objects:  {
 			P: "UseMaterial", "bool", "", "",1
 		}
 		Media: "Video::Map #0"
-		FileName: "C:\Git\Art\Character\Emily\Idun\IdunDiffuse - Kopie.png"
-		RelativeFilename: "IdunDiffuse - Kopie.png"
+		FileName: "C:\Git\Art\Character\Emily\Idun\Idundiff.tga"
+		RelativeFilename: "Idundiff.tga"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "Alpha_Black"
 		Cropping: 0,0,0,0
 	}
-	CollectionExclusive: 1051259104, "DisplayLayer::LP", "DisplayLayer" {
+	CollectionExclusive: 1051253472, "DisplayLayer::LP", "DisplayLayer" {
 		Properties70:  {
 			P: "Color", "ColorRGB", "Color", "",0.890196078431373,0.72156862745098,0.6
 		}
 	}
-	CollectionExclusive: 1051252064, "DisplayLayer::cryExportLayer", "DisplayLayer" {
+	CollectionExclusive: 1051264032, "DisplayLayer::cryExportLayer", "DisplayLayer" {
 		Properties70:  {
 			P: "Color", "ColorRGB", "Color", "",0.345098039215686,0.780392156862745,0.882352941176471
 			P: "Freeze", "bool", "", "",1
@@ -1560,23 +1559,23 @@ Objects:  {
 Connections:  {
 	
 	;Model::Idun, Model::RootNode
-	C: "OO",1824182848,0
+	C: "OO",1829139776,0
 	
 	;AnimLayer::BaseLayer, AnimStack::Take 001
-	C: "OO",1062096048,1061667040
+	C: "OO",1062096048,1061666272
 	
 	;Geometry::, Model::Idun
-	C: "OO",1303198384,1824182848
+	C: "OO",1303197696,1829139776
 	
 	;Material::08___Default, Model::Idun
-	C: "OO",1699237216,1824182848
+	C: "OO",1699243776,1829139776
 	
 	;Texture::Map #0, Material::08___Default
-	C: "OP",1698944240,1699237216, "DiffuseColor"
+	C: "OP",1698944240,1699243776, "DiffuseColor"
 	
 	;Video::Map #0, Texture::Map #0
-	C: "OO",1699232624,1698944240
+	C: "OO",1699243120,1698944240
 	
 	;Model::Idun, DisplayLayer::LP
-	C: "OO",1824182848,1051259104
+	C: "OO",1829139776,1051253472
 }
