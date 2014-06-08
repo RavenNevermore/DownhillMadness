@@ -56,6 +56,22 @@ class ADriverPawn : public APawn
 	UFUNCTION()
 	void OnGetBrakeInput(float axisInput);
 
+	/**
+	* @brief	Debug reset key pressed
+	*/
+	UFUNCTION()
+	void OnDebugReset();
+
+	/**
+	* @brief	Open a level
+	* @param	WorldContextObject	World context
+	* @param	LevelName	Level to load
+	* @param	bAbsolute	Use absolute loading
+	* @param	Options	Level load options
+	*/
+	UFUNCTION()
+	void OpenLevel(UObject* WorldContextObject, FName LevelName, bool bAbsolute, FString Options);
+
 	/** The vehicle controlled by this driver */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	AVehicleBodyBase* controlledVehicle;

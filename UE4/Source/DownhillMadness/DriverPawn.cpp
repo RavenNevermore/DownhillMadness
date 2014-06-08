@@ -125,6 +125,7 @@ void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	FInputAxisBinding binding;
 	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
 	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
+	InputComponent->BindAction("DebugReset", EInputEvent::IE_Pressed, this, &ADriverPawn::OnDebugReset).bConsumeInput = false;
 }
 
 
@@ -143,6 +144,47 @@ void ADriverPawn::OnGetSteeringInput(float axisInput)
 void ADriverPawn::OnGetBrakeInput(float axisInput)
 {
 	this->brakeAxisInput = axisInput;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::OnDebugReset()
+{
+	if (GEngine)
+	{
+		FString levelName = this->GetWorld()->GetMapName();
+		levelName.RemoveFromStart(FString(TEXT("UEDPIE_0_")), ESearchCase::CaseSensitive);
+		this->OpenLevel(this, FName(*levelName), true, FString(TEXT("")));
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::OpenLevel(UObject* WorldContextObject, FName LevelName, bool bAbsolute, FString Options)
+{
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
+	const ETravelType TravelType = (bAbsolute ? TRAVEL_Absolute : TRAVEL_Relative);
+	FWorldContext &WorldContext = GEngine->GetWorldContextFromWorldChecked(World);
+	FString Cmd = LevelName.ToString();
+	if (Options.Len() > 0)
+	{
+		Cmd += FString(TEXT("?")) + Options;
+	}
+	FURL TestURL(&WorldContext.LastURL, *Cmd, TravelType);
+	if (TestURL.IsLocalInternal())
+	{
+		// make sure the file exists if we are opening a local file
+		if (!GEngine->MakeSureMapNameIsValid(TestURL.Map))
+		{
+			UE_LOG(LogLevel, Warning, TEXT("WARNING: The map '%s' does not exist."), *TestURL.Map);
+		}
+	}
+
+	GEngine->SetClientTravel(World, *Cmd, TravelType);
 }
 
 
