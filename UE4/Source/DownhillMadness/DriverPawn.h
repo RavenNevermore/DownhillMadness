@@ -56,6 +56,22 @@ class ADriverPawn : public APawn
 	UFUNCTION()
 	void OnGetBrakeInput(float axisInput);
 
+	/**
+	* @brief	Debug reset key pressed
+	*/
+	UFUNCTION()
+	void OnDebugReset();
+
+	/**
+	* @brief	Open a level
+	* @param	WorldContextObject	World context
+	* @param	LevelName	Level to load
+	* @param	bAbsolute	Use absolute loading
+	* @param	Options	Level load options
+	*/
+	UFUNCTION()
+	void OpenLevel(UObject* WorldContextObject, FName LevelName, bool bAbsolute, FString Options);
+
 	/** The vehicle controlled by this driver */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	AVehicleBodyBase* controlledVehicle;
@@ -76,9 +92,9 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
-	/** Spring arm for camera */
+	/** Camera's rigid body */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class USpringArmComponent> CameraSpringArm;
+	TSubobjectPtr<class USphereComponent> CameraSphere;
 
 	/** Camera observing character */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
@@ -95,4 +111,17 @@ class ADriverPawn : public APawn
 	/** Driver's current state */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	TEnumAsByte<EDriverPawnState::Type> driverState;
+
+private:
+	/* Camera anchor */
+	UPROPERTY()
+	FVector cameraAnchor;
+
+	/* Old driver location */
+	UPROPERTY()
+	FVector driverOldLocation;
+
+	/* Old driver rotation */
+	UPROPERTY()
+	FRotator driverOldRotation;
 };
