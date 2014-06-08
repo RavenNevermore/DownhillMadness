@@ -33,7 +33,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 
 	this->CameraSpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, FName(TEXT("CameraSpringArm")));
 	this->CameraSpringArm->bUseControllerViewRotation = true;
-	this->CameraSpringArm->TargetArmLength = 200.0f;
+	this->CameraSpringArm->TargetArmLength = 300.0f;
 	this->CameraSpringArm->SocketOffset = FVector(0, 0, 70);
 	this->CameraSpringArm->bDoCollisionTest = false;
 	this->CameraSpringArm->AttachTo(this->DriverMesh);
@@ -41,10 +41,12 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
 	this->CharacterCamera->AttachTo(this->CameraSpringArm, USpringArmComponent::SocketName);
 	this->CharacterCamera->bUseControllerViewRotation = false;
+	this->CharacterCamera->bAbsoluteLocation = true;
+	this->CharacterCamera->bAbsoluteRotation = true;
 
 	this->driverState = EDriverPawnState::PushingVehicle;
 	this->steeringAxisInput = 0.0f;
-	this->cameraStiffness = 36.0f;
+	this->cameraStiffness = 60.0f;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -57,6 +59,9 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 void ADriverPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	this->anchor = this->DriverMesh->GetComponentLocation() - this->DriverMesh->GetForwardVector() * 200.0f + this->DriverMesh->GetUpVector() * 300.0f;
+	this->oldRotation = this->DriverMesh->GetComponentRotation();
+	this->oldLocation = this->DriverMesh->GetComponentLocation();
 }
 
 
@@ -67,7 +72,31 @@ void ADriverPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	this->anchor += this->DriverMesh->GetComponentLocation() - this->oldLocation;
+
+	FRotator deltaRotation = this->DriverMesh->GetComponentRotation() - this->oldRotation;
+
+	//this->anchor = this->DriverMesh->GetComponentLocation() + (this->anchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
+	this->anchor = this->DriverMesh->GetComponentLocation() + (this->anchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+
 	FRotator rootRotation = this->DriverMesh->GetComponentRotation();
+
+	FVector baseLocation = this->CharacterCamera->GetComponentLocation();
+	FRotator baseRotation = this->CharacterCamera->GetComponentRotation();
+
+	//FVector destLocation = this->DriverMesh->GetComponentLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
+	FRotator destRotation = (this->DriverMesh->GetComponentLocation() - this->CharacterCamera->GetComponentLocation()).Rotation();
+
+	FVector worldLocation = FMath::VInterpTo(baseLocation, anchor, DeltaSeconds, 4);// (anchor - baseLocation).Size() / 50.0f);
+	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
+
+	this->CharacterCamera->SetWorldLocation(worldLocation);
+	this->CharacterCamera->SetWorldRotation(worldRotation);
+
+	this->oldLocation = this->DriverMesh->GetComponentLocation();
+	this->oldRotation = this->DriverMesh->GetComponentRotation();
+
+	/*FRotator rootRotation = this->DriverMesh->GetComponentRotation();
 	FRotator springArmRotation = this->CameraSpringArm->GetComponentRotation();
 	float rootYaw = rootRotation.Yaw < 0.0f ? rootRotation.Yaw + 360.0f : rootRotation.Yaw;
 	float springArmYaw = springArmRotation.Yaw < 0.0f ? springArmRotation.Yaw + 360.0f : springArmRotation.Yaw;
@@ -83,7 +112,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 	{
 		factor = (rootYaw - springArmYaw);
 	}
-	this->AddControllerYawInput(factor / this->cameraStiffness);
+	this->AddControllerYawInput(factor / this->cameraStiffness);*/
 
 	if (this->controlledVehicle != nullptr)
 	{
