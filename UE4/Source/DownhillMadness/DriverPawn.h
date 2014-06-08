@@ -95,4 +95,10 @@ class ADriverPawn : public APawn
 	/** Driver's current state */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	TEnumAsByte<EDriverPawnState::Type> driverState;
+
+private:
+
+	FVector anchor;
+	FVector oldLocation;
+	FRotator oldRotation;
 };
