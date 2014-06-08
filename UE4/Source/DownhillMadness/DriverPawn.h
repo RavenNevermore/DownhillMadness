@@ -92,9 +92,9 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
-	/** Spring arm for camera */
+	/** Camera's rigid body */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class USpringArmComponent> CameraSpringArm;
+	TSubobjectPtr<class USphereComponent> CameraSphere;
 
 	/** Camera observing character */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
@@ -113,8 +113,15 @@ class ADriverPawn : public APawn
 	TEnumAsByte<EDriverPawnState::Type> driverState;
 
 private:
+	/* Camera anchor */
+	UPROPERTY()
+	FVector cameraAnchor;
 
-	FVector anchor;
-	FVector oldLocation;
-	FRotator oldRotation;
+	/* Old driver location */
+	UPROPERTY()
+	FVector driverOldLocation;
+
+	/* Old driver rotation */
+	UPROPERTY()
+	FRotator driverOldRotation;
 };

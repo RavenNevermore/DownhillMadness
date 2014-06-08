@@ -31,18 +31,22 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverMesh->bAbsoluteScale = true;
 	this->DriverMesh->AttachTo(this->RootComponent);
 
-	this->CameraSpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, FName(TEXT("CameraSpringArm")));
-	this->CameraSpringArm->bUseControllerViewRotation = true;
-	this->CameraSpringArm->TargetArmLength = 300.0f;
-	this->CameraSpringArm->SocketOffset = FVector(0, 0, 70);
-	this->CameraSpringArm->bDoCollisionTest = false;
-	this->CameraSpringArm->AttachTo(this->DriverMesh);
+	this->CameraSphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, FName(TEXT("CameraSphere")));
+	this->CameraSphere->AttachTo(this->FrontArrow);
+	this->CameraSphere->RelativeLocation = FVector(0, 0, 70);
+	this->CameraSphere->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->CameraSphere->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->CameraSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	this->CameraSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->CameraSphere->SetSimulatePhysics(true);
+	this->CameraSphere->SetEnableGravity(false);
+	this->CameraSphere->SetSphereRadius(10.0f, false);
+	this->CameraSphere->bAbsoluteLocation = true;
+	this->CameraSphere->bAbsoluteRotation = true;
 
 	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
-	this->CharacterCamera->AttachTo(this->CameraSpringArm, USpringArmComponent::SocketName);
+	this->CharacterCamera->AttachTo(this->CameraSphere);
 	this->CharacterCamera->bUseControllerViewRotation = false;
-	this->CharacterCamera->bAbsoluteLocation = true;
-	this->CharacterCamera->bAbsoluteRotation = true;
 
 	this->driverState = EDriverPawnState::PushingVehicle;
 	this->steeringAxisInput = 0.0f;
@@ -59,9 +63,9 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 void ADriverPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	this->anchor = this->DriverMesh->GetComponentLocation() - this->DriverMesh->GetForwardVector() * 200.0f + this->DriverMesh->GetUpVector() * 300.0f;
-	this->oldRotation = this->DriverMesh->GetComponentRotation();
-	this->oldLocation = this->DriverMesh->GetComponentLocation();
+	this->cameraAnchor = this->DriverMesh->GetComponentLocation() - this->DriverMesh->GetForwardVector() * 200.0f + this->DriverMesh->GetUpVector() * 300.0f;
+	this->driverOldRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
+	this->driverOldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
 }
 
 
@@ -72,47 +76,32 @@ void ADriverPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	this->anchor += this->DriverMesh->GetComponentLocation() - this->oldLocation;
+	this->cameraAnchor += this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->driverOldLocation;
 
-	FRotator deltaRotation = this->DriverMesh->GetComponentRotation() - this->oldRotation;
+	FRotator deltaRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator() - this->driverOldRotation;
 
-	//this->anchor = this->DriverMesh->GetComponentLocation() + (this->anchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
-	this->anchor = this->DriverMesh->GetComponentLocation() + (this->anchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+	//this->cameraAnchor = this->DriverMesh->GetComponentLocation() + (this->cameraAnchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
+	this->cameraAnchor = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() + (this->cameraAnchor - this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
 
-	FRotator rootRotation = this->DriverMesh->GetComponentRotation();
+	FRotator rootRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
 
-	FVector baseLocation = this->CharacterCamera->GetComponentLocation();
-	FRotator baseRotation = this->CharacterCamera->GetComponentRotation();
+	FVector baseLocation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	FRotator baseRotation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().Rotator();
 
-	//FVector destLocation = this->DriverMesh->GetComponentLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
-	FRotator destRotation = (this->DriverMesh->GetComponentLocation() - this->CharacterCamera->GetComponentLocation()).Rotation();
+	//FVector destLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
+	FRotator destRotation = (this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
 
-	FVector worldLocation = FMath::VInterpTo(baseLocation, anchor, DeltaSeconds, 4);// (anchor - baseLocation).Size() / 50.0f);
+	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
 
-	this->CharacterCamera->SetWorldLocation(worldLocation);
-	this->CharacterCamera->SetWorldRotation(worldRotation);
+	//this->CharacterCamera->SetWorldLocation(worldLocation);
+	//this->CharacterCamera->SetWorldRotation(worldRotation);	
+	FTransform newCameraTransform(worldRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
+	this->CameraSphere->BodyInstance.SetBodyTransform(newCameraTransform, false);
 
-	this->oldLocation = this->DriverMesh->GetComponentLocation();
-	this->oldRotation = this->DriverMesh->GetComponentRotation();
+	this->driverOldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	this->driverOldRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
 
-	/*FRotator rootRotation = this->DriverMesh->GetComponentRotation();
-	FRotator springArmRotation = this->CameraSpringArm->GetComponentRotation();
-	float rootYaw = rootRotation.Yaw < 0.0f ? rootRotation.Yaw + 360.0f : rootRotation.Yaw;
-	float springArmYaw = springArmRotation.Yaw < 0.0f ? springArmRotation.Yaw + 360.0f : springArmRotation.Yaw;
-	float dist = rootYaw > springArmYaw ? rootYaw - springArmYaw : springArmYaw - rootYaw;
-
-	float factor = 0.0f;
-
-	if (dist > 180.0f)
-	{
-		factor = (rootYaw > springArmYaw) ? -(360.0f - dist) : (360.0f - dist);
-	}
-	else
-	{
-		factor = (rootYaw - springArmYaw);
-	}
-	this->AddControllerYawInput(factor / this->cameraStiffness);*/
 
 	if (this->controlledVehicle != nullptr)
 	{
