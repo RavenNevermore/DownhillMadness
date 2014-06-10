@@ -124,4 +124,7 @@ private:
 	/* Old driver rotation */
 	UPROPERTY()
 	FRotator driverOldRotation;
+
+	UPROPERTY()
+	FVector cameraAirDifference;
 };

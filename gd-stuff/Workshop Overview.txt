@@ -57,15 +57,8 @@ Komponenten:
 All diese Komponenten können im Tab "Components" des Blueprints
 eingestellt werden. Die Rad-Aufhängung sollte dabei in Richtung
 des grünen Pfeils zeigen und das Rad selbst in Richtung des
-roten Pfeils ausgerichtet sein. Bei Kapsel-Rädern ist außerdem
-noch wichtig, dass Kapseln ja automatisch größer sind, als die zu
-Grunde liegenden Räder und dadurch die automatisch berechnete
-Masse nicht mehr stimmt. Das plane ich in einer späteren Version
-zu beheben (indem die richtige Masse automatisch berechnet wird),
-aber fürs erste muss man die Masse über Mass Scale noch manuell
-korrigieren. Damit das leichter fällt ist es wichtig, dass
-Kapsel und Rad-Mesh dasselbe Physics Material zugewiesen ist, da
-dieses die Masse beeinflusst.
+roten Pfeils ausgerichtet sein. Masse und PhysicsMaterial sollten
+nur beim Wheel Mesh eingestellt werden.
 
 Zusätzlich zu diesen Blueprint-spezifischen Einstellungen hat
 noch jede einzelne Instanz eines Rades die zwei Einstellungen

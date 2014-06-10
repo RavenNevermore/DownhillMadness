@@ -31,9 +31,11 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverMesh->bAbsoluteScale = true;
 	this->DriverMesh->AttachTo(this->RootComponent);
 
+	this->cameraAirDifference = FVector(0, 0, 70);
+
 	this->CameraSphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, FName(TEXT("CameraSphere")));
 	this->CameraSphere->AttachTo(this->FrontArrow);
-	this->CameraSphere->RelativeLocation = FVector(0, 0, 70);
+	this->CameraSphere->RelativeLocation = this->cameraAirDifference;
 	this->CameraSphere->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->CameraSphere->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	this->CameraSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -76,6 +78,32 @@ void ADriverPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+
+	// Is car standing on ground?
+	bool onGround = false;
+
+	TArray<FHitResult> hitResults;
+
+	FVector rayStart = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	FVector rayEnd = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - (this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetUnitAxis(EAxis::Z) * 25.0f);
+
+	FCollisionQueryParams queryParams(false);
+	queryParams.bFindInitialOverlaps = true;
+
+	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Block);
+
+	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter && !onGround; ++hitResultIter)
+	{
+		FHitResult currentHitResult = *hitResultIter;
+		if (currentHitResult.Component.Get()->GetCollisionObjectType() == ECollisionChannel::ECC_WorldStatic)
+		{
+			onGround = true;
+			break;
+		}
+	}
+
 	this->cameraAnchor += this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->driverOldLocation;
 
 	FRotator deltaRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator() - this->driverOldRotation;
@@ -93,10 +121,19 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
+	
+	if (onGround)
+		this->cameraAirDifference = worldLocation - this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	else
+		worldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() + this->cameraAirDifference;
 
 	//this->CharacterCamera->SetWorldLocation(worldLocation);
-	//this->CharacterCamera->SetWorldRotation(worldRotation);	
-	FTransform newCameraTransform(worldRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
+	//this->CharacterCamera->SetWorldRotation(worldRotation);
+	FTransform newCameraTransform;
+	if (onGround)
+		newCameraTransform = FTransform(worldRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
+	else
+		newCameraTransform = FTransform(baseRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 	this->CameraSphere->BodyInstance.SetBodyTransform(newCameraTransform, false);
 
 	this->driverOldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
