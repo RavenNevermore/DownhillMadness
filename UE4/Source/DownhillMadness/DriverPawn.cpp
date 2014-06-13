@@ -100,15 +100,15 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
-	FVector rayEnd = this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - (this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetUnitAxis(EAxis::Z) * 1500.0f);
+	FVector rayStart = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
+	FVector rayEnd = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - (this->DriverSkeletalMesh->GetComponenTransform().GetUnitAxis(EAxis::Z) * 50.0f);
 	
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
 
-	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
+	FCollisionObjectQueryParams objectQueryParams(ECollisionChannel::ECC_WorldStatic);
 
-	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, queryParams, objectQueryParams);
 
 	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter && !onGround; ++hitResultIter)
 	{
