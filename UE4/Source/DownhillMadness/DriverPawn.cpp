@@ -21,15 +21,29 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->PhysicsConstraint->bAbsoluteScale = true;
 	this->PhysicsConstraint->AttachTo(this->FrontArrow);
 
-	this->DriverMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("DriverMesh")));
-	this->DriverMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
-	this->DriverMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	this->DriverMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	this->DriverMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	this->DriverMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-	this->DriverMesh->SetSimulatePhysics(true);
-	this->DriverMesh->bAbsoluteScale = true;
-	this->DriverMesh->AttachTo(this->RootComponent);
+	this->DriverSkeletalMesh = PCIP.CreateDefaultSubobject<USkeletalMeshComponent>(this, FName(TEXT("DriverSkeletalMesh")));
+	this->DriverSkeletalMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->DriverSkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->DriverSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	this->DriverSkeletalMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->DriverSkeletalMesh->bAbsoluteScale = true;
+	this->DriverSkeletalMesh->SetSimulatePhysics(false);
+	this->DriverSkeletalMesh->SetEnableGravity(false);
+	this->DriverSkeletalMesh->AttachTo(this->FrontArrow);
+
+	this->DriverCapsule = PCIP.CreateDefaultSubobject<UCapsuleComponent>(this, FName(TEXT("DriverCapsule")));
+	this->DriverCapsule->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->DriverCapsule->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->DriverCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	this->DriverCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	this->DriverCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	this->DriverCapsule->SetSimulatePhysics(false);
+	this->DriverCapsule->SetNotifyRigidBodyCollision(true);
+	this->DriverCapsule->bGenerateOverlapEvents = true;
+	this->DriverCapsule->SetCapsuleHalfHeight(54.0f);
+	this->DriverCapsule->SetCapsuleRadius(21.0f);
+	this->DriverCapsule->BodyInstance.bUpdateMassWhenScaleChanges = true;
+	this->DriverCapsule->AttachTo(this->DriverSkeletalMesh);
 
 	this->cameraAirDifference = FVector(0, 0, 70);
 
@@ -45,6 +59,8 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->CameraSphere->SetSphereRadius(10.0f, false);
 	this->CameraSphere->bAbsoluteLocation = true;
 	this->CameraSphere->bAbsoluteRotation = true;
+
+	this->steeringAnimation = nullptr;
 
 	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
 	this->CharacterCamera->AttachTo(this->CameraSphere);
@@ -65,9 +81,9 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 void ADriverPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	this->cameraAnchor = this->DriverMesh->GetComponentLocation() - this->DriverMesh->GetForwardVector() * 200.0f + this->DriverMesh->GetUpVector() * 300.0f;
-	this->driverOldRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
-	this->driverOldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	this->cameraAnchor = this->DriverCapsule->GetComponentLocation() - this->DriverCapsule->GetForwardVector() * 200.0f + this->DriverCapsule->GetUpVector() * 300.0f;
+	this->driverOldRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
+	this->driverOldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
 }
 
 
@@ -84,13 +100,13 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
-	FVector rayEnd = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - (this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetUnitAxis(EAxis::Z) * 25.0f);
-
+	FVector rayStart = this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	FVector rayEnd = this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - (this->DriverSkeletalMesh->BodyInstance.GetUnrealWorldTransform().GetUnitAxis(EAxis::Z) * 1500.0f);
+	
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
 
-	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Block);
+	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
 
 	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 
@@ -104,28 +120,28 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		}
 	}
 
-	this->cameraAnchor += this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->driverOldLocation;
+	this->cameraAnchor += this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->driverOldLocation;
 
-	FRotator deltaRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator() - this->driverOldRotation;
+	FRotator deltaRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator() - this->driverOldRotation;
 
 	//this->cameraAnchor = this->DriverMesh->GetComponentLocation() + (this->cameraAnchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
-	this->cameraAnchor = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() + (this->cameraAnchor - this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+	this->cameraAnchor = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() + (this->cameraAnchor - this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
 
-	FRotator rootRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
+	FRotator rootRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
 
 	FVector baseLocation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation();
 	FRotator baseRotation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().Rotator();
 
 	//FVector destLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
-	FRotator destRotation = (this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
+	FRotator destRotation = (this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
 
 	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
 	
 	if (onGround)
-		this->cameraAirDifference = worldLocation - this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
+		this->cameraAirDifference = worldLocation - this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
 	else
-		worldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() + this->cameraAirDifference;
+		worldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() + this->cameraAirDifference;
 
 	//this->CharacterCamera->SetWorldLocation(worldLocation);
 	//this->CharacterCamera->SetWorldRotation(worldRotation);
@@ -136,8 +152,11 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		newCameraTransform = FTransform(baseRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 	this->CameraSphere->BodyInstance.SetBodyTransform(newCameraTransform, false);
 
-	this->driverOldLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation();
-	this->driverOldRotation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().Rotator();
+	this->driverOldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
+	this->driverOldRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
+
+	if (this->steeringAnimation != nullptr)
+		this->DriverSkeletalMesh->PlayAnimation(this->steeringAnimation, true);
 
 
 	if (this->controlledVehicle != nullptr)
@@ -145,24 +164,31 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		if (this->driverState == EDriverPawnState::JumpingIntoVehicle)
 		{
 			FTransform newTransform = this->controlledVehicle->Body->ComponentToWorld;
-			newTransform.SetScale3D(this->DriverMesh->ComponentToWorld.GetScale3D());
-			newTransform.SetLocation(newTransform.GetLocation() - newTransform.GetUnitAxis(EAxis::Z) * 50.0f);
-			this->DriverMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-			this->DriverMesh->SetWorldTransform(newTransform);
+			newTransform.SetScale3D(this->DriverSkeletalMesh->ComponentToWorld.GetScale3D());
+			this->DriverSkeletalMesh->SetWorldTransform(newTransform);
+
+			FVector capsulePos = newTransform.GetLocation() + (this->DriverCapsule->GetScaledCapsuleHalfHeight() * newTransform.GetUnitAxis(EAxis::Z));
+			newTransform.SetLocation(capsulePos);
+			this->DriverCapsule->AttachTo(this->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+			this->DriverCapsule->SetWorldTransform(newTransform, false);
+			this->DriverCapsule->BodyInstance.SetBodyTransform(newTransform, true);
+			this->DriverSkeletalMesh->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 			this->PhysicsConstraint->SetWorldTransform(this->controlledVehicle->Body->ComponentToWorld);
 			this->PhysicsConstraint->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
-			this->PhysicsConstraint->SetConstrainedComponents(this->DriverMesh, NAME_None, this->controlledVehicle->Body, NAME_None);
+			this->PhysicsConstraint->SetConstrainedComponents(this->DriverCapsule, NAME_None, this->controlledVehicle->Body, NAME_None);
 			this->PhysicsConstraint->bWantsInitializeComponent = true;
 			this->PhysicsConstraint->InitializeComponent();
 
-			this->DriverMesh->SetEnableGravity(true);
+			this->DriverCapsule->SetSimulatePhysics(true);
+			this->DriverCapsule->SetEnableGravity(true);
 
 			this->driverState = EDriverPawnState::SteeringVehicle;
 		}
 
 		if (this->driverState == EDriverPawnState::SteeringVehicle)
 		{
+
 			this->controlledVehicle->SetSteeringInput(this->steeringAxisInput);
 			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);

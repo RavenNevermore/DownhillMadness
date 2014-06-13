@@ -106,11 +106,19 @@ class ADriverPawn : public APawn
 
 	/** Driver mesh */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class UStaticMeshComponent> DriverMesh;
+	TSubobjectPtr<class USkeletalMeshComponent> DriverSkeletalMesh;
+
+	/** Driver's rigid body */
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UCapsuleComponent> DriverCapsule;
 
 	/** Driver's current state */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	TEnumAsByte<EDriverPawnState::Type> driverState;
+
+	/** Driver's steering animation */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, EditDefaultsOnly)
+	UAnimationAsset* steeringAnimation;
 
 private:
 	/* Camera anchor */
