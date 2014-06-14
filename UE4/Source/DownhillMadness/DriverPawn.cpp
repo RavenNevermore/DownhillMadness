@@ -40,8 +40,8 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverCapsule->SetSimulatePhysics(false);
 	this->DriverCapsule->SetNotifyRigidBodyCollision(true);
 	this->DriverCapsule->bGenerateOverlapEvents = true;
-	this->DriverCapsule->SetCapsuleHalfHeight(54.0f);
-	this->DriverCapsule->SetCapsuleRadius(21.0f);
+	this->DriverCapsule->SetCapsuleHalfHeight(43.0f);
+	this->DriverCapsule->SetCapsuleRadius(13.0f);
 	this->DriverCapsule->BodyInstance.bUpdateMassWhenScaleChanges = true;
 	this->DriverCapsule->AttachTo(this->DriverSkeletalMesh);
 
@@ -68,6 +68,9 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 
 	this->driverState = EDriverPawnState::PushingVehicle;
 	this->steeringAxisInput = 0.0f;
+	this->brakeAxisInput = 0.0f;
+	this->leaningXInputOld = 0.0f;
+	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
 
 	this->PrimaryActorTick.bCanEverTick = true;
@@ -81,9 +84,22 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 void ADriverPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
 	this->cameraAnchor = this->DriverCapsule->GetComponentLocation() - this->DriverCapsule->GetForwardVector() * 200.0f + this->DriverCapsule->GetUpVector() * 300.0f;
 	this->driverOldRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
 	this->driverOldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
+
+	UPhysicalMaterial* PhysMaterial = this->DriverSkeletalMesh->GetBodySetup()->PhysMaterial;
+	if (PhysMaterial == NULL && GEngine != NULL)
+	{
+		PhysMaterial = GEngine->DefaultPhysMaterial;
+	}
+
+	this->DriverCapsule->SetPhysMaterialOverride(PhysMaterial);
+	this->DriverCapsule->BodyInstance.UpdateMassProperties();
+	float massDifference = this->DriverSkeletalMesh->CalculateMass() / (this->DriverCapsule->CalculateMass() / this->DriverCapsule->BodyInstance.MassScale);
+	this->DriverCapsule->BodyInstance.MassScale = massDifference;
+	this->DriverCapsule->BodyInstance.UpdateMassProperties();
 }
 
 
@@ -101,7 +117,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 	TArray<FHitResult> hitResults;
 
 	FVector rayStart = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
-	FVector rayEnd = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - (this->DriverSkeletalMesh->GetComponenTransform().GetUnitAxis(EAxis::Z) * 50.0f);
+	FVector rayEnd = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - (this->DriverSkeletalMesh->GetComponenTransform().GetUnitAxis(EAxis::Z) * 75.0f);
 	
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
@@ -120,28 +136,28 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		}
 	}
 
-	this->cameraAnchor += this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->driverOldLocation;
+	this->cameraAnchor += this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - this->driverOldLocation;
 
-	FRotator deltaRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator() - this->driverOldRotation;
+	FRotator deltaRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator() - this->driverOldRotation;
 
 	//this->cameraAnchor = this->DriverMesh->GetComponentLocation() + (this->cameraAnchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
-	this->cameraAnchor = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() + (this->cameraAnchor - this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+	this->cameraAnchor = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() + (this->cameraAnchor - this->DriverSkeletalMesh->GetComponenTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
 
-	FRotator rootRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
+	FRotator rootRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator();
 
 	FVector baseLocation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation();
 	FRotator baseRotation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().Rotator();
 
 	//FVector destLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
-	FRotator destRotation = (this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
+	FRotator destRotation = (this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
 
 	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
 	
 	if (onGround)
-		this->cameraAirDifference = worldLocation - this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
+		this->cameraAirDifference = worldLocation - this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
 	else
-		worldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation() + this->cameraAirDifference;
+		worldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() + this->cameraAirDifference;
 
 	//this->CharacterCamera->SetWorldLocation(worldLocation);
 	//this->CharacterCamera->SetWorldRotation(worldRotation);
@@ -152,8 +168,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		newCameraTransform = FTransform(baseRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 	this->CameraSphere->BodyInstance.SetBodyTransform(newCameraTransform, false);
 
-	this->driverOldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
-	this->driverOldRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
+	this->driverOldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
+	this->driverOldRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator();
 
 	if (this->steeringAnimation != nullptr)
 		this->DriverSkeletalMesh->PlayAnimation(this->steeringAnimation, true);
@@ -188,7 +204,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 		if (this->driverState == EDriverPawnState::SteeringVehicle)
 		{
-
+			this->LeanPlayer(this->leaningXInput, this->leaningYInput);
 			this->controlledVehicle->SetSteeringInput(this->steeringAxisInput);
 			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);
@@ -207,6 +223,8 @@ void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
 	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
 	InputComponent->BindAction("DebugReset", EInputEvent::IE_Pressed, this, &ADriverPawn::OnDebugReset).bConsumeInput = false;
+	InputComponent->BindAxis("Lean X", this, &ADriverPawn::OnGetLeanX).bConsumeInput = false;
+	InputComponent->BindAxis("Lean Y", this, &ADriverPawn::OnGetLeanY).bConsumeInput = false;
 }
 
 
@@ -238,6 +256,75 @@ void ADriverPawn::OnDebugReset()
 		FString levelName = this->GetWorld()->GetMapName();
 		levelName.RemoveFromStart(FString(TEXT("UEDPIE_0_")), ESearchCase::CaseSensitive);
 		this->OpenLevel(this, FName(*levelName), true, FString(TEXT("")));
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::OnGetLeanX(float axisInput)
+{
+	this->leaningXInput = axisInput;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::OnGetLeanY(float axisInput)
+{
+	this->leaningYInput = axisInput;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::LeanPlayer(float leanX, float leanY)
+{
+	FTransform vehicleTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
+
+	FVector2D leanVector(leanX, leanY);
+	leanVector.Normalize();
+
+	float leanXDegree = -(leanVector.X * 30.0f);
+	float leanYDegree = -(leanVector.Y * 30.0f);
+
+	FVector capsuleForward = vehicleTransform.GetUnitAxis(EAxis::X);
+	FVector capsuleRight = vehicleTransform.GetUnitAxis(EAxis::Y);
+	FVector capsuleUp = vehicleTransform.GetUnitAxis(EAxis::Z);
+
+	capsuleForward = capsuleForward.RotateAngleAxis(leanXDegree, vehicleTransform.GetUnitAxis(EAxis::X));
+	capsuleRight = capsuleRight.RotateAngleAxis(leanXDegree, vehicleTransform.GetUnitAxis(EAxis::X));
+	capsuleUp = capsuleUp.RotateAngleAxis(leanXDegree, vehicleTransform.GetUnitAxis(EAxis::X));
+
+	capsuleForward = capsuleForward.RotateAngleAxis(leanYDegree, vehicleTransform.GetUnitAxis(EAxis::Y));
+	capsuleRight = capsuleRight.RotateAngleAxis(leanYDegree, vehicleTransform.GetUnitAxis(EAxis::Y));
+	capsuleUp = capsuleUp.RotateAngleAxis(leanYDegree, vehicleTransform.GetUnitAxis(EAxis::Y));
+
+	vehicleTransform = FTransform(capsuleForward, capsuleRight, capsuleUp, vehicleTransform.GetLocation());
+
+	if (FMath::Abs(leanXDegree - this->leaningXInputOld) >= 1.0f || FMath::Abs(leanYDegree - this->leaningYInputOld) >= 1.0f)
+	{
+		this->PhysicsConstraint->ConstraintInstance.TermConstraint();
+	}
+
+	FVector capsulePos = vehicleTransform.GetLocation() + (this->DriverCapsule->GetScaledCapsuleHalfHeight() * vehicleTransform.GetUnitAxis(EAxis::Z));
+	vehicleTransform.SetLocation(capsulePos);
+
+	this->DriverCapsule->BodyInstance.SetBodyTransform(vehicleTransform, true);
+	this->DriverCapsule->SetWorldTransform(vehicleTransform, false);
+
+	if (FMath::Abs(leanXDegree - this->leaningXInputOld) >= 1.0f || FMath::Abs(leanYDegree - this->leaningYInputOld) >= 1.0f)
+	{
+		this->PhysicsConstraint->InitializeComponent();
+	}
+
+	if (FMath::Abs(leanXDegree - this->leaningXInputOld) >= 1.0f || FMath::Abs(leanYDegree - this->leaningYInputOld) >= 1.0f)
+	{
+		this->leaningXInputOld = leanXDegree;
+		this->leaningYInputOld = leanYDegree;
 	}
 }
 

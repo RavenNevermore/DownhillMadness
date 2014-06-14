@@ -44,14 +44,14 @@ class ADriverPawn : public APawn
 
 	/**
 	* @brief	Get input for steering
-	* @float	Axis value
+	* @param	axisInput	Axis value
 	*/
 	UFUNCTION()
 	void OnGetSteeringInput(float axisInput);
 
 	/**
 	* @brief	Get input for brakes
-	* @float	Axis value
+	* @param	axisInput	Axis value
 	*/
 	UFUNCTION()
 	void OnGetBrakeInput(float axisInput);
@@ -61,6 +61,28 @@ class ADriverPawn : public APawn
 	*/
 	UFUNCTION()
 	void OnDebugReset();
+
+	/**
+	* @brief	Get X axis input for leaning
+	* @param	axisInput	Axis value
+	*/
+	UFUNCTION()
+	void OnGetLeanX(float axisInput);
+
+	/**
+	* @brief	Get Y axis input for leaning
+	* @param	axisInput	Axis value
+	*/
+	UFUNCTION()
+	void OnGetLeanY(float axisInput);
+
+	/**
+	* @brief	Make player lean
+	* @param	leanX	X axis lean
+	* @param	leanY	Y axis lean
+	*/
+	UFUNCTION()
+	void LeanPlayer(float leanX, float leanY);
 
 	/**
 	* @brief	Open a level
@@ -83,6 +105,14 @@ class ADriverPawn : public APawn
 	/** Input of brake axis */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	float brakeAxisInput;
+
+	/** X axis input for leaning */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
+	float leaningXInput;
+
+	/** Y axis input for leaning */
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
+	float leaningYInput;
 
 	/** Camera stiffness */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
@@ -121,6 +151,14 @@ class ADriverPawn : public APawn
 	UAnimationAsset* steeringAnimation;
 
 private:
+	/** Old X axis input for leaning */
+	UPROPERTY()
+	float leaningXInputOld;
+
+	/** =ld Y axis input for leaning */
+	UPROPERTY()
+	float leaningYInputOld;
+
 	/* Camera anchor */
 	UPROPERTY()
 	FVector cameraAnchor;
