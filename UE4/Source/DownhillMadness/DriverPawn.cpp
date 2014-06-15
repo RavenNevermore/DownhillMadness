@@ -286,7 +286,8 @@ void ADriverPawn::LeanPlayer(float leanX, float leanY)
 	FTransform vehicleTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
 
 	FVector2D leanVector(leanX, leanY);
-	leanVector.Normalize();
+	if (leanVector.Size() > 1.0f)
+		leanVector.Normalize();
 
 	float leanXDegree = -(leanVector.X * 30.0f);
 	float leanYDegree = -(leanVector.Y * 30.0f);
