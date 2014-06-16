@@ -40,9 +40,12 @@ Thumbs.db
 
 UE4/DerivedDataCache
 UE4/Intermediate
+UE4/Plugins/VictoryPlugin/Intermediate
 UE4/Saved
 UE4/Binaries/Win64/*.pdb
 UE4/Binaries/Win64/*.PDB
+UE4/Plugins/VictoryPlugin/Binaries/Win64/*.pdb
+UE4/Plugins/VictoryPlugin/Binaries/Win64/*.PDB
 UE4/*.sdf
 UE4/*.suo
 UE4/*.sln
