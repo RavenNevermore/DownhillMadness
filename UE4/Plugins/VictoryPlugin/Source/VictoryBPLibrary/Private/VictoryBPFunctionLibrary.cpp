@@ -169,7 +169,7 @@ bool UVictoryBPFunctionLibrary::OptionsMenu__GetDisplayAdapterScreenResolutions(
 
 AStaticMeshActor* UVictoryBPFunctionLibrary::Clone__StaticMeshActor(UObject* WorldContextObject, bool&IsValid, AStaticMeshActor* ToClone, FVector LocationOffset,FRotator RotationOffset)
 {
-	IsValid = NULL;
+	IsValid = false;
 	if(!ToClone) return NULL;
 	if(!ToClone->IsValidLowLevel()) return NULL;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -188,7 +188,7 @@ AStaticMeshActor* UVictoryBPFunctionLibrary::Clone__StaticMeshActor(UObject* Wor
 	SpawnInfo.bNoCollisionFail 		= true;
 	SpawnInfo.Owner 				= ToClone;
 	SpawnInfo.Instigator				= NULL;
-	SpawnInfo.bDeferConstruction 	= NULL;
+	SpawnInfo.bDeferConstruction 	= 0;
 	
 	AStaticMeshActor* NewSMA = World->SpawnActor<AStaticMeshActor>(SpawnClass, ToClone->GetActorLocation() + FVector(0,0,512) ,ToClone->GetActorRotation(), SpawnInfo );
 	
@@ -732,13 +732,13 @@ AActor*  UVictoryBPFunctionLibrary::Traces__CharacterMeshTrace___ClosestBone(
 	
 	//Get a PC to GetWorld() from
 	TObjectIterator<APlayerController> Itr;
-	if (!Itr) return false;
+	if (!Itr) return NULL;
 	
 	//~~~~~~~~~~~~
 	
 	//Get World
 	UWorld* TheWorld = Itr->GetWorld();
-	if (!TheWorld) return false;
+	if (!TheWorld) return NULL;
 	//~~~~~~~~~~~~~~~~~
 	
 	
@@ -844,13 +844,13 @@ AActor* UVictoryBPFunctionLibrary::Traces__CharacterMeshTrace___ClosestSocket(
 	
 	//Get a PC to GetWorld() from
 	TObjectIterator<APlayerController> Itr;
-	if (!Itr) return false;
+	if (!Itr) return NULL;
 	
 	//~~~~~~~~~~~~
 	
 	//Get World
 	UWorld* TheWorld = Itr->GetWorld();
-	if (!TheWorld) return false;
+	if (!TheWorld) return NULL;
 	//~~~~~~~~~~~~~~~~~
 	
 	
