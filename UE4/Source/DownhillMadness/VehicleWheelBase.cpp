@@ -108,7 +108,9 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 			return;
 
 		FVector negativeVelocity = -(brakeValue * rigidBody->BodyInstance.GetUnrealWorldVelocity());
+		FVector downVelocity = -(this->PhysicsConstraint->GetUpVector() * negativeVelocity.Size());
 		rigidBody->AddImpulse(negativeVelocity, NAME_None, true);
+		rigidBody->AddImpulse(downVelocity, NAME_None, true);
 	}
 }
 
