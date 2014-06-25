@@ -58,3 +58,4 @@ DownhillMadness/Assets/Downloads/
 *.meta
 *.xcodeproj
 UE4/DownhillMadness.opensdf
+UE4/build/DownhillMadness.build/DebugGame/UE4XcodeHelper.build/*
