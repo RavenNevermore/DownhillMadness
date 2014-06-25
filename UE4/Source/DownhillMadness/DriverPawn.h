@@ -146,6 +146,10 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	TEnumAsByte<EDriverPawnState::Type> driverState;
 
+	/** Power of impulse used for leaning */
+	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
+	float leaningImpulse;
+
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()

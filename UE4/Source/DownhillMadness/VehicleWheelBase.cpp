@@ -55,6 +55,7 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->isGrounded = false;
 	this->isGroundedInternal = false;
 	this->currentBrake = 0.0f;
+	this->groundNormal = FVector::ZeroVector;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -108,7 +109,7 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 			return;
 
 		FVector negativeVelocity = -(brakeValue * rigidBody->BodyInstance.GetUnrealWorldVelocity());
-		FVector downVelocity = -(this->PhysicsConstraint->GetUpVector() * negativeVelocity.Size());
+		FVector downVelocity = -(this->groundNormal * negativeVelocity.Size());
 		rigidBody->AddImpulse(negativeVelocity, NAME_None, true);
 		rigidBody->AddImpulse(downVelocity, NAME_None, true);
 	}
@@ -126,5 +127,6 @@ void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AAct
 	{
 		this->isGrounded = true;
 		this->isGroundedInternal = true;
+		this->groundNormal = Hit.ImpactNormal;
 	}
 }

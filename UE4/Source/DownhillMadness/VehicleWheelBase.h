@@ -83,5 +83,11 @@ class AVehicleWheelBase : public AVehiclePartBase
 	void BrakeWheel(float brakeValue);
 
 private:
+	/* Is grounded for current frame */
+	UPROPERTY()
 	bool isGroundedInternal;
+
+	/* Camera anchor */
+	UPROPERTY()
+	FVector groundNormal;
 };
