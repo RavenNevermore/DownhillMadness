@@ -70,6 +70,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->leaningXInputOld = 0.0f;
 	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
+	this->leaningImpulse = 200.0f;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -134,6 +135,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		}
 	}
 
+
+	// Calculate camera movement
 	this->cameraAnchor += this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - this->driverOldLocation;
 
 	FRotator deltaRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator() - this->driverOldRotation;
@@ -172,6 +175,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	if (this->controlledVehicle != nullptr)
 	{
+		// Character is mounting car?
 		if (this->driverState == EDriverPawnState::JumpingIntoVehicle)
 		{
 			FTransform newTransform = this->controlledVehicle->Body->ComponentToWorld;
@@ -197,12 +201,20 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->driverState = EDriverPawnState::SteeringVehicle;
 		}
 
+		// Character is controlling car?
 		if (this->driverState == EDriverPawnState::SteeringVehicle)
 		{
 			this->LeanPlayer(this->leaningXInput, this->leaningYInput);
 			this->controlledVehicle->SetSteeringInput(this->steeringAxisInput);
 			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);
+
+			// Leaning
+			if (!onGround)
+			{
+				FVector capsuleTop = this->DriverCapsule->GetComponenTransform().GetLocation() + (this->DriverCapsule->GetScaledCapsuleHalfHeight() * this->DriverCapsule->GetComponenTransform().GetUnitAxis(EAxis::Z));
+				this->DriverCapsule->BodyInstance.AddImpulseAtPosition(FVector(0.0, 0.0, -1.0) * this->leaningImpulse, capsuleTop);
+			}
 		}
 	}
 }
