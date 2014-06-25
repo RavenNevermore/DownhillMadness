@@ -146,10 +146,6 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	TEnumAsByte<EDriverPawnState::Type> driverState;
 
-	/** Driver's steering animation */
-	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, EditDefaultsOnly)
-	UAnimationAsset* steeringAnimation;
-
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()
@@ -171,6 +167,7 @@ private:
 	UPROPERTY()
 	FRotator driverOldRotation;
 
+	/* Distance of camera when in air */
 	UPROPERTY()
 	FVector cameraAirDifference;
 };

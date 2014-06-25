@@ -60,8 +60,6 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->CameraSphere->bAbsoluteLocation = true;
 	this->CameraSphere->bAbsoluteRotation = true;
 
-	this->steeringAnimation = nullptr;
-
 	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
 	this->CharacterCamera->AttachTo(this->CameraSphere);
 	this->CharacterCamera->bUseControllerViewRotation = false;
@@ -170,9 +168,6 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	this->driverOldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
 	this->driverOldRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator();
-
-	if (this->steeringAnimation != nullptr)
-		this->DriverSkeletalMesh->PlayAnimation(this->steeringAnimation, true);
 
 
 	if (this->controlledVehicle != nullptr)
