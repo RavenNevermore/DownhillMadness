@@ -18,6 +18,14 @@ class AVehicleWeightBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
+	/** Arrow for visualizing snap pivot's forward vector */
+	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UArrowComponent> SnapForward;
+
+	/** Arrow for visualizing snap pivot's right vector */
+	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UArrowComponent> SnapRight;
+
 	/** Weight mesh */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> WeightMesh;
@@ -25,6 +33,10 @@ class AVehicleWeightBase : public AVehiclePartBase
 	/** Weight's physics constraint */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UPhysicsConstraintComponent> PhysicsConstraint;
+
+	/** Pivot for snapping */
+	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> SnapPivot;
 
 	/** Weight's transform relative to root */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleAnywhere)

@@ -29,9 +29,13 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
-	/** Arrow component for wheel axis */
+	/** Arrow for visualizing snap pivot's forward vector */
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class UArrowComponent> AxisArrow;
+	TSubobjectPtr<class UArrowComponent> SnapForward;
+
+	/** Arrow for visualizing snap pivot's right vector */
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UArrowComponent> SnapRight;
 
 	/** Axis mesh */
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
@@ -40,6 +44,10 @@ class AVehicleWheelBase : public AVehiclePartBase
 	/** Brake mesh */
 	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> BrakeMesh;
+
+	/** Pivot for snapping */
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> SnapPivot;
 
 	/** Indicates whether this wheel can be steered or not */
 	UPROPERTY(Category = VehicleWheel, EditInstanceOnly, BlueprintReadWrite)

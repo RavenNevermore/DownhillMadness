@@ -21,6 +21,21 @@ AVehicleWeightBase::AVehicleWeightBase(const class FPostConstructInitializePrope
 	this->PhysicsConstraint->bAbsoluteScale = true;
 	this->PhysicsConstraint->AttachTo(this->FrontArrow);
 
+	this->SnapPivot = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("SnapPivot")));
+	this->SnapPivot->AttachTo(this->FrontArrow);
+
+	this->SnapForward = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("SnapForward")));
+	this->SnapForward->bAbsoluteScale = true;
+	this->SnapForward->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
+	this->SnapForward->AttachTo(this->SnapPivot);
+
+	this->SnapRight = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("SnapRight")));
+	this->SnapRight->bAbsoluteScale = true;
+	this->SnapRight->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
+	this->SnapRight->RelativeRotation.Yaw = 90.0f;
+	this->SnapRight->SetArrowColor_New(FColor::Green);
+	this->SnapRight->AttachTo(this->SnapPivot);
+
 	this->WeightMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("WeightMesh")));
 	this->WeightMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->WeightMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);

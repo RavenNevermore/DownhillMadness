@@ -169,6 +169,24 @@ class AVehicleBodyBase : public AVehiclePartBase
 	bool AlignWeight(AVehicleWeightBase* weight, float minDistance, float maxDistance, FTransform& newTransform);
 
 	/**
+	* @brief	Snap a wheel to vehicle's bounding box
+	* @param	wheel	Wheel to snap to vehicle
+	* @param	newTransform	New transform of wheel
+	* @returns	True if snapping was successful
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform);
+
+	/**
+	* @brief	Snap a weight to vehicle's bounding box
+	* @param	weight	Wheight to snap to vehicle
+	* @param	newTransform	New transform of weight
+	* @returns	True if snapping was successful
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	bool SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform);
+
+	/**
 	* @brief	Check this vehicle for errors
 	* @returns	All errors found
 	*/
@@ -202,4 +220,25 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/** Attached brake system */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleAnywhere)
 	AVehicleBrakeBase* attachedBrake;
+
+private:
+	/**
+	* @brief	Align a vehicle part to vehicle's bounding box and check if it can be attached
+	* @param	inTransform	Base transform of vehicle part
+	* @param	minDistance	Minimum distance of vehicle part from bounding box
+	* @param	maxDistance	Maximum distance of vehicle part from bounding box
+	* @param	newTransform	New projected vehicle part transform
+	* @returns	True if vehicle part can be placed
+	*/
+	UFUNCTION()
+	bool AlignPart(const FTransform& inTransform, float minDistance, float maxDistance, FTransform& newTransform);
+
+	/**
+	* @brief	Snap a vehicle part to vehicle's bounding box
+	* @param	inTransform	Transform of vehicle part's snap pivot
+	* @param	newTransform	New transform of vehicle part's snap pivot 
+	* @returns	True if snapping was successful
+	*/
+	UFUNCTION()
+	bool SnapPart(const FTransform& inTransform, FTransform& newTransform);
 };

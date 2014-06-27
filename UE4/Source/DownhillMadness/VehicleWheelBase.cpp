@@ -11,13 +11,6 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->FrontArrow->bAbsoluteScale = true;
 	this->RootComponent = this->FrontArrow;
 
-	this->AxisArrow = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("AxisArrow")));
-	this->AxisArrow->bAbsoluteScale = true;
-	this->AxisArrow->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
-	this->AxisArrow->RelativeRotation.Yaw = 90.0f;
-	this->AxisArrow->SetArrowColor_New(FColor::Green);
-	this->AxisArrow->AttachTo(this->FrontArrow);
-
 	this->PhysicsConstraint = PCIP.CreateDefaultSubobject<UPhysicsConstraintComponent>(this, FName(TEXT("PhysicsConstraint")));
 	this->PhysicsConstraint->ConstraintInstance.LinearXMotion = ELinearConstraintMotion::LCM_Locked;
 	this->PhysicsConstraint->ConstraintInstance.LinearYMotion = ELinearConstraintMotion::LCM_Locked;
@@ -40,6 +33,21 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->AxisMesh->SetSimulatePhysics(false);
 	this->AxisMesh->bAbsoluteScale = true;
 	this->AxisMesh->AttachTo(this->WheelConstraint);
+
+	this->SnapPivot = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("SnapPivot")));
+	this->SnapPivot->AttachTo(this->FrontArrow);
+
+	this->SnapForward = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("SnapForward")));
+	this->SnapForward->bAbsoluteScale = true;
+	this->SnapForward->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
+	this->SnapForward->AttachTo(this->SnapPivot);
+
+	this->SnapRight = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("SnapRight")));
+	this->SnapRight->bAbsoluteScale = true;
+	this->SnapRight->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
+	this->SnapRight->RelativeRotation.Yaw = 90.0f;
+	this->SnapRight->SetArrowColor_New(FColor::Green);
+	this->SnapRight->AttachTo(this->SnapPivot);
 
 	this->BrakeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("BrakeMesh")));
 	this->BrakeMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));

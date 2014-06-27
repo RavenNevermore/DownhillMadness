@@ -350,11 +350,71 @@ void AVehicleBodyBase::DisablePhysics()
 
 bool AVehicleBodyBase::AlignWheel(AVehicleWheelBase* wheel, float minDistance, float maxDistance, FTransform& newTransform)
 {
-	newTransform = wheel->FrontArrow->GetComponenTransform();
+	FMatrix relativeMatrix = wheel->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
+	relativeMatrix = relativeMatrix.Inverse();
+
+	bool allignedPart = this->AlignPart(wheel->SnapPivot->GetComponenTransform(), minDistance, maxDistance, newTransform);
+
+	FVector newTransformLocation = newTransform.GetLocation() - (wheel->SnapPivot->RelativeLocation.X * wheel->FrontArrow->GetForwardVector())
+		- (wheel->SnapPivot->RelativeLocation.Y * wheel->FrontArrow->GetRightVector())
+		- (wheel->SnapPivot->RelativeLocation.Z * wheel->FrontArrow->GetUpVector());
+
+	FVector newTransformForward = (relativeMatrix.GetUnitAxis(EAxis::X).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformRight = (relativeMatrix.GetUnitAxis(EAxis::Y).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformUp = (relativeMatrix.GetUnitAxis(EAxis::Z).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Z * newTransform.GetUnitAxis(EAxis::Z));
+
+	newTransform = FTransform(newTransformForward, newTransformRight, newTransformUp, newTransformLocation);
+
+	return allignedPart;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance, float maxDistance, FTransform& newTransform)
+{
+	FMatrix relativeMatrix = weight->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
+	relativeMatrix = relativeMatrix.Inverse();
+
+	bool allignedPart = this->AlignPart(weight->SnapPivot->GetComponenTransform(), minDistance, maxDistance, newTransform);
+
+	FVector newTransformLocation = newTransform.GetLocation() - (weight->SnapPivot->RelativeLocation.X * weight->FrontArrow->GetForwardVector())
+		- (weight->SnapPivot->RelativeLocation.Y * weight->FrontArrow->GetRightVector())
+		- (weight->SnapPivot->RelativeLocation.Z * weight->FrontArrow->GetUpVector());
+
+	FVector newTransformForward = (relativeMatrix.GetUnitAxis(EAxis::X).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformRight = (relativeMatrix.GetUnitAxis(EAxis::Y).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformUp = (relativeMatrix.GetUnitAxis(EAxis::Z).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Z * newTransform.GetUnitAxis(EAxis::Z));
+
+	newTransform = FTransform(newTransformForward, newTransformRight, newTransformUp, newTransformLocation);
+
+	return allignedPart;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::AlignPart(const FTransform& inTransform, float minDistance, float maxDistance, FTransform& newTransform)
+{
+	newTransform = inTransform;
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = wheel->FrontArrow->GetComponentLocation();
+	FVector rayStart = inTransform.GetLocation();
 	FVector rayEnd = this->RaycastBase->GetComponentLocation();
 
 	FCollisionQueryParams queryParams(false);
@@ -363,7 +423,8 @@ bool AVehicleBodyBase::AlignWheel(AVehicleWheelBase* wheel, float minDistance, f
 	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
 
 	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
-	
+
+
 	// Outer loop
 	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter; ++hitResultIter)
 	{
@@ -383,7 +444,8 @@ bool AVehicleBodyBase::AlignWheel(AVehicleWheelBase* wheel, float minDistance, f
 				{
 					if ((rayStart - currentHitResult.ImpactPoint).Size() < minDistance || (rayStart - rayEnd).Size() < (currentHitResult.ImpactPoint - rayEnd).Size())
 						return false;
-					
+
+
 					// Get new transform
 					FVector forwardVector;
 					FVector rightVector = -currentHitResult.ImpactNormal;
@@ -414,13 +476,73 @@ bool AVehicleBodyBase::AlignWheel(AVehicleWheelBase* wheel, float minDistance, f
 // ----------------------------------------------------------------------------
 
 
-bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance, float maxDistance, FTransform& newTransform)
+bool AVehicleBodyBase::SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform)
 {
-	newTransform = weight->FrontArrow->GetComponenTransform();
+	FMatrix relativeMatrix = wheel->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
+	relativeMatrix = relativeMatrix.Inverse();
+
+	bool snappedPart = this->SnapPart(wheel->SnapPivot->GetComponenTransform(), newTransform);
+
+	FVector newTransformLocation = newTransform.GetLocation() - (wheel->SnapPivot->RelativeLocation.X * wheel->FrontArrow->GetForwardVector())
+		- (wheel->SnapPivot->RelativeLocation.Y * wheel->FrontArrow->GetRightVector())
+		- (wheel->SnapPivot->RelativeLocation.Z * wheel->FrontArrow->GetUpVector());
+
+	FVector newTransformForward = (relativeMatrix.GetUnitAxis(EAxis::X).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformRight = (relativeMatrix.GetUnitAxis(EAxis::Y).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformUp = (relativeMatrix.GetUnitAxis(EAxis::Z).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Z * newTransform.GetUnitAxis(EAxis::Z));
+
+	newTransform = FTransform(newTransformForward, newTransformRight, newTransformUp, newTransformLocation);
+
+	return snappedPart;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform)
+{
+	FMatrix relativeMatrix = weight->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
+	relativeMatrix = relativeMatrix.Inverse();
+
+	bool snappedPart = this->SnapPart(weight->SnapPivot->GetComponenTransform(), newTransform);
+
+	FVector newTransformLocation = newTransform.GetLocation() - (weight->SnapPivot->RelativeLocation.X * weight->FrontArrow->GetForwardVector())
+		- (weight->SnapPivot->RelativeLocation.Y * weight->FrontArrow->GetRightVector())
+		- (weight->SnapPivot->RelativeLocation.Z * weight->FrontArrow->GetUpVector());
+
+	FVector newTransformForward = (relativeMatrix.GetUnitAxis(EAxis::X).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::X).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformRight = (relativeMatrix.GetUnitAxis(EAxis::Y).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Y).Z * newTransform.GetUnitAxis(EAxis::Z));
+	FVector newTransformUp = (relativeMatrix.GetUnitAxis(EAxis::Z).X * newTransform.GetUnitAxis(EAxis::X))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Y * newTransform.GetUnitAxis(EAxis::Y))
+		+ (relativeMatrix.GetUnitAxis(EAxis::Z).Z * newTransform.GetUnitAxis(EAxis::Z));
+
+	newTransform = FTransform(newTransformForward, newTransformRight, newTransformUp, newTransformLocation);
+
+	return snappedPart;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTransform)
+{
+	newTransform = inTransform;
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = weight->FrontArrow->GetComponentLocation();
+	FVector rayStart = inTransform.GetLocation();
 	FVector rayEnd = this->RaycastBase->GetComponentLocation();
 
 	FCollisionQueryParams queryParams(false);
@@ -430,6 +552,28 @@ bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance
 
 	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 
+	bool foundBox = false;
+	FHitResult boxHitResult;
+	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter && !foundBox; ++hitResultIter)
+	{
+		FHitResult currentHitResult = *hitResultIter;
+
+		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+		{
+			foundBox = true;
+			boxHitResult = currentHitResult;
+		}
+	}
+
+	if (foundBox && boxHitResult.ImpactPoint == FVector::ZeroVector)
+	{
+		FVector shiftDirection = (rayStart - rayEnd);
+		shiftDirection.Normalize();
+		rayStart = rayStart + (shiftDirection * 500000.0f);		// Kinda stupid, but can't think of anything better here...
+		this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+	}
+
+
 	// Outer loop
 	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter; ++hitResultIter)
 	{
@@ -437,7 +581,7 @@ bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance
 
 		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 		{
-			rayEnd = rayStart + maxDistance * -(currentHitResult.ImpactNormal);
+			rayStart = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
 			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 
 			// Inner loop
@@ -447,12 +591,10 @@ bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance
 
 				if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 				{
-					if ((rayStart - currentHitResult.ImpactPoint).Size() < minDistance || (rayStart - rayEnd).Size() < (currentHitResult.ImpactPoint - rayEnd).Size())
-						return false;
+					FVector rightVector = -currentHitResult.ImpactNormal;
 
 					// Get new transform
 					FVector forwardVector;
-					FVector rightVector = -currentHitResult.ImpactNormal;
 					FVector upVector = this->RaycastBase->GetUpVector();
 					float dotProduct = FVector::DotProduct(upVector, rightVector);
 
@@ -463,7 +605,7 @@ bool AVehicleBodyBase::AlignWeight(AVehicleWeightBase* weight, float minDistance
 
 					forwardVector = FVector::CrossProduct(rightVector, upVector);
 
-					newTransform = FTransform(forwardVector, rightVector, upVector, rayStart);
+					newTransform = FTransform(forwardVector, rightVector, upVector, currentHitResult.ImpactPoint);
 
 					return true;
 				}
