@@ -99,6 +99,8 @@ void ADriverPawn::BeginPlay()
 	float massDifference = this->DriverSkeletalMesh->CalculateMass() / (this->DriverCapsule->CalculateMass() / this->DriverCapsule->BodyInstance.MassScale);
 	this->DriverCapsule->BodyInstance.MassScale = massDifference;
 	this->DriverCapsule->BodyInstance.UpdateMassProperties();
+
+	this->vehicleResetTransform = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform();
 }
 
 
@@ -178,15 +180,16 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		// Character is mounting car?
 		if (this->driverState == EDriverPawnState::JumpingIntoVehicle)
 		{
-			FTransform newTransform = this->controlledVehicle->Body->ComponentToWorld;
+			FTransform newTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
 			newTransform.SetScale3D(this->DriverSkeletalMesh->ComponentToWorld.GetScale3D());
 			this->DriverSkeletalMesh->SetWorldTransform(newTransform);
 
-			FVector capsulePos = newTransform.GetLocation() + (this->DriverCapsule->GetScaledCapsuleHalfHeight() * newTransform.GetUnitAxis(EAxis::Z));
+			newTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
+			FVector capsulePos = newTransform.GetLocation() + (this->DriverCapsule->GetUnscaledCapsuleHalfHeight() * newTransform.GetUnitAxis(EAxis::Z));
 			newTransform.SetLocation(capsulePos);
 			this->DriverCapsule->AttachTo(this->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
-			this->DriverCapsule->SetWorldTransform(newTransform, false);
 			this->DriverCapsule->BodyInstance.SetBodyTransform(newTransform, true);
+			this->DriverCapsule->SetWorldTransform(newTransform, false);
 			this->DriverSkeletalMesh->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 			this->PhysicsConstraint->SetWorldTransform(this->controlledVehicle->Body->ComponentToWorld);
 			this->PhysicsConstraint->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
@@ -197,6 +200,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 			this->DriverCapsule->SetSimulatePhysics(true);
 			this->DriverCapsule->SetEnableGravity(true);
+
+			this->vehicleResetTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
 
 			this->driverState = EDriverPawnState::SteeringVehicle;
 		}
@@ -263,11 +268,18 @@ void ADriverPawn::OnGetBrakeInput(float axisInput)
 
 void ADriverPawn::OnDebugReset()
 {
-	if (GEngine)
+	//if (GEngine)
+	//{
+	//	FString levelName = this->GetWorld()->GetMapName();
+	//	levelName.RemoveFromStart(FString(TEXT("UEDPIE_0_")), ESearchCase::CaseSensitive);
+	//	this->OpenLevel(this, FName(*levelName), true, FString(TEXT("")));
+	//}
+	
+	if (this->controlledVehicle != nullptr)
 	{
-		FString levelName = this->GetWorld()->GetMapName();
-		levelName.RemoveFromStart(FString(TEXT("UEDPIE_0_")), ESearchCase::CaseSensitive);
-		this->OpenLevel(this, FName(*levelName), true, FString(TEXT("")));
+		this->controlledVehicle->Body->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
+		this->controlledVehicle->Body->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
+		this->controlledVehicle->Body->BodyInstance.SetBodyTransform(this->vehicleResetTransform, true);
 	}
 }
 
@@ -347,25 +359,25 @@ void ADriverPawn::LeanPlayer(float leanX, float leanY)
 
 void ADriverPawn::OpenLevel(UObject* WorldContextObject, FName LevelName, bool bAbsolute, FString Options)
 {
-	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
-	const ETravelType TravelType = (bAbsolute ? TRAVEL_Absolute : TRAVEL_Relative);
-	FWorldContext &WorldContext = GEngine->GetWorldContextFromWorldChecked(World);
-	FString Cmd = LevelName.ToString();
-	if (Options.Len() > 0)
-	{
-		Cmd += FString(TEXT("?")) + Options;
-	}
-	FURL TestURL(&WorldContext.LastURL, *Cmd, TravelType);
-	if (TestURL.IsLocalInternal())
-	{
-		// make sure the file exists if we are opening a local file
-		if (!GEngine->MakeSureMapNameIsValid(TestURL.Map))
-		{
-			UE_LOG(LogLevel, Warning, TEXT("WARNING: The map '%s' does not exist."), *TestURL.Map);
-		}
-	}
-
-	GEngine->SetClientTravel(World, *Cmd, TravelType);
+//	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
+//	const ETravelType TravelType = (bAbsolute ? TRAVEL_Absolute : TRAVEL_Relative);
+//	FWorldContext &WorldContext = GEngine->GetWorldContextFromWorldChecked(World);
+//	FString Cmd = LevelName.ToString();
+//	if (Options.Len() > 0)
+//	{
+//		Cmd += FString(TEXT("?")) + Options;
+//	}
+//	FURL TestURL(&WorldContext.LastURL, *Cmd, TravelType);
+//	if (TestURL.IsLocalInternal())
+//	{
+//		// make sure the file exists if we are opening a local file
+//		if (!GEngine->MakeSureMapNameIsValid(TestURL.Map))
+//		{
+//			UE_LOG(LogLevel, Warning, TEXT("WARNING: The map '%s' does not exist."), *TestURL.Map);
+//		}
+//	}
+//
+//	GEngine->SetClientTravel(World, *Cmd, TravelType);
 }
 
 

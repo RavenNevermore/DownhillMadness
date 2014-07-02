@@ -17,6 +17,5 @@ class AWorkshopHudBase : public AHUD
         FVector2D MyCursorScreenPosition;
 
         UFUNCTION(BlueprintCallable, Category = Utility)
-        bool cursorOverKartBody();
-	
+        bool cursorOverKartBody();	
 };
