@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "DownhillMadnessGameMode.h"
 #include "DownhillMadnessPlayerController.h"
+#include "WorkshopHudBase.h"
 #include "WheelConstraint.h"
 #include "VehiclePartBase.h"
 #include "VehicleWheelBase.h"
