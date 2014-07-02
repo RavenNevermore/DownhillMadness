@@ -13,10 +13,9 @@ class AWorkshopHudBase : public AHUD
 {
     GENERATED_UCLASS_BODY()
 
-        UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Hud)
+        UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Hud)
         FVector2D MyCursorScreenPosition;
 
         UFUNCTION(BlueprintCallable, Category = Utility)
-        bool cursorOverKartBody();
-	
+        bool cursorOverKartBody();	
 };
