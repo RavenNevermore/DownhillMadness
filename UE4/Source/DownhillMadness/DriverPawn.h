@@ -174,4 +174,8 @@ private:
 	/* Distance of camera when in air */
 	UPROPERTY()
 	FVector cameraAirDifference;
+
+	/* Reset transform of vehicle */
+	UPROPERTY()
+	FTransform vehicleResetTransform;
 };
