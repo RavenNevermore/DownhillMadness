@@ -150,6 +150,10 @@ class ADriverPawn : public APawn
 	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
 	float maxLeaningImpulse;
 
+	/** Driver requested respawn */
+	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
+	uint32 bRespawnRequested : 1;
+
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()
@@ -177,5 +181,8 @@ private:
 
 	/* Reset transform of vehicle */
 	UPROPERTY()
-	FTransform vehicleResetTransform;
+	FTransform checkpointTransform;
+
+	UPROPERTY()
+	bool hasTransformed;
 };

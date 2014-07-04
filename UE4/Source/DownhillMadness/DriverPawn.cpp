@@ -71,6 +71,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
 	this->maxLeaningImpulse = 10000.0f;
+	this->bRespawnRequested = false;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -100,7 +101,7 @@ void ADriverPawn::BeginPlay()
 	this->DriverCapsule->BodyInstance.MassScale = massDifference;
 	this->DriverCapsule->BodyInstance.UpdateMassProperties();
 
-	this->vehicleResetTransform = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform();
+	this->checkpointTransform = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform();
 }
 
 
@@ -201,7 +202,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->DriverCapsule->SetSimulatePhysics(true);
 			this->DriverCapsule->SetEnableGravity(true);
 
-			this->vehicleResetTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
+			this->checkpointTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
 
 			this->driverState = EDriverPawnState::SteeringVehicle;
 		}
@@ -213,6 +214,27 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->controlledVehicle->SetSteeringInput(this->steeringAxisInput);
 			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);
+
+			if (this->hasTransformed)
+			{
+				this->controlledVehicle->EnablePhysics();
+				this->hasTransformed = false;
+			}
+
+			if (this->bRespawnRequested)
+			{
+				this->controlledVehicle->DisablePhysics();
+
+				this->controlledVehicle->Body->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
+				this->controlledVehicle->Body->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
+				this->checkpointTransform.SetScale3D(this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform().GetScale3D());
+				this->controlledVehicle->Body->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
+				this->controlledVehicle->Body->SetWorldLocationAndRotation(this->checkpointTransform.GetLocation(), this->checkpointTransform.GetRotation(), false);
+
+				this->hasTransformed = true;
+
+				this->bRespawnRequested = false;
+			}
 
 			// Leaning
 			FVector capsuleTop = this->DriverCapsule->GetComponenTransform().GetLocation() + (this->DriverCapsule->GetScaledCapsuleHalfHeight() * this->DriverCapsule->GetComponenTransform().GetUnitAxis(EAxis::Z));
@@ -277,9 +299,29 @@ void ADriverPawn::OnDebugReset()
 	
 	if (this->controlledVehicle != nullptr)
 	{
-		this->controlledVehicle->Body->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
-		this->controlledVehicle->Body->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
-		this->controlledVehicle->Body->BodyInstance.SetBodyTransform(this->vehicleResetTransform, true);
+		//this->DriverCapsule->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
+		//this->DriverCapsule->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
+		//this->DriverCapsule->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
+
+		//for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->controlledVehicle->attachedWheels); wheelIter; ++wheelIter)
+		//{
+		//	AVehicleWheelBase* currentWheel = *wheelIter;
+
+		//	currentWheel->GetRigidBody()->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
+		//	currentWheel->GetRigidBody()->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
+		//	currentWheel->GetRigidBody()->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
+		//}
+
+		//for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->controlledVehicle->attachedWeights); weightIter; ++weightIter)
+		//{
+		//	AVehicleWeightBase* currentWeight = *weightIter;
+
+		//	currentWeight->WeightMesh->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
+		//	currentWeight->WeightMesh->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
+		//	currentWeight->WeightMesh->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
+		//}
+
+		this->bRespawnRequested = true;
 	}
 }
 
