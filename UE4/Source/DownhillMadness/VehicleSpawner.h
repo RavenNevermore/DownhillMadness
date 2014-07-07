@@ -9,6 +9,24 @@
 #include "VehicleSteeringBase.h"
 #include "VehicleSpawner.generated.h"
 
+class FObjectWriterFix : public FObjectWriter
+{
+public:
+	FObjectWriterFix(TArray<uint8>& InBytes) : FObjectWriter(InBytes)
+	{
+	}
+};
+
+class FObjectReaderFix : public FObjectReader
+{
+public:
+	FObjectReaderFix(TArray<uint8>& InBytes) : FObjectReader(InBytes)
+	{
+	}
+
+	static UClass* FindClass(const FString& className);
+};
+
 /**
 * @brief	Struct representing a wheel class
 */
@@ -35,7 +53,18 @@ struct FWheelClass
 
 	friend FArchive& operator << (FArchive &Ar, FWheelClass& wheelClass)
 	{
-		Ar << wheelClass.classInstance;
+		if (Ar.IsLoading())
+		{
+			FString className;
+			Ar << className;
+			wheelClass.classInstance = FObjectReaderFix::FindClass(className);
+		}
+		else
+		{
+			FString className = wheelClass.classInstance->GetFName().ToString();
+			Ar << className;
+		}
+
 		Ar << wheelClass.isSteerable;
 		Ar << wheelClass.hasBrake;
 		Ar << wheelClass.relativeWheelMatrix;
@@ -64,7 +93,18 @@ struct FWeightClass
 
 	friend FArchive& operator << (FArchive &Ar, FWeightClass& weightClass)
 	{
-		Ar << weightClass.classInstance;
+		if (Ar.IsLoading())
+		{
+			FString className;
+			Ar << className;
+			weightClass.classInstance = FObjectReaderFix::FindClass(className);
+		}
+		else
+		{
+			FString className = weightClass.classInstance->GetFName().ToString();
+			Ar << className;
+		}
+
 		Ar << weightClass.relativeWeightMatrix;
 
 		return Ar;

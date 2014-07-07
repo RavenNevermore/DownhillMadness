@@ -27,6 +27,7 @@ void AGameStarter::BeginPlay()
 	while (spawnPoints && currentPlayer < this->numberOfPlayers)
 	{
 		currentPlayer++;
+		++spawnPoints;
 	}
 }
 

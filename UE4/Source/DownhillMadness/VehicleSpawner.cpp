@@ -131,13 +131,25 @@ AVehicleBodyBase* AVehicleSpawner::SpawnVehicle(FVector spawnLocation, FRotator 
 
 void AVehicleSpawner::SaveLoadData(FArchive& archive)
 {
-	archive << this->bodyClass;
+	if (archive.IsLoading())
+	{
+		FString className;
+		archive << className;
+		this->bodyClass = FObjectReaderFix::FindClass(className);
+	}
+	else
+	{
+		FString className = this->bodyClass->GetFName().ToString();
+		archive << className;
+	}
 
 	int numWheels = this->wheelClasses.Num();
 	archive << numWheels;
 	this->wheelClasses.Reserve(numWheels);
 	for (int i = 0; i < numWheels; i++)
 	{
+		if (i >= this->wheelClasses.Num())
+			this->wheelClasses.Add(FWheelClass());
 		archive << this->wheelClasses[i];
 	}
 
@@ -146,11 +158,34 @@ void AVehicleSpawner::SaveLoadData(FArchive& archive)
 	this->weightClasses.Reserve(numWeights);
 	for (int i = 0; i < numWeights; i++)
 	{
+		if (i >= this->weightClasses.Num())
+			this->weightClasses.Add(FWeightClass());
 		archive << this->weightClasses[i];
 	}
 
-	archive << this->steeringClass;
-	archive << this->brakeClass;
+	if (archive.IsLoading())
+	{
+		FString className;
+		archive << className;
+		this->steeringClass = FObjectReaderFix::FindClass(className);
+	}
+	else
+	{
+		FString className = this->steeringClass->GetFName().ToString();
+		archive << className;
+	}
+
+	if (archive.IsLoading())
+	{
+		FString className;
+		archive << className;
+		this->brakeClass = FObjectReaderFix::FindClass(className);
+	}
+	else
+	{
+		FString className = this->brakeClass->GetFName().ToString();
+		archive << className;
+	}
 }
 
 
@@ -160,7 +195,8 @@ void AVehicleSpawner::SaveLoadData(FArchive& archive)
 bool AVehicleSpawner::SaveToFile(const FString& filePath)
 {
 	TArray<uint8> dataArray;
-	FObjectWriter archive(this->bodyClass, dataArray, false, false, true);
+	UScriptStruct* dummyObject = FWheelClass::StaticStruct();
+	FObjectWriterFix archive(dataArray);
 	this->SaveLoadData(archive);
 
 	if (dataArray.Num() <= 0) return false;
@@ -194,8 +230,8 @@ bool AVehicleSpawner::LoadFromFile(const FString& filePath)
 
 	if (binaryArray.Num() <= 0) return false;
 
-	FObjectReader archive = FObjectReader(this->bodyClass, binaryArray, false, false);
-	archive.Seek(binaryArray.Num());
+	FObjectReaderFix archive(binaryArray);
+	archive.Seek(0);
 	this->SaveLoadData(archive);
 
 	archive.FlushCache();
@@ -204,6 +240,24 @@ bool AVehicleSpawner::LoadFromFile(const FString& filePath)
 	archive.Close();
 
 	return true;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+UClass* FObjectReaderFix::FindClass(const FString& className)
+{
+	TObjectIterator<UClass> allClasses = TObjectIterator<UClass>();
+
+	while (allClasses)
+	{
+		if (allClasses->GetFName().ToString() == className)
+			return *allClasses;
+		++allClasses;
+	}
+
+	return nullptr;
 }
 
 
