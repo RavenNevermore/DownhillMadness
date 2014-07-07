@@ -80,9 +80,15 @@ AVehicleBodyBase* AVehicleSpawner::SpawnVehicle(FVector spawnLocation, FRotator 
 				FVector wheelSpawnPos = wheelMatrix.GetOrigin();
 				FRotator wheelSpawnRotation = wheelMatrix.Rotator();
 
-				AVehicleWheelBase* vehicleWheel = (AVehicleWheelBase*)(this->GetWorld()->SpawnActor(currentWheel.staticClassInstance, &wheelSpawnPos, &wheelSpawnRotation, spawnParameters));
-				vehicleWheel->bIsSteerable = currentWheel.bIsSteerable;
-				vehicleWheel->bHasBrake = currentWheel.bHasBrake;
+				AVehicleWheelBase* vehicleWheel = (AVehicleWheelBase*)(this->GetWorld()->SpawnActor(currentWheel.classInstance, &wheelSpawnPos, &wheelSpawnRotation, spawnParameters));
+				if (currentWheel.isSteerable != 0)
+					vehicleWheel->bIsSteerable = true;
+				else
+					vehicleWheel->bIsSteerable = false;
+				if (currentWheel.hasBrake != 0)
+					vehicleWheel->bHasBrake = true;
+				else
+					vehicleWheel->bHasBrake = false;
 
 				vehicleBody->AttachWheel(vehicleWheel);
 			}
@@ -95,7 +101,7 @@ AVehicleBodyBase* AVehicleSpawner::SpawnVehicle(FVector spawnLocation, FRotator 
 				FVector weightSpawnPos = weightMatrix.GetOrigin();
 				FRotator weightSpawnRotation = weightMatrix.Rotator();
 
-				AVehicleWeightBase* vehicleWeight = (AVehicleWeightBase*)(this->GetWorld()->SpawnActor(currentWeight.staticClassInstance, &weightSpawnPos, &weightSpawnRotation, spawnParameters));
+				AVehicleWeightBase* vehicleWeight = (AVehicleWeightBase*)(this->GetWorld()->SpawnActor(currentWeight.classInstance, &weightSpawnPos, &weightSpawnRotation, spawnParameters));
 
 				vehicleBody->AttachWeight(vehicleWeight);
 			}
@@ -123,11 +129,92 @@ AVehicleBodyBase* AVehicleSpawner::SpawnVehicle(FVector spawnLocation, FRotator 
 // ----------------------------------------------------------------------------
 
 
+void AVehicleSpawner::SaveLoadData(FArchive& archive)
+{
+	archive << this->bodyClass;
+
+	int numWheels = this->wheelClasses.Num();
+	archive << numWheels;
+	this->wheelClasses.Reserve(numWheels);
+	for (int i = 0; i < numWheels; i++)
+	{
+		archive << this->wheelClasses[i];
+	}
+
+	int numWeights = this->weightClasses.Num();
+	archive << numWeights;
+	this->weightClasses.Reserve(numWeights);
+	for (int i = 0; i < numWeights; i++)
+	{
+		archive << this->weightClasses[i];
+	}
+
+	archive << this->steeringClass;
+	archive << this->brakeClass;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleSpawner::SaveToFile(const FString& filePath)
+{
+	TArray<uint8> dataArray;
+	FObjectWriter archive(this->bodyClass, dataArray, false, false, true);
+	this->SaveLoadData(archive);
+
+	if (dataArray.Num() <= 0) return false;
+
+	if (FFileHelper::SaveArrayToFile(dataArray, *filePath))
+	{
+		archive.FlushCache();
+		dataArray.Empty();
+
+		return true;
+	}
+
+	archive.FlushCache();
+	dataArray.Empty();
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool AVehicleSpawner::LoadFromFile(const FString& filePath)
+{
+	TArray<uint8> binaryArray;
+
+	if (!FFileHelper::LoadFileToArray(binaryArray, *filePath))
+	{
+		return false;
+	}
+
+	if (binaryArray.Num() <= 0) return false;
+
+	FObjectReader archive = FObjectReader(this->bodyClass, binaryArray, false, false);
+	archive.Seek(binaryArray.Num());
+	this->SaveLoadData(archive);
+
+	archive.FlushCache();
+
+	binaryArray.Empty();
+	archive.Close();
+
+	return true;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 FWheelClass::FWheelClass()
 {
-	this->staticClassInstance = nullptr;
-	this->bIsSteerable = false;
-	this->bHasBrake = false;
+	this->classInstance = nullptr;
+	this->isSteerable = 0;
+	this->hasBrake = 0;
 	this->relativeWheelMatrix = FMatrix::Identity;
 }
 
@@ -137,7 +224,7 @@ FWheelClass::FWheelClass()
 
 FWeightClass::FWeightClass()
 {
-	this->staticClassInstance = nullptr;
+	this->classInstance = nullptr;
 	this->relativeWeightMatrix = FMatrix::Identity;
 }
 
@@ -145,11 +232,17 @@ FWeightClass::FWeightClass()
 // ----------------------------------------------------------------------------
 
 
-FWheelClass::FWheelClass(UClass* staticClassInstance, bool bIsSteerable, bool bHasBrake, const FMatrix& relativeWheelMatrix)
+FWheelClass::FWheelClass(UClass* classInstance, bool bIsSteerable, bool bHasBrake, const FMatrix& relativeWheelMatrix)
 {
-	this->staticClassInstance = staticClassInstance;
-	this->bIsSteerable = bIsSteerable;
-	this->bHasBrake = bHasBrake;
+	this->classInstance = classInstance;
+	if (bIsSteerable)
+		this->isSteerable = 1;
+	else
+		this->isSteerable = 0;
+	if (bHasBrake)
+		this->hasBrake = 1;
+	else
+		this->hasBrake = 0;
 	this->relativeWheelMatrix = relativeWheelMatrix;
 }
 
@@ -157,9 +250,9 @@ FWheelClass::FWheelClass(UClass* staticClassInstance, bool bIsSteerable, bool bH
 // ----------------------------------------------------------------------------
 
 
-FWeightClass::FWeightClass(UClass* staticClassInstance, const FMatrix& relativeWeightMatrix)
+FWeightClass::FWeightClass(UClass* classInstance, const FMatrix& relativeWeightMatrix)
 {
-	this->staticClassInstance = staticClassInstance;
+	this->classInstance = classInstance;
 	this->relativeWeightMatrix = relativeWeightMatrix;
 }
 
