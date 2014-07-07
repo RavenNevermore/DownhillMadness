@@ -154,6 +154,10 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	uint32 bRespawnRequested : 1;
 
+	/* Reset transform of vehicle */
+	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
+	FTransform checkpointTransform;
+
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()
@@ -178,10 +182,6 @@ private:
 	/* Distance of camera when in air */
 	UPROPERTY()
 	FVector cameraAirDifference;
-
-	/* Reset transform of vehicle */
-	UPROPERTY()
-	FTransform checkpointTransform;
 
 	UPROPERTY()
 	bool hasTransformed;
