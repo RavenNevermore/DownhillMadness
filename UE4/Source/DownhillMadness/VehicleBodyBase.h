@@ -41,7 +41,7 @@ struct FVehicleErrorCheck
 /**
  * @brief	Base class for vehicle bodies that manages and communicates with all other vehicle components
  */
-UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, DefaultToInstanced, DependsOn = (UWheelConstraint, AVehiclePartBase, AVehicleWheelBase, AVehicleWheelCapsuleBase, AVehicleWheelMeshBase, AVehicleBrakeBase, AVehicleSteeringBase), ShowCategories = ("Actors|CustomVehicle|VehicleBody"))
+UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, DefaultToInstanced, DependsOn = (UWheelConstraint, AVehiclePartBase, AVehicleWheelBase, AVehicleWheelCapsuleBase, AVehicleWheelMeshBase, AVehicleWeightBase, AVehicleBrakeBase, AVehicleSteeringBase), ShowCategories = ("Actors|CustomVehicle|VehicleBody"))
 class AVehicleBodyBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()

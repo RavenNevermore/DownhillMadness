@@ -16,3 +16,6 @@
 #include "VehicleWeightBase.h"
 #include "VehicleBodyBase.h"
 #include "DriverPawn.h"
+#include "SpawnPoint.h"
+#include "VehicleSpawner.h"
+#include "GameStarter.h"
