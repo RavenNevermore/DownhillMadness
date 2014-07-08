@@ -13,7 +13,7 @@ AWorkshopHudBase::AWorkshopHudBase(const class FPostConstructInitializePropertie
 
 bool AWorkshopHudBase::cursorOverKartBody(FHitResult& hit){
     //FHitResult hit;
-    GetOwningPlayerController()->GetHitResultAtScreenPosition(this->MyCursorScreenPosition, ECC_Visibility, false, hit);
+    GetOwningPlayerController()->GetHitResultAtScreenPosition(this->MyCursorScreenPosition, ECC_Visibility, true, hit);
     
     AActor* actor = hit.GetActor();
     if (NULL == actor)
