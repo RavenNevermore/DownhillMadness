@@ -150,4 +150,10 @@ class AVehicleSpawner : public AActor
 
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleSpawner")
 	bool LoadFromFile(const FString& filePath);
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleSpawner")
+	bool LoadFromArray(const TArray<uint8>& binaryArray);
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleSpawner")
+	void LoadStaticVehicle(uint8 index);
 };
