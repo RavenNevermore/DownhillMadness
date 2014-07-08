@@ -10,17 +10,18 @@
 /**
  * @brief	Class for starting game
  */
-UCLASS(ClassGroup = GameStart, Blueprintable, BlueprintType, DefaultToInstanced, DependsOn = (ASpawnPoint, UVehicleSpawner), ShowCategories = ("Actors|GameStart|GameStarter"))
+UCLASS(ClassGroup = GameStart, Abstract, Blueprintable, BlueprintType, DefaultToInstanced, DependsOn = (ASpawnPoint, UVehicleSpawner), ShowCategories = ("Actors|GameStart|GameStarter"))
 class AGameStarter : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
-	void BeginPlay() OVERRIDE;
-
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleDefaultsOnly)
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class USceneComponent> Root;
 
-	/** Current number of players */
-	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
-	uint8 numberOfPlayers;
+	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditDefaultsOnly)
+	TArray<UClass*> driverClasses;
+
+	/* Start current game */
+	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
+	void StartGame(uint8 numberOfPlayers, const TArray<AVehicleSpawner*>& vehicles, const TArray<uint8>& drivers);
 };
