@@ -581,8 +581,29 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 		{
-			rayStart = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
+			FVector newStartPos = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
+			FVector newEndPos = currentHitResult.ImpactPoint - currentHitResult.ImpactNormal;
+			rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(inTransform.GetUnitAxis(EAxis::Y));
 			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+			foundBox = false;
+			for (TArray<FHitResult>::TIterator testHitResultIter(hitResults); testHitResultIter && !foundBox; ++testHitResultIter)
+			{
+				FHitResult testHitResult = *testHitResultIter;
+
+				if (testHitResult.Component.Get() == this->RaycastBase.Get())
+				{
+					foundBox = true;
+					boxHitResult = testHitResult;
+				}
+			}
+
+			if (!foundBox || (foundBox && boxHitResult.ImpactPoint == FVector::ZeroVector))
+			{
+				rayStart = newStartPos;
+				rayEnd = newEndPos;
+				this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+			}
 
 			// Inner loop
 			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
