@@ -36,6 +36,12 @@ void AGameStarter::StartGame(uint8 numberOfPlayers, const TArray<AVehicleSpawner
 
 		if (spawnedDriver != nullptr && currentPlayer >= 0 && currentPlayer < vehicles.Num())
 		{
+			FString outString;
+			if (currentPlayer > 0 && GEngine)
+			{
+				GEngine->AddGamePlayer(GEngine->GameViewport, GEngine->GameViewport->CreatePlayer(currentPlayer, outString, true));
+			}
+
 			APlayerController* playerController = nullptr;
 
 			UWorld* world = this->GetWorld();
