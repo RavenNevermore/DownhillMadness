@@ -192,6 +192,9 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->DriverCapsule->BodyInstance.SetBodyTransform(newTransform, true);
 			this->DriverCapsule->SetWorldTransform(newTransform, false);
 			this->DriverSkeletalMesh->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
+			// TODO: Remove later
+			this->DriverSkeletalMesh->SetWorldScale3D(FVector(2.5f, 2.5f, 2.5f));
+			// ---
 			this->PhysicsConstraint->SetWorldTransform(this->controlledVehicle->Body->ComponentToWorld);
 			this->PhysicsConstraint->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
