@@ -185,4 +185,7 @@ private:
 
 	UPROPERTY()
 	bool hasTransformed;
+
+	UPROPERTY()
+	bool touchedGround;
 };

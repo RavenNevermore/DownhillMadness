@@ -72,6 +72,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->cameraStiffness = 60.0f;
 	this->maxLeaningImpulse = 10000.0f;
 	this->bRespawnRequested = false;
+	this->touchedGround = false;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -134,6 +135,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		if (currentHitResult.Component.Get()->GetCollisionObjectType() == ECollisionChannel::ECC_WorldStatic)
 		{
 			onGround = true;
+			this->touchedGround = true;
 			break;
 		}
 	}
@@ -158,7 +160,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
 	
-	if (onGround)
+	if (onGround || !(this->touchedGround))
 		this->cameraAirDifference = worldLocation - this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
 	else
 		worldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() + this->cameraAirDifference;
@@ -166,7 +168,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 	//this->CharacterCamera->SetWorldLocation(worldLocation);
 	//this->CharacterCamera->SetWorldRotation(worldRotation);
 	FTransform newCameraTransform;
-	if (onGround)
+	if (onGround || !(this->touchedGround))
 		newCameraTransform = FTransform(worldRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 	else
 		newCameraTransform = FTransform(baseRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
@@ -233,6 +235,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				this->checkpointTransform.SetScale3D(this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 				this->controlledVehicle->Body->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
 				this->controlledVehicle->Body->SetWorldLocationAndRotation(this->checkpointTransform.GetLocation(), this->checkpointTransform.GetRotation(), false);
+
+				this->touchedGround = false;
 
 				this->hasTransformed = true;
 
