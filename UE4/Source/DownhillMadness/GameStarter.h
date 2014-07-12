@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "VehicleSpawner.h"
+#include "VehicleSpawnerLibrary.h"
 #include "SpawnPoint.h"
 #include "GameStarter.generated.h"
 
@@ -15,6 +15,8 @@ class AGameStarter : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
+	void Tick(float DeltaSeconds) OVERRIDE;
+
 	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class USceneComponent> Root;
 
@@ -23,5 +25,13 @@ class AGameStarter : public AActor
 
 	/* Start current game */
 	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
-	void StartGame(uint8 numberOfPlayers, const TArray<AVehicleSpawner*>& vehicles, const TArray<uint8>& drivers);
+	void StartGame(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
+
+private:
+	bool gameStarted;
+	uint8 numberOfPlayers;
+	TArray<FSerializedVehicle> vehicles;
+	TArray<uint8> drivers;
+
+	void StartGameInternal(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
 };

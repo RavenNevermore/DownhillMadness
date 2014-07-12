@@ -45,11 +45,8 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverCapsule->BodyInstance.bUpdateMassWhenScaleChanges = true;
 	this->DriverCapsule->AttachTo(this->DriverSkeletalMesh);
 
-	this->cameraAirDifference = FVector(0, 0, 70);
-
 	this->CameraSphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, FName(TEXT("CameraSphere")));
 	this->CameraSphere->AttachTo(this->FrontArrow);
-	this->CameraSphere->RelativeLocation = this->cameraAirDifference;
 	this->CameraSphere->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->CameraSphere->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	this->CameraSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -57,8 +54,12 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->CameraSphere->SetSimulatePhysics(true);
 	this->CameraSphere->SetEnableGravity(false);
 	this->CameraSphere->SetSphereRadius(10.0f, false);
-	this->CameraSphere->bAbsoluteLocation = true;
-	this->CameraSphere->bAbsoluteRotation = true;
+
+	FMatrix driverMatrix = this->DriverSkeletalMesh->GetComponenTransform().ToMatrixWithScale();
+	FMatrix cameraMatrix = this->CameraSphere->GetComponenTransform().ToMatrixWithScale();
+	FMatrix localCameraMatrix = cameraMatrix * driverMatrix.InverseSafe();
+
+	this->cameraAirDifference = (localCameraMatrix.GetOrigin().X * driverMatrix.GetUnitAxis(EAxis::X)) + (localCameraMatrix.GetOrigin().Y * driverMatrix.GetUnitAxis(EAxis::Y)) + (localCameraMatrix.GetOrigin().Z * driverMatrix.GetUnitAxis(EAxis::Z));
 
 	this->CharacterCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("CharacterCamera")));
 	this->CharacterCamera->AttachTo(this->CameraSphere);
