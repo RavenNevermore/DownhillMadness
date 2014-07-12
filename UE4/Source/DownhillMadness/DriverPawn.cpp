@@ -221,26 +221,27 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->controlledVehicle->SetBrakeInput(this->brakeAxisInput);
 			this->controlledVehicle->UpdateControls(DeltaSeconds);
 
-			if (this->hasTransformed)
-			{
-				this->controlledVehicle->EnablePhysics();
-				this->hasTransformed = false;
-			}
-
 			if (this->bRespawnRequested)
 			{
-				this->controlledVehicle->DisablePhysics();
+				FSerializedVehicle serializedVehicle;
+				UVehicleSpawnerLibrary::SerializeVehicle(serializedVehicle, this->controlledVehicle);
+				this->controlledVehicle->DestroyVehicle();
+				FVector spawnLocation = this->checkpointTransform.GetLocation();
+				FRotator spawnRotation = this->checkpointTransform.GetRotation().Rotator();
+				AVehicleBodyBase* newVehicle = UVehicleSpawnerLibrary::SpawnVehicle(this, serializedVehicle, spawnLocation, spawnRotation);
+				ADriverPawn* newDriverPawn = (ADriverPawn*)(this->GetWorld()->SpawnActor(this->GetClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
 
-				this->controlledVehicle->Body->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
-				this->controlledVehicle->Body->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
-				this->checkpointTransform.SetScale3D(this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform().GetScale3D());
-				this->controlledVehicle->Body->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
-				this->controlledVehicle->Body->SetWorldLocationAndRotation(this->checkpointTransform.GetLocation(), this->checkpointTransform.GetRotation(), false);
+				if (newDriverPawn != nullptr && newVehicle != nullptr)
+				{
+					this->Controller->Possess(newDriverPawn);
+					newVehicle->EnablePhysics();
+					newDriverPawn->SetVehicle(newVehicle);
+					newDriverPawn->StartRace();
+				}
+
+				this->GetWorld()->DestroyActor(this);
 
 				this->touchedGround = false;
-
-				this->hasTransformed = true;
-
 				this->bRespawnRequested = false;
 			}
 

@@ -676,3 +676,50 @@ FVehicleErrorCheck AVehicleBodyBase::CheckVehicleForErrors()
 
 	return foundErrors;
 }
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::DestroyVehicle()
+{
+	AVehicleBrakeBase* installedBrake = this->attachedBrake;
+	if (installedBrake != nullptr)
+	{
+		this->DetachBrake(installedBrake);
+		this->GetWorld()->DestroyActor(installedBrake);
+	}
+
+	AVehicleSteeringBase* installedSteering = this->attachedSteering;
+	if (installedSteering != nullptr)
+	{
+		this->DetachSteering(installedSteering);
+		this->GetWorld()->DestroyActor(installedSteering);
+	}
+
+	while (this->attachedWheels.Num() > 0)
+	{
+		AVehicleWheelBase* currentWheel = this->attachedWheels[0];
+		this->attachedWheels.RemoveSwap(currentWheel);
+
+		if (currentWheel != nullptr)
+		{
+			this->DetachWheel(currentWheel);
+			this->GetWorld()->DestroyActor(currentWheel);
+		}
+	}
+
+	while (this->attachedWeights.Num() > 0)
+	{
+		AVehicleWeightBase* currentWeight = this->attachedWeights[0];
+		this->attachedWeights.RemoveSwap(currentWeight);
+
+		if (currentWeight != nullptr)
+		{
+			this->DetachWeight(currentWeight);
+			this->GetWorld()->DestroyActor(currentWeight);
+		}
+	}
+
+	this->GetWorld()->DestroyActor(this);
+}

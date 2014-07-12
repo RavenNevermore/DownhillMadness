@@ -109,3 +109,17 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 }
 
 
+// ----------------------------------------------------------------------------
+
+
+void AGameStarter::EndGame()
+{
+	if (GEngine)
+	{
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
+	}
+}
+
+

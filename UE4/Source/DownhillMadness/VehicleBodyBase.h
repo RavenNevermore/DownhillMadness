@@ -193,6 +193,12 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	FVehicleErrorCheck CheckVehicleForErrors();
 
+	/**
+	* @brief	Destroys this vehicle and all of its parts
+	*/
+	UFUNCTION()
+	void DestroyVehicle();
+
 	/** Body's mesh */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> Body;

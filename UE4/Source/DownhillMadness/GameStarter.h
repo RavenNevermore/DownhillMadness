@@ -23,9 +23,19 @@ class AGameStarter : public AActor
 	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditDefaultsOnly)
 	TArray<UClass*> driverClasses;
 
-	/* Start current game */
+	/**
+	* @brief	Start current game
+	* @param	numberOfPlayers	The number of players in this game
+	* @param	vehicles	The vehicle for each player
+	* @param	drivers	The driver index for each player*/
 	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
 	void StartGame(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
+
+	/**
+	* @brief	Ends splitscreen
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
+	void EndGame();
 
 private:
 	bool gameStarted;

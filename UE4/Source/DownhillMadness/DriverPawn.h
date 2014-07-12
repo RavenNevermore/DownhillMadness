@@ -184,8 +184,5 @@ private:
 	FVector cameraAirDifference;
 
 	UPROPERTY()
-	bool hasTransformed;
-
-	UPROPERTY()
 	bool touchedGround;
 };
