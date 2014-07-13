@@ -21,6 +21,9 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->PhysicsConstraint->bAbsoluteScale = true;
 	this->PhysicsConstraint->AttachTo(this->FrontArrow);
 
+	this->DriverAnchor = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("DriverAnchor")));
+	this->DriverAnchor->AttachTo(this->FrontArrow);
+
 	this->DriverSkeletalMesh = PCIP.CreateDefaultSubobject<USkeletalMeshComponent>(this, FName(TEXT("DriverSkeletalMesh")));
 	this->DriverSkeletalMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->DriverSkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -29,7 +32,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverSkeletalMesh->bAbsoluteScale = true;
 	this->DriverSkeletalMesh->SetSimulatePhysics(false);
 	this->DriverSkeletalMesh->SetEnableGravity(false);
-	this->DriverSkeletalMesh->AttachTo(this->FrontArrow);
+	this->DriverSkeletalMesh->AttachTo(this->DriverAnchor);
 
 	this->DriverCapsule = PCIP.CreateDefaultSubobject<UCapsuleComponent>(this, FName(TEXT("DriverCapsule")));
 	this->DriverCapsule->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
@@ -43,7 +46,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverCapsule->SetCapsuleHalfHeight(43.0f);
 	this->DriverCapsule->SetCapsuleRadius(13.0f);
 	this->DriverCapsule->BodyInstance.bUpdateMassWhenScaleChanges = true;
-	this->DriverCapsule->AttachTo(this->DriverSkeletalMesh);
+	this->DriverCapsule->AttachTo(this->DriverAnchor);
 
 	this->CameraSphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, FName(TEXT("CameraSphere")));
 	this->CameraSphere->AttachTo(this->FrontArrow);
@@ -55,7 +58,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->CameraSphere->SetEnableGravity(false);
 	this->CameraSphere->SetSphereRadius(10.0f, false);
 
-	FMatrix driverMatrix = this->DriverSkeletalMesh->GetComponenTransform().ToMatrixWithScale();
+	FMatrix driverMatrix = this->DriverAnchor->GetComponenTransform().ToMatrixWithScale();
 	FMatrix cameraMatrix = this->CameraSphere->GetComponenTransform().ToMatrixWithScale();
 	FMatrix localCameraMatrix = cameraMatrix * driverMatrix.InverseSafe();
 
@@ -120,8 +123,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
-	FVector rayEnd = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - (this->DriverSkeletalMesh->GetComponenTransform().GetUnitAxis(EAxis::Z) * 75.0f);
+	FVector rayStart = this->DriverAnchor->GetComponenTransform().GetLocation();
+	FVector rayEnd = this->DriverAnchor->GetComponenTransform().GetLocation() - (this->DriverAnchor->GetComponenTransform().GetUnitAxis(EAxis::Z) * 75.0f);
 	
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
@@ -143,31 +146,27 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 
 	// Calculate camera movement
-	this->cameraAnchor += this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - this->driverOldLocation;
+	this->cameraAnchor += this->DriverAnchor->GetComponenTransform().GetLocation() - this->driverOldLocation;
 
-	FRotator deltaRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator() - this->driverOldRotation;
+	FRotator deltaRotation = this->DriverAnchor->GetComponenTransform().Rotator() - this->driverOldRotation;
 
-	//this->cameraAnchor = this->DriverMesh->GetComponentLocation() + (this->cameraAnchor - this->DriverMesh->GetComponentLocation()).RotateAngleAxis(deltaRotation.Pitch, FVector(0, 1, 0));
-	this->cameraAnchor = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() + (this->cameraAnchor - this->DriverSkeletalMesh->GetComponenTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+	this->cameraAnchor = this->DriverAnchor->GetComponenTransform().GetLocation() + (this->cameraAnchor - this->DriverAnchor->GetComponenTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
 
-	FRotator rootRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator();
+	FRotator rootRotation = this->DriverAnchor->GetComponenTransform().Rotator();
 
 	FVector baseLocation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation();
 	FRotator baseRotation = this->CameraSphere->BodyInstance.GetUnrealWorldTransform().Rotator();
 
-	//FVector destLocation = this->DriverMesh->BodyInstance.GetUnrealWorldTransform().GetLocation() - FRotator(FMath::ClampAngle(rootRotation.Pitch - 30, -80, -30), rootRotation.Yaw, 0).Vector() * 450.0f;
-	FRotator destRotation = (this->DriverSkeletalMesh->GetComponenTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
+	FRotator destRotation = (this->DriverAnchor->GetComponenTransform().GetLocation() - this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetLocation()).Rotation();
 
-	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);// (cameraAnchor - baseLocation).Size() / 50.0f);
+	FVector worldLocation = FMath::VInterpTo(baseLocation, cameraAnchor, DeltaSeconds, 4);
 	FRotator worldRotation = FMath::RInterpTo(baseRotation, FRotator(destRotation.Pitch, destRotation.Yaw, 0), DeltaSeconds, 2);
 	
 	if (onGround || !(this->touchedGround))
-		this->cameraAirDifference = worldLocation - this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
+		this->cameraAirDifference = worldLocation - this->DriverAnchor->GetComponenTransform().GetLocation();
 	else
-		worldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation() + this->cameraAirDifference;
+		worldLocation = this->DriverAnchor->GetComponenTransform().GetLocation() + this->cameraAirDifference;
 
-	//this->CharacterCamera->SetWorldLocation(worldLocation);
-	//this->CharacterCamera->SetWorldRotation(worldRotation);
 	FTransform newCameraTransform;
 	if (onGround || !(this->touchedGround))
 		newCameraTransform = FTransform(worldRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
@@ -175,8 +174,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		newCameraTransform = FTransform(baseRotation, worldLocation, this->CameraSphere->BodyInstance.GetUnrealWorldTransform().GetScale3D());
 	this->CameraSphere->BodyInstance.SetBodyTransform(newCameraTransform, false);
 
-	this->driverOldLocation = this->DriverSkeletalMesh->GetComponenTransform().GetLocation();
-	this->driverOldRotation = this->DriverSkeletalMesh->GetComponenTransform().Rotator();
+	this->driverOldLocation = this->DriverAnchor->GetComponenTransform().GetLocation();
+	this->driverOldRotation = this->DriverAnchor->GetComponenTransform().Rotator();
 
 
 	if (this->controlledVehicle != nullptr)
@@ -185,8 +184,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		if (this->driverState == EDriverPawnState::JumpingIntoVehicle)
 		{
 			FTransform newTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
-			newTransform.SetScale3D(this->DriverSkeletalMesh->ComponentToWorld.GetScale3D());
-			this->DriverSkeletalMesh->SetWorldTransform(newTransform);
+			newTransform.SetScale3D(this->DriverAnchor->ComponentToWorld.GetScale3D());
+			this->DriverAnchor->SetWorldTransform(newTransform);
 
 			newTransform = this->controlledVehicle->Body->BodyInstance.GetUnrealWorldTransform();
 			FVector capsulePos = newTransform.GetLocation() + (this->DriverCapsule->GetUnscaledCapsuleHalfHeight() * newTransform.GetUnitAxis(EAxis::Z));
@@ -194,10 +193,14 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->DriverCapsule->AttachTo(this->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
 			this->DriverCapsule->BodyInstance.SetBodyTransform(newTransform, true);
 			this->DriverCapsule->SetWorldTransform(newTransform, false);
-			this->DriverSkeletalMesh->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
-			// TODO: Remove later
-			this->DriverSkeletalMesh->SetWorldScale3D(FVector(2.5f, 2.5f, 2.5f));
-			// ---
+			this->DriverAnchor->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
+
+			// Animation fix, because fuck you, Unreal Engine!
+			this->DriverSkeletalMesh->SetWorldScale3D(FVector(2.54f, 2.54f, 2.54f));
+			this->DriverSkeletalMesh->RelativeRotation.Yaw = -90.0f;
+			this->DriverSkeletalMesh->RelativeRotation.Roll = 90.0f;
+			this->DriverSkeletalMesh->RelativeLocation.Z -= 2.54f * 12.23f;
+
 			this->PhysicsConstraint->SetWorldTransform(this->controlledVehicle->Body->ComponentToWorld);
 			this->PhysicsConstraint->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
@@ -270,7 +273,7 @@ void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	FInputAxisBinding binding;
 	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
 	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
-	InputComponent->BindAction("DebugReset", EInputEvent::IE_Pressed, this, &ADriverPawn::OnDebugReset).bConsumeInput = false;
+	InputComponent->BindAction("PlayerRespawn", EInputEvent::IE_Pressed, this, &ADriverPawn::OnRespawnRequested).bConsumeInput = false;
 	InputComponent->BindAxis("Lean X", this, &ADriverPawn::OnGetLeanX).bConsumeInput = false;
 	InputComponent->BindAxis("Lean Y", this, &ADriverPawn::OnGetLeanY).bConsumeInput = false;
 }
@@ -297,39 +300,10 @@ void ADriverPawn::OnGetBrakeInput(float axisInput)
 // ----------------------------------------------------------------------------
 
 
-void ADriverPawn::OnDebugReset()
-{
-	//if (GEngine)
-	//{
-	//	FString levelName = this->GetWorld()->GetMapName();
-	//	levelName.RemoveFromStart(FString(TEXT("UEDPIE_0_")), ESearchCase::CaseSensitive);
-	//	this->OpenLevel(this, FName(*levelName), true, FString(TEXT("")));
-	//}
-	
+void ADriverPawn::OnRespawnRequested()
+{	
 	if (this->controlledVehicle != nullptr)
 	{
-		//this->DriverCapsule->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
-		//this->DriverCapsule->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
-		//this->DriverCapsule->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
-
-		//for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->controlledVehicle->attachedWheels); wheelIter; ++wheelIter)
-		//{
-		//	AVehicleWheelBase* currentWheel = *wheelIter;
-
-		//	currentWheel->GetRigidBody()->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
-		//	currentWheel->GetRigidBody()->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
-		//	currentWheel->GetRigidBody()->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
-		//}
-
-		//for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->controlledVehicle->attachedWeights); weightIter; ++weightIter)
-		//{
-		//	AVehicleWeightBase* currentWeight = *weightIter;
-
-		//	currentWeight->WeightMesh->BodyInstance.SetLinearVelocity(FVector::ZeroVector, false);
-		//	currentWeight->WeightMesh->BodyInstance.SetAngularVelocity(FVector::ZeroVector, false);
-		//	currentWeight->WeightMesh->BodyInstance.SetBodyTransform(this->checkpointTransform, true);
-		//}
-
 		this->bRespawnRequested = true;
 	}
 }
@@ -402,33 +376,6 @@ void ADriverPawn::LeanPlayer(float leanX, float leanY)
 		this->leaningXInputOld = leanXDegree;
 		this->leaningYInputOld = leanYDegree;
 	}
-}
-
-
-// ----------------------------------------------------------------------------
-
-
-void ADriverPawn::OpenLevel(UObject* WorldContextObject, FName LevelName, bool bAbsolute, FString Options)
-{
-//	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
-//	const ETravelType TravelType = (bAbsolute ? TRAVEL_Absolute : TRAVEL_Relative);
-//	FWorldContext &WorldContext = GEngine->GetWorldContextFromWorldChecked(World);
-//	FString Cmd = LevelName.ToString();
-//	if (Options.Len() > 0)
-//	{
-//		Cmd += FString(TEXT("?")) + Options;
-//	}
-//	FURL TestURL(&WorldContext.LastURL, *Cmd, TravelType);
-//	if (TestURL.IsLocalInternal())
-//	{
-//		// make sure the file exists if we are opening a local file
-//		if (!GEngine->MakeSureMapNameIsValid(TestURL.Map))
-//		{
-//			UE_LOG(LogLevel, Warning, TEXT("WARNING: The map '%s' does not exist."), *TestURL.Map);
-//		}
-//	}
-//
-//	GEngine->SetClientTravel(World, *Cmd, TravelType);
 }
 
 

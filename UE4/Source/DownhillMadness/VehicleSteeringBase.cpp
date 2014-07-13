@@ -11,6 +11,12 @@ AVehicleSteeringBase::AVehicleSteeringBase(const class FPostConstructInitializeP
 	this->FrontArrow->bAbsoluteScale = true;
 	this->RootComponent = this->FrontArrow;
 
+	this->SteeringWheelPos = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("SteeringWheelPos")));
+	this->SteeringWheelPos->AttachTo(this->FrontArrow);
+
+	this->SteeringWheelPivot = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("SteeringWheelPivot")));
+	this->SteeringWheelPivot->AttachTo(this->SteeringWheelPos);
+
 	this->SteeringMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("SteeringMesh")));
 	this->SteeringMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->SteeringMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -18,12 +24,13 @@ AVehicleSteeringBase::AVehicleSteeringBase(const class FPostConstructInitializeP
 	this->SteeringMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	this->SteeringMesh->SetSimulatePhysics(false);
 	this->SteeringMesh->bAbsoluteScale = true;
-	this->SteeringMesh->AttachTo(this->FrontArrow);
+	this->SteeringMesh->AttachTo(this->SteeringWheelPivot);
 
 	this->currentSteering = 0.0f;
 	this->maxSteeringDegree = 30.0f;
 	this->steeringSpeed = 90.0f;
 	this->steeringSnapBackSpeed = 270.0f;
+	this->maxSteeringWheelRotation = 75.0f;
 }
 
 
@@ -85,6 +92,8 @@ float AVehicleSteeringBase::UpdateSteering(float DeltaSeconds)
 		if (this->currentSteering < this->currentInput * this->maxSteeringDegree)
 			this->currentSteering = this->currentInput * this->maxSteeringDegree;
 	}
+
+	this->SteeringWheelPivot->RelativeRotation.Roll = (this->currentSteering / this->maxSteeringDegree) * this->maxSteeringWheelRotation;
 
 	return this->currentSteering;
 }

@@ -33,6 +33,14 @@ class AVehicleSteeringBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
+	/** Steering wheel position */
+	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> SteeringWheelPos;
+
+	/** Steering wheel pivot */
+	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> SteeringWheelPivot;
+
 	/** Steering mesh */
 	UPROPERTY(Category = VehicleSteering, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> SteeringMesh;
@@ -56,4 +64,8 @@ class AVehicleSteeringBase : public AVehiclePartBase
 	/** Steering snap back speed */
 	UPROPERTY(EditDefaultsOnly, Category = VehicleSteering, BlueprintReadOnly)
 	float steeringSnapBackSpeed;
+
+	/** The maximum rotation of the steering wheel */
+	UPROPERTY(EditDefaultsOnly, Category = VehicleSteering, BlueprintReadOnly)
+	float maxSteeringWheelRotation;
 };
