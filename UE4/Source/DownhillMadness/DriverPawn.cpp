@@ -195,12 +195,6 @@ void ADriverPawn::Tick(float DeltaSeconds)
 			this->DriverCapsule->SetWorldTransform(newTransform, false);
 			this->DriverAnchor->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
-			// Animation fix, because fuck you, Unreal Engine!
-			this->DriverSkeletalMesh->SetWorldScale3D(FVector(2.54f, 2.54f, 2.54f));
-			this->DriverSkeletalMesh->RelativeRotation.Yaw = -90.0f;
-			this->DriverSkeletalMesh->RelativeRotation.Roll = 90.0f;
-			this->DriverSkeletalMesh->RelativeLocation.Z -= 2.54f * 12.23f;
-
 			this->PhysicsConstraint->SetWorldTransform(this->controlledVehicle->Body->ComponentToWorld);
 			this->PhysicsConstraint->AttachTo(this->controlledVehicle->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 
