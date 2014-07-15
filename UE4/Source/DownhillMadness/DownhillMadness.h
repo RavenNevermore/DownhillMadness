@@ -18,4 +18,8 @@
 #include "DriverPawn.h"
 #include "SpawnPoint.h"
 #include "VehicleSpawnerLibrary.h"
+#include "GameStateStatics.h"
+#include "SavedVehicle.h"
+#include "SavedGameData.h"
+#include "DriverSpectatorPawn.h"
 #include "GameStarter.h"

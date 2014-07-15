@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "VehicleSpawnerLibrary.h"
 #include "SpawnPoint.h"
+#include "DriverSpectatorPawn.h"
 #include "GameStarter.generated.h"
 
 /**

@@ -195,6 +195,9 @@ class UVehicleSpawnerLibrary : public UBlueprintFunctionLibrary
 	static bool SaveToFile(const FSerializedVehicle& inSerializedVehicle, const FString& filePath);
 
 	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
+	static bool SaveToArray(const FSerializedVehicle& inSerializedVehicle, TArray<uint8>& binaryArray);
+
+	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
 	static bool LoadFromFile(FSerializedVehicle& outSerializedVehicle, const FString& filePath);
 
 	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")

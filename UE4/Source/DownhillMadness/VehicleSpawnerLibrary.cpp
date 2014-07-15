@@ -259,7 +259,6 @@ void UVehicleSpawnerLibrary::SaveLoadData(FSerializedVehicle& outSerializedVehic
 bool UVehicleSpawnerLibrary::SaveToFile(const FSerializedVehicle& inSerializedVehicle, const FString& filePath)
 {
 	TArray<uint8> dataArray;
-	UScriptStruct* dummyObject = FWheelClass::StaticStruct();
 	FObjectWriterFix archive(dataArray);
 	FSerializedVehicle saveVehicle = inSerializedVehicle;
 	UVehicleSpawnerLibrary::SaveLoadData(saveVehicle, archive);
@@ -273,6 +272,27 @@ bool UVehicleSpawnerLibrary::SaveToFile(const FSerializedVehicle& inSerializedVe
 
 		return true;
 	}
+
+	archive.FlushCache();
+	dataArray.Empty();
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool UVehicleSpawnerLibrary::SaveToArray(const FSerializedVehicle& inSerializedVehicle, TArray<uint8>& binaryArray)
+{
+	TArray<uint8> dataArray;
+	FObjectWriterFix archive(dataArray);
+	FSerializedVehicle saveVehicle = inSerializedVehicle;
+	UVehicleSpawnerLibrary::SaveLoadData(saveVehicle, archive);
+
+	if (dataArray.Num() <= 0) return false;
+
+	binaryArray = TArray<uint8>(dataArray);
 
 	archive.FlushCache();
 	dataArray.Empty();

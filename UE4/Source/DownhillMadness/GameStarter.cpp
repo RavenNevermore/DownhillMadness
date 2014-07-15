@@ -106,6 +106,55 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 		currentPlayer++;
 		++spawnPoints;
 	}
+
+
+	// Spawn spectator in three player splitscreen
+
+	if (numberOfPlayers == 3)
+	{
+		FActorSpawnParameters spawnParameters;
+		FVector spawnPos;
+		FRotator spawnRotation;
+
+		if (spawnPoints)
+		{
+			spawnPos = spawnPoints->GetActorLocation();
+			spawnRotation = spawnPoints->GetActorRotation();
+		}
+
+		ADriverSpectatorPawn* spawnedSpectator = (ADriverSpectatorPawn*)(this->GetWorld()->SpawnActor(ADriverSpectatorPawn::StaticClass(), &spawnPos, &spawnRotation, spawnParameters));
+
+		UWorld* world = this->GetWorld();
+
+		if (spawnedSpectator != nullptr)
+		{
+			FString outString;
+			UPlayer* player = world->GetFirstLocalPlayerFromController();
+			if (GEngine)
+			{
+				player = GEngine->GameViewport->CreatePlayer(currentPlayer, outString, true);
+				GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+			}
+
+			APlayerController* playerController = nullptr;
+
+			for (FConstPlayerControllerIterator iterator = world->GetPlayerControllerIterator(); iterator && playerController == nullptr; ++iterator)
+			{
+				APlayerController* currentPlayerController = *iterator;
+				if (currentPlayerController->Player == player)
+				{
+					playerController = currentPlayerController;
+				}
+			}
+
+			if (playerController != nullptr)
+			{
+				playerController->AutoReceiveInput = (EAutoReceiveInput::Type)(currentPlayer + 1);
+				playerController->EnableInput(playerController);
+				playerController->Possess(spawnedSpectator);
+			}
+		}
+	}
 }
 
 
