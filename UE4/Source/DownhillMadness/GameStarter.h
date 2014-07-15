@@ -6,6 +6,7 @@
 #include "VehicleSpawnerLibrary.h"
 #include "SpawnPoint.h"
 #include "DriverSpectatorPawn.h"
+#include "CustomGameViewportClient.h"
 #include "GameStarter.generated.h"
 
 /**

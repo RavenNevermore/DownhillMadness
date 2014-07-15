@@ -65,6 +65,14 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 
 		UWorld* world = this->GetWorld();
 
+		if (GEngine)
+		{
+			UCustomGameViewportClient* customGameViewportClient = Cast<UCustomGameViewportClient>(GEngine->GameViewport);
+
+			if (customGameViewportClient != nullptr)
+				customGameViewportClient->bDontUseSplitscreen = false;
+		}
+
 		if (spawnedDriver != nullptr && currentPlayer >= 0 && currentPlayer < vehicles.Num())
 		{
 			FString outString;

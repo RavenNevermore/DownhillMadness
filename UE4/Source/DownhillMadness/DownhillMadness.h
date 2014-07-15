@@ -22,4 +22,5 @@
 #include "SavedVehicle.h"
 #include "SavedGameData.h"
 #include "DriverSpectatorPawn.h"
+#include "CustomGameViewportClient.h"
 #include "GameStarter.h"

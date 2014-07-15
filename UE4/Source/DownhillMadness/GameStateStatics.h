@@ -31,6 +31,12 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool GetReloadMenu();
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics", meta = (HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static void StartNoSplitscreenMultiplayer(UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void EndNoSplitscreenMultiplayer();
+
 private:
 	static uint8 numberOfPlayers;
 	static TArray<uint8> selectedCharacters;
