@@ -37,6 +37,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void EndNoSplitscreenMultiplayer();
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static float GetNearClipPlane();
+
 private:
 	static uint8 numberOfPlayers;
 	static TArray<uint8> selectedCharacters;

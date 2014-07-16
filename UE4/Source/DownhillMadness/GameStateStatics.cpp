@@ -122,8 +122,25 @@ void UGameStateStatics::EndNoSplitscreenMultiplayer()
 		if (customGameViewportClient != nullptr)
 			customGameViewportClient->bDontUseSplitscreen = false;
 
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
 		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+
+		if (customGameViewportClient != nullptr)
+			customGameViewportClient->UpdateActiveSplitscreenType();
 	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+float UGameStateStatics::GetNearClipPlane()
+{
+	if (GEngine)
+	{
+		return GEngine->NearClipPlane;
+	}
+
+	return 10.0f;
 }
