@@ -6,7 +6,13 @@
 
 uint8 UGameStateStatics::numberOfPlayers = 1;
 TArray<uint8> UGameStateStatics::selectedCharacters = TArray<uint8>();
+TArray<FSerializedVehicle> UGameStateStatics::selectedVehicles = TArray<FSerializedVehicle>();
 bool UGameStateStatics::reloadMenu = false;
+TArray<FSerializedVehicle> UGameStateStatics::workshopVehicles = TArray<FSerializedVehicle>();
+TArray<FSerializedVehicle> UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();
+TArray<float> UGameStateStatics::trackRecords = TArray<float>();
+TArray<bool> UGameStateStatics::beatenRecords = TArray<bool>();
+bool UGameStateStatics::ratatoskUnlocked = false;
 
 
 // ----------------------------------------------------------------------------
@@ -16,12 +22,49 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 : Super(PCIP)
 {
 	UGameStateStatics::numberOfPlayers = 1;
+
 	UGameStateStatics::selectedCharacters = TArray<uint8>();
 	UGameStateStatics::selectedCharacters.Add(0);
 	UGameStateStatics::selectedCharacters.Add(0);
 	UGameStateStatics::selectedCharacters.Add(0);
 	UGameStateStatics::selectedCharacters.Add(0);
+
+	FSerializedVehicle defaultVehicle;
+	UVehicleSpawnerLibrary::LoadStaticVehicle(defaultVehicle, 1);
+	UGameStateStatics::selectedVehicles = TArray<FSerializedVehicle>();
+	UGameStateStatics::selectedVehicles.Add(defaultVehicle);
+	UGameStateStatics::selectedVehicles.Add(defaultVehicle);
+	UGameStateStatics::selectedVehicles.Add(defaultVehicle);
+	UGameStateStatics::selectedVehicles.Add(defaultVehicle);
+
 	UGameStateStatics::reloadMenu = false;
+
+	UGameStateStatics::workshopVehicles = TArray<FSerializedVehicle>();
+	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
+	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
+	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
+	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
+
+
+	UGameStateStatics::LoadAllVehicles();
+
+
+	UGameStateStatics::trackRecords = TArray<float>();
+	UGameStateStatics::trackRecords.Add(599.99f);
+	UGameStateStatics::trackRecords.Add(599.99f);
+	UGameStateStatics::trackRecords.Add(599.99f);
+	UGameStateStatics::trackRecords.Add(599.99f);
+
+	UGameStateStatics::beatenRecords = TArray<bool>();
+	UGameStateStatics::beatenRecords.Add(false);
+	UGameStateStatics::beatenRecords.Add(false);
+	UGameStateStatics::beatenRecords.Add(false);
+	UGameStateStatics::beatenRecords.Add(false);
+
+	UGameStateStatics::ratatoskUnlocked = false;
+
+
+	UGameStateStatics::LoadSavedGame();
 }
 
 
@@ -143,4 +186,74 @@ float UGameStateStatics::GetNearClipPlane()
 	}
 
 	return 10.0f;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+uint8 UGameStateStatics::GetMaxVehicleSlots()
+{
+	return UGameStateStatics::maxVehicleSlots;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool UGameStateStatics::GetRatatoskUnlocked()
+{
+	return UGameStateStatics::ratatoskUnlocked;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool UGameStateStatics::SaveGameData()
+{
+	USavedGameData* createdSaveGame = Cast<USavedGameData>(UGameplayStatics::CreateSaveGameObject(USavedGameData::StaticClass()));
+	if (createdSaveGame != nullptr)
+	{
+		createdSaveGame->ratatoskUnlocked = UGameStateStatics::ratatoskUnlocked;
+		createdSaveGame->trackRecords = TArray<float>(UGameStateStatics::trackRecords);
+		createdSaveGame->beatenRecords = TArray<bool>(UGameStateStatics::beatenRecords);
+		return UGameplayStatics::SaveGameToSlot(createdSaveGame, FString(TEXT("GameData")), 0);
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::LoadAllVehicles()
+{
+	UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();
+
+	for (uint32 i = 0; i < UGameStateStatics::maxVehicleSlots; i++)
+	{
+		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(i);
+
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::LoadSavedGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(FString(TEXT("GameData")), 0))
+	{
+		USavedGameData* loadedSaveGame = Cast<USavedGameData>(UGameplayStatics::LoadGameFromSlot(FString(TEXT("GameData")), 0));
+
+		if (loadedSaveGame != nullptr)
+		{
+			UGameStateStatics::ratatoskUnlocked = loadedSaveGame->ratatoskUnlocked;
+			UGameStateStatics::trackRecords = TArray<float>(loadedSaveGame->trackRecords);
+			UGameStateStatics::beatenRecords = TArray<bool>(loadedSaveGame->beatenRecords);
+		}
+	}
 }

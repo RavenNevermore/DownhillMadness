@@ -7,6 +7,7 @@
 #include "SpawnPoint.h"
 #include "DriverSpectatorPawn.h"
 #include "CustomGameViewportClient.h"
+#include "GameStateStatics.h"
 #include "GameStarter.generated.h"
 
 /**
