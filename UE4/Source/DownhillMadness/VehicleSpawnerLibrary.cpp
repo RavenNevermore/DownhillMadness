@@ -455,16 +455,22 @@ void UVehicleSpawnerLibrary::LoadStaticVehicle(FSerializedVehicle& outSerialized
 
 UClass* FObjectReaderFix::FindClass(const FString& className)
 {
-	TObjectIterator<UClass> allClasses = TObjectIterator<UClass>();
+	UClass* foundClass = FindObject<UClass>(ANY_PACKAGE, *className);
 
-	while (allClasses)
+	if (foundClass == nullptr)
 	{
-		if ((allClasses->ClassGeneratedBy != nullptr && allClasses->ClassGeneratedBy->GetFName().ToString() == className) || allClasses->GetFName().ToString() == className)
-			return *allClasses;
-		++allClasses;
+		// Potentially dangerous code down here - couldn't find another way, though
+		FString composedString = FString(TEXT("Blueprint'/Game/Blueprints/Karts/")) + className + FString(TEXT("'"));
+		FString pathName(*composedString);
+		ConstructorHelpers::StripObjectClass(pathName, true);
+
+		UBlueprint* foundBlueprint = ConstructorHelpersInternal::FindOrLoadObject<UBlueprint>(pathName);
+
+		if (foundBlueprint != nullptr)
+			foundClass = foundBlueprint->GeneratedClass;
 	}
 
-	return nullptr;
+	return foundClass;
 }
 
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "ConstructorHelpers.h"
 #include "VehicleBodyBase.h"
 #include "VehicleWheelBase.h"
 #include "VehicleBrakeBase.h"

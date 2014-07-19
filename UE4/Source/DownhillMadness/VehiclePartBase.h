@@ -11,5 +11,5 @@
 UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, DefaultToInstanced, ShowCategories = ("Actors|CustomVehicle|VehiclePart"))
 class AVehiclePartBase : public AActor
 {
-	GENERATED_UCLASS_BODY()	
+	GENERATED_UCLASS_BODY()
 };
