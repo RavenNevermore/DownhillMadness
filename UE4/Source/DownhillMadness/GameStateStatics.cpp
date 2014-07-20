@@ -8,7 +8,6 @@ uint8 UGameStateStatics::numberOfPlayers = 1;
 TArray<uint8> UGameStateStatics::selectedCharacters = TArray<uint8>();
 TArray<FSerializedVehicle> UGameStateStatics::selectedVehicles = TArray<FSerializedVehicle>();
 bool UGameStateStatics::reloadMenu = false;
-TArray<FSerializedVehicle> UGameStateStatics::workshopVehicles = TArray<FSerializedVehicle>();
 TArray<FSerializedVehicle> UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();
 TArray<float> UGameStateStatics::trackRecords = TArray<float>();
 TArray<bool> UGameStateStatics::beatenRecords = TArray<bool>();
@@ -39,23 +38,19 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 
 	UGameStateStatics::reloadMenu = false;
 
-	UGameStateStatics::workshopVehicles = TArray<FSerializedVehicle>();
-	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
-	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
-	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
-	UGameStateStatics::workshopVehicles.Add(FSerializedVehicle());
-
 
 	UGameStateStatics::LoadAllVehicles();
 
 
 	UGameStateStatics::trackRecords = TArray<float>();
-	UGameStateStatics::trackRecords.Add(599.99f);
-	UGameStateStatics::trackRecords.Add(599.99f);
-	UGameStateStatics::trackRecords.Add(599.99f);
-	UGameStateStatics::trackRecords.Add(599.99f);
+	UGameStateStatics::trackRecords.Add(90.0f);
+	UGameStateStatics::trackRecords.Add(90.0f);
+	UGameStateStatics::trackRecords.Add(90.0f);
+	UGameStateStatics::trackRecords.Add(90.0f);
+	UGameStateStatics::trackRecords.Add(90.0f);
 
 	UGameStateStatics::beatenRecords = TArray<bool>();
+	UGameStateStatics::beatenRecords.Add(false);
 	UGameStateStatics::beatenRecords.Add(false);
 	UGameStateStatics::beatenRecords.Add(false);
 	UGameStateStatics::beatenRecords.Add(false);
@@ -210,6 +205,60 @@ bool UGameStateStatics::GetRatatoskUnlocked()
 // ----------------------------------------------------------------------------
 
 
+TArray<FSerializedVehicle> UGameStateStatics::GetWorkshopVehicles()
+{
+	return TArray<FSerializedVehicle>(UGameStateStatics::savedVehicles);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+TArray<FSerializedVehicle> UGameStateStatics::GetAvailableVehicles()
+{
+	TArray<FSerializedVehicle> availableVehicles = TArray<FSerializedVehicle>();
+	availableVehicles.Empty();
+
+	for (TArray<FSerializedVehicle>::TIterator vehicleIter(UGameStateStatics::savedVehicles); vehicleIter; ++vehicleIter)
+	{
+		FSerializedVehicle currentVehicle = *vehicleIter;
+
+		if (currentVehicle.bodyClass != nullptr)
+			availableVehicles.Add(currentVehicle);
+	}
+
+	FSerializedVehicle staticVehicle;
+	UVehicleSpawnerLibrary::LoadStaticVehicle(staticVehicle, 1);
+	if (staticVehicle.bodyClass != nullptr)
+		availableVehicles.Add(staticVehicle);
+
+	staticVehicle = FSerializedVehicle();
+	UVehicleSpawnerLibrary::LoadStaticVehicle(staticVehicle, 2);
+	if (staticVehicle.bodyClass != nullptr)
+		availableVehicles.Add(staticVehicle);
+
+	staticVehicle = FSerializedVehicle();
+	UVehicleSpawnerLibrary::LoadStaticVehicle(staticVehicle, 3);
+	if (staticVehicle.bodyClass != nullptr)
+		availableVehicles.Add(staticVehicle);
+
+	staticVehicle = FSerializedVehicle();
+	UVehicleSpawnerLibrary::LoadStaticVehicle(staticVehicle, 4);
+	if (staticVehicle.bodyClass != nullptr)
+		availableVehicles.Add(staticVehicle);
+
+	staticVehicle = FSerializedVehicle();
+	UVehicleSpawnerLibrary::LoadStaticVehicle(staticVehicle, 5);
+	if (staticVehicle.bodyClass != nullptr)
+		availableVehicles.Add(staticVehicle);
+
+	return availableVehicles;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 bool UGameStateStatics::SaveGameData()
 {
 	USavedGameData* createdSaveGame = Cast<USavedGameData>(UGameplayStatics::CreateSaveGameObject(USavedGameData::StaticClass()));
@@ -228,6 +277,75 @@ bool UGameStateStatics::SaveGameData()
 // ----------------------------------------------------------------------------
 
 
+bool UGameStateStatics::SaveTrackRecord(uint8 trackIndex, float trackRecord)
+{
+	if (trackIndex >= 0 && trackIndex < UGameStateStatics::trackRecords.Num() && trackIndex < UGameStateStatics::beatenRecords.Num())
+	{
+		if (trackRecord < UGameStateStatics::trackRecords[trackIndex])
+		{
+			UGameStateStatics::trackRecords[trackIndex] = trackRecord;
+			UGameStateStatics::beatenRecords[trackIndex] = true;
+		}
+
+		if (!(UGameStateStatics::beatenRecords.Contains(false)))
+			UGameStateStatics::ratatoskUnlocked = true;
+	}
+
+	return UGameStateStatics::SaveGameData();
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool UGameStateStatics::SaveVehicle(AVehicleBodyBase* vehicle, uint8 slotIndex)
+{
+	if (slotIndex >= 0 && slotIndex < UGameStateStatics::maxVehicleSlots)
+	{
+		FSerializedVehicle serializedVehicle;
+		UVehicleSpawnerLibrary::SerializeVehicle(serializedVehicle, vehicle);
+		UGameStateStatics::savedVehicles[slotIndex] = serializedVehicle;
+
+		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(slotIndex);
+
+		USavedVehicle* createdVehicleSave = Cast<USavedVehicle>(UGameplayStatics::CreateSaveGameObject(USavedVehicle::StaticClass()));
+		if (createdVehicleSave != nullptr)
+		{
+			createdVehicleSave->SetVehicle(serializedVehicle);
+			return UGameplayStatics::SaveGameToSlot(createdVehicleSave, slotName, 0);
+		}
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+bool UGameStateStatics::SaveSerializedVehicle(const FSerializedVehicle& vehicle, uint8 slotIndex)
+{
+	if (slotIndex >= 0 && slotIndex < UGameStateStatics::maxVehicleSlots)
+	{
+		UGameStateStatics::savedVehicles[slotIndex] = vehicle;
+
+		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(slotIndex);
+
+		USavedVehicle* createdVehicleSave = Cast<USavedVehicle>(UGameplayStatics::CreateSaveGameObject(USavedVehicle::StaticClass()));
+		if (createdVehicleSave != nullptr)
+		{
+			createdVehicleSave->SetVehicle(vehicle);
+			return UGameplayStatics::SaveGameToSlot(createdVehicleSave, slotName, 0);
+		}
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::LoadAllVehicles()
 {
 	UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();
@@ -236,6 +354,17 @@ void UGameStateStatics::LoadAllVehicles()
 	{
 		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(i);
 
+		if (UGameplayStatics::DoesSaveGameExist(slotName, 0))
+		{
+			USavedVehicle* loadedVehicle = Cast<USavedVehicle>(UGameplayStatics::LoadGameFromSlot(slotName, 0));
+
+			if (loadedVehicle != nullptr)
+				UGameStateStatics::savedVehicles.Add(loadedVehicle->GetVehicle());
+			else
+				UGameStateStatics::savedVehicles.Add(FSerializedVehicle());
+		}
+		else
+			UGameStateStatics::savedVehicles.Add(FSerializedVehicle());
 	}
 }
 

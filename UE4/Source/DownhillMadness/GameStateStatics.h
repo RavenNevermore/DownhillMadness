@@ -49,22 +49,37 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool GetRatatoskUnlocked();
+	
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static TArray<FSerializedVehicle> GetWorkshopVehicles();
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static TArray<FSerializedVehicle> GetAvailableVehicles();
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool SaveGameData();
 
-private:
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static bool SaveTrackRecord(uint8 trackIndex, float trackRecord);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static bool SaveVehicle(AVehicleBodyBase* vehicle, uint8 slotIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static bool SaveSerializedVehicle(const FSerializedVehicle& vehicle, uint8 slotIndex);
+
 	static uint8 numberOfPlayers;
 	static TArray<uint8> selectedCharacters;
 	static TArray<FSerializedVehicle> selectedVehicles;
+
+private:
 	static bool reloadMenu;
-	static TArray<FSerializedVehicle> workshopVehicles;
 	static TArray<FSerializedVehicle> savedVehicles;
 	static TArray<float> trackRecords;
 	static TArray<bool> beatenRecords;
 	static bool ratatoskUnlocked;
 
-	static const uint8 maxVehicleSlots = 30;
+	static const uint8 maxVehicleSlots = 16;
 
 	static void LoadAllVehicles();
 	static void LoadSavedGame();

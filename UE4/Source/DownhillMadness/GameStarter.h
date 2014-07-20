@@ -32,7 +32,7 @@ class AGameStarter : public AActor
 	* @param	vehicles	The vehicle for each player
 	* @param	drivers	The driver index for each player*/
 	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
-	void StartGame(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
+	void StartGame();
 
 	/**
 	* @brief	Ends splitscreen

@@ -34,12 +34,12 @@ void AGameStarter::Tick(float DeltaSeconds)
 // ----------------------------------------------------------------------------
 
 
-void AGameStarter::StartGame(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers)
+void AGameStarter::StartGame()
 {
+	this->numberOfPlayers = UGameStateStatics::numberOfPlayers;
+	this->vehicles = TArray<FSerializedVehicle>(UGameStateStatics::selectedVehicles);
+	this->drivers = TArray<uint8>(UGameStateStatics::selectedCharacters);
 	this->gameStarted = true;
-	this->numberOfPlayers = numberOfPlayers;
-	this->vehicles = TArray<FSerializedVehicle>(vehicles);
-	this->drivers = TArray<uint8>(drivers);
 }
 
 
