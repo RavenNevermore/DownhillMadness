@@ -107,6 +107,28 @@ uint8 UGameStateStatics::GetSelectedCharacter(uint8 playerIndex)
 // ----------------------------------------------------------------------------
 
 
+void UGameStateStatics::SetSelectedVehicle(uint8 playerIndex, const FSerializedVehicle& vehicle)
+{
+	if (playerIndex >= 0 && playerIndex < 4 && vehicle.bodyClass != nullptr)
+		UGameStateStatics::selectedVehicles[playerIndex] = vehicle;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+FSerializedVehicle UGameStateStatics::GetSelectedVehicle(uint8 playerIndex)
+{
+	if (playerIndex >= 0 && playerIndex < 4)
+		return UGameStateStatics::selectedVehicles[playerIndex];
+	else
+		return FSerializedVehicle();
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::SetReloadMenu(bool reloadMenu)
 {
 	UGameStateStatics::reloadMenu = reloadMenu;

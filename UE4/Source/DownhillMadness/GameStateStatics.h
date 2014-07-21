@@ -30,6 +30,12 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static uint8 GetSelectedCharacter(uint8 playerIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void SetSelectedVehicle(uint8 playerIndex, const FSerializedVehicle& vehicle);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static FSerializedVehicle GetSelectedVehicle(uint8 playerIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void SetReloadMenu(bool reloadMenu);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")

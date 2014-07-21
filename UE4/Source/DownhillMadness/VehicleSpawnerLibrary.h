@@ -153,7 +153,7 @@ struct FWeightClass
 /**
 * @brief	Contains information on a serialized vehicle
 */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSerializedVehicle
 {
 	GENERATED_USTRUCT_BODY()

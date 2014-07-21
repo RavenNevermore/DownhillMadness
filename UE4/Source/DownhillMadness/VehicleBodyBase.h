@@ -196,7 +196,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	/**
 	* @brief	Destroys this vehicle and all of its parts
 	*/
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	void DestroyVehicle();
 
 	/** Body's mesh */
