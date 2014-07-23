@@ -62,6 +62,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static TArray<FSerializedVehicle> GetAvailableVehicles();
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics", meta = (HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static TArray<AActor*> FindActorsOfType(UObject* WorldContextObject, UClass* targetActorClass);
+
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool SaveGameData();
 

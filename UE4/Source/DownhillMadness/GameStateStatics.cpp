@@ -281,6 +281,30 @@ TArray<FSerializedVehicle> UGameStateStatics::GetAvailableVehicles()
 // ----------------------------------------------------------------------------
 
 
+TArray<AActor*> UGameStateStatics::FindActorsOfType(UObject* WorldContextObject, UClass* targetActorClass)
+{
+	TArray<AActor*> actorArray = TArray<AActor*>();
+	actorArray.Empty();
+
+	TActorIterator<AActor> allActors = TActorIterator<AActor>(WorldContextObject->GetWorld());
+
+	while (allActors)
+	{
+		AActor* currentActor = *allActors;
+
+		if (currentActor->GetClass()->GetFullName() == targetActorClass->GetFullName())
+			actorArray.Add(currentActor);
+
+		++allActors;
+	}
+
+	return actorArray;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 bool UGameStateStatics::SaveGameData()
 {
 	USavedGameData* createdSaveGame = Cast<USavedGameData>(UGameplayStatics::CreateSaveGameObject(USavedGameData::StaticClass()));

@@ -453,6 +453,42 @@ void UVehicleSpawnerLibrary::LoadStaticVehicle(FSerializedVehicle& outSerialized
 // ----------------------------------------------------------------------------
 
 
+FString UVehicleSpawnerLibrary::GetVehicleName(const FSerializedVehicle& inSerializedVehicle)
+{
+	if (inSerializedVehicle.bodyClass != nullptr)
+	{
+		FString vehicleName(TEXT(""));
+
+		if (inSerializedVehicle.bodyClass->ClassGeneratedBy != nullptr)
+			vehicleName += inSerializedVehicle.bodyClass->ClassGeneratedBy->GetFName().ToString();
+		else
+			vehicleName += inSerializedVehicle.bodyClass->GetFName().ToString();
+
+		if (vehicleName.EndsWith(FString(TEXT("Body"))))
+			vehicleName.RemoveAt(vehicleName.Len() - 4, 4, false);
+
+		vehicleName = FName::NameToDisplayString(vehicleName, false);
+
+		vehicleName += FString(TEXT(" ("));
+
+		vehicleName += FString::FromInt(inSerializedVehicle.wheelClasses.Num());
+
+		vehicleName += FString(TEXT(" Wheels, "));
+
+		vehicleName += FString::FromInt(inSerializedVehicle.weightClasses.Num());
+
+		vehicleName += FString(TEXT(" Weights)"));
+
+		return vehicleName;
+	}
+
+	return FString(TEXT("---"));
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 UClass* FObjectReaderFix::FindClass(const FString& className)
 {
 	UClass* foundClass = FindObject<UClass>(ANY_PACKAGE, *className);

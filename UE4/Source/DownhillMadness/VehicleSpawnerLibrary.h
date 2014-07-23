@@ -31,21 +31,21 @@ public:
 /**
 * @brief	Struct representing a wheel class
 */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FWheelClass
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* classInstance;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	uint32 isSteerable;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	uint32 hasBrake;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	FMatrix relativeWheelMatrix;
 
 	FWheelClass();
@@ -97,15 +97,15 @@ struct FWheelClass
 /**
 * @brief	Struct representing a weight class
 */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FWeightClass
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* classInstance;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	FMatrix relativeWeightMatrix;
 
 	FWeightClass();
@@ -158,19 +158,19 @@ struct FSerializedVehicle
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* bodyClass;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	TArray<FWheelClass> wheelClasses;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	TArray<FWeightClass> weightClasses;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* steeringClass;
 
-	UPROPERTY(Category = VehicleSpawner, BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* brakeClass;
 
 	FSerializedVehicle();
@@ -206,4 +206,7 @@ class UVehicleSpawnerLibrary : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
 	static void LoadStaticVehicle(FSerializedVehicle& outSerializedVehicle, uint8 index);
+
+	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
+	static FString GetVehicleName(const FSerializedVehicle& inSerializedVehicle);
 };
