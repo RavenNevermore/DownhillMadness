@@ -175,7 +175,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	* @returns	True if snapping was successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
-	bool SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform);
+	bool SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform, FVector snapDirection = FVector::ZeroVector);
 
 	/**
 	* @brief	Snap a weight to vehicle's bounding box
@@ -184,7 +184,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	* @returns	True if snapping was successful
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
-	bool SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform);
+	bool SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform, FVector snapDirection = FVector::ZeroVector);
 
 	/**
 	* @brief	Check this vehicle for errors
@@ -246,5 +246,5 @@ private:
 	* @returns	True if snapping was successful
 	*/
 	UFUNCTION()
-	bool SnapPart(const FTransform& inTransform, FTransform& newTransform);
+	bool SnapPart(const FTransform& inTransform, FTransform& newTransform, const FVector& snapDirection);
 };

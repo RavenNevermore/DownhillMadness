@@ -476,12 +476,12 @@ bool AVehicleBodyBase::AlignPart(const FTransform& inTransform, float minDistanc
 // ----------------------------------------------------------------------------
 
 
-bool AVehicleBodyBase::SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform)
+bool AVehicleBodyBase::SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransform, FVector snapDirection)
 {
 	FMatrix relativeMatrix = wheel->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
 	relativeMatrix = relativeMatrix.Inverse();
 
-	bool snappedPart = this->SnapPart(wheel->SnapPivot->GetComponenTransform(), newTransform);
+	bool snappedPart = this->SnapPart(wheel->SnapPivot->GetComponenTransform(), newTransform, snapDirection);
 
 	FVector newTransformLocation = newTransform.GetLocation() - (wheel->SnapPivot->RelativeLocation.X * wheel->FrontArrow->GetForwardVector())
 		- (wheel->SnapPivot->RelativeLocation.Y * wheel->FrontArrow->GetRightVector())
@@ -506,12 +506,12 @@ bool AVehicleBodyBase::SnapWheel(AVehicleWheelBase* wheel, FTransform& newTransf
 // ----------------------------------------------------------------------------
 
 
-bool AVehicleBodyBase::SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform)
+bool AVehicleBodyBase::SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform, FVector snapDirection)
 {
 	FMatrix relativeMatrix = weight->SnapPivot->GetRelativeTransform().ToMatrixNoScale();
 	relativeMatrix = relativeMatrix.Inverse();
 
-	bool snappedPart = this->SnapPart(weight->SnapPivot->GetComponenTransform(), newTransform);
+	bool snappedPart = this->SnapPart(weight->SnapPivot->GetComponenTransform(), newTransform, snapDirection);
 
 	FVector newTransformLocation = newTransform.GetLocation() - (weight->SnapPivot->RelativeLocation.X * weight->FrontArrow->GetForwardVector())
 		- (weight->SnapPivot->RelativeLocation.Y * weight->FrontArrow->GetRightVector())
@@ -536,7 +536,7 @@ bool AVehicleBodyBase::SnapWeight(AVehicleWeightBase* weight, FTransform& newTra
 // ----------------------------------------------------------------------------
 
 
-bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTransform)
+bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTransform, const FVector& snapDirection)
 {
 	newTransform = inTransform;
 
@@ -581,29 +581,39 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 		{
-			FVector newStartPos = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
-			FVector newEndPos = currentHitResult.ImpactPoint - currentHitResult.ImpactNormal;
-			rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(inTransform.GetUnitAxis(EAxis::Y));
+			//FVector newStartPos = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
+			//FVector newEndPos = currentHitResult.ImpactPoint - currentHitResult.ImpactNormal;
+			//rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(inTransform.GetUnitAxis(EAxis::Y));
+			if (snapDirection == FVector::ZeroVector)
+				rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(currentHitResult.ImpactNormal);
+			else
+			{
+				FVector firstProjection = (rayEnd - rayStart).ProjectOnTo(currentHitResult.ImpactNormal);
+				FVector secondProjection = snapDirection.ProjectOnTo(currentHitResult.ImpactNormal);
+				float lengthDifference = firstProjection.Size() / secondProjection.Size();
+				rayEnd = rayStart + (snapDirection * lengthDifference);
+
+			}
 			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 
-			foundBox = false;
-			for (TArray<FHitResult>::TIterator testHitResultIter(hitResults); testHitResultIter && !foundBox; ++testHitResultIter)
-			{
-				FHitResult testHitResult = *testHitResultIter;
+			//foundBox = false;
+			//for (TArray<FHitResult>::TIterator testHitResultIter(hitResults); testHitResultIter && !foundBox; ++testHitResultIter)
+			//{
+			//	FHitResult testHitResult = *testHitResultIter;
 
-				if (testHitResult.Component.Get() == this->RaycastBase.Get())
-				{
-					foundBox = true;
-					boxHitResult = testHitResult;
-				}
-			}
+			//	if (testHitResult.Component.Get() == this->RaycastBase.Get())
+			//	{
+			//		foundBox = true;
+			//		boxHitResult = testHitResult;
+			//	}
+			//}
 
-			if (!foundBox || (foundBox && boxHitResult.ImpactPoint == FVector::ZeroVector))
-			{
-				rayStart = newStartPos;
-				rayEnd = newEndPos;
-				this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
-			}
+			//if (!foundBox || (foundBox && boxHitResult.ImpactPoint == FVector::ZeroVector))
+			//{
+			//	rayStart = newStartPos;
+			//	rayEnd = newEndPos;
+			//	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+			//}
 
 			// Inner loop
 			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
