@@ -667,23 +667,13 @@ AVehiclePartBase* AVehicleBodyBase::GetFirstPartInLine(const FVector& startPos, 
 	{
 		FHitResult currentHitResult = *hitResultIter;
 
-		if (currentHitResult.Component.Get() == this->Body.Get() && currentHitResult.ImpactPoint != FVector::ZeroVector)
+		if (currentHitResult.Component.Get() == this->Body.Get())
 		{
-			rayEnd = currentHitResult.ImpactPoint;
-
-			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
-
-			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
-			{
-				currentHitResult = *innerHitResultIter;
-
-				if ((currentHitResult.Actor->IsA(AVehicleWheelBase::StaticClass()) && this->attachedWheels.Contains(Cast<AVehicleWheelBase>(currentHitResult.Actor.Get()))) || (currentHitResult.Actor->IsA(AVehicleWeightBase::StaticClass()) && this->attachedWeights.Contains(Cast<AVehicleWeightBase>(currentHitResult.Actor.Get()))))
-				{
-					return Cast<AVehiclePartBase>(currentHitResult.Actor.Get());
-				}
-			}
-
 			return nullptr;
+		}
+		else if ((currentHitResult.Actor->IsA(AVehicleWheelBase::StaticClass()) && this->attachedWheels.Contains(Cast<AVehicleWheelBase>(currentHitResult.Actor.Get()))) || (currentHitResult.Actor->IsA(AVehicleWeightBase::StaticClass()) && this->attachedWeights.Contains(Cast<AVehicleWeightBase>(currentHitResult.Actor.Get()))))
+		{
+			return Cast<AVehiclePartBase>(currentHitResult.Actor.Get());
 		}
 	}
 
