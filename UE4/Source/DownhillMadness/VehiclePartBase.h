@@ -12,4 +12,10 @@ UCLASS(ClassGroup = CustomVehicle, Abstract, Blueprintable, BlueprintType, Defau
 class AVehiclePartBase : public AActor
 {
 	GENERATED_UCLASS_BODY()
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	virtual void HidePart();
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	virtual void ShowPart();
 };

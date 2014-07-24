@@ -36,6 +36,28 @@ AVehicleWheelCapsuleBase::AVehicleWheelCapsuleBase(const class FPostConstructIni
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWheelCapsuleBase::HidePart()
+{
+	this->WheelMesh->SetHiddenInGame(true, false);
+	this->AxisMesh->SetHiddenInGame(true, false);
+	this->BrakeMesh->SetHiddenInGame(true, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelCapsuleBase::ShowPart()
+{
+	this->WheelMesh->SetHiddenInGame(false, false);
+	this->AxisMesh->SetHiddenInGame(false, false);
+	this->BrakeMesh->SetHiddenInGame(false, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWheelCapsuleBase::BeginPlay()
 {
 	Super::BeginPlay();

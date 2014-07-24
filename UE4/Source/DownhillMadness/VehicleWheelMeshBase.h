@@ -13,6 +13,8 @@ class AVehicleWheelMeshBase : public AVehicleWheelBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
 	UPrimitiveComponent* GetRigidBody() OVERRIDE;
 
 	/** Wheel's mesh */

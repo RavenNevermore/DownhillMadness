@@ -581,9 +581,6 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 		{
-			//FVector newStartPos = currentHitResult.ImpactPoint + currentHitResult.ImpactNormal;
-			//FVector newEndPos = currentHitResult.ImpactPoint - currentHitResult.ImpactNormal;
-			//rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(inTransform.GetUnitAxis(EAxis::Y));
 			if (snapDirection == FVector::ZeroVector)
 				rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(currentHitResult.ImpactNormal);
 			else
@@ -596,25 +593,6 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 			}
 			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 
-			//foundBox = false;
-			//for (TArray<FHitResult>::TIterator testHitResultIter(hitResults); testHitResultIter && !foundBox; ++testHitResultIter)
-			//{
-			//	FHitResult testHitResult = *testHitResultIter;
-
-			//	if (testHitResult.Component.Get() == this->RaycastBase.Get())
-			//	{
-			//		foundBox = true;
-			//		boxHitResult = testHitResult;
-			//	}
-			//}
-
-			//if (!foundBox || (foundBox && boxHitResult.ImpactPoint == FVector::ZeroVector))
-			//{
-			//	rayStart = newStartPos;
-			//	rayEnd = newEndPos;
-			//	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
-			//}
-
 			// Inner loop
 			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
 			{
@@ -622,6 +600,24 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 				if (currentHitResult.Component.Get() == this->RaycastBase.Get())
 				{
+					FVector targetPos = currentHitResult.ImpactPoint;
+
+					// Find actual mesh
+					bool foundMesh = false;
+					for (TArray<FHitResult>::TIterator bodyMeshIther(hitResults); bodyMeshIther && !foundMesh; ++bodyMeshIther)
+					{
+						FHitResult bodyMeshHitResult = *bodyMeshIther;
+
+						if (bodyMeshHitResult.Component.Get() == this->Body.Get())
+						{
+							targetPos = bodyMeshHitResult.ImpactPoint;
+							foundMesh = true;
+						}
+					}
+
+					if (!foundMesh)
+						return false;
+
 					FVector rightVector = -currentHitResult.ImpactNormal;
 
 					// Get new transform
@@ -636,7 +632,7 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 					forwardVector = FVector::CrossProduct(rightVector, upVector);
 
-					newTransform = FTransform(forwardVector, rightVector, upVector, currentHitResult.ImpactPoint);
+					newTransform = FTransform(forwardVector, rightVector, upVector, targetPos);
 
 					return true;
 				}
@@ -647,6 +643,51 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 	}
 
 	return false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+AVehiclePartBase* AVehicleBodyBase::GetFirstPartInLine(const FVector& startPos, const FVector& traceDirection)
+{
+	TArray<FHitResult> hitResults;
+
+	FVector rayStart = startPos;
+	FVector rayEnd = startPos + (traceDirection * (this->Body->GetComponentLocation() - startPos).Size());
+
+	FCollisionQueryParams queryParams(false);
+	queryParams.bFindInitialOverlaps = true;
+
+	FCollisionResponseParams responseParams(ECollisionResponse::ECR_Overlap);
+
+	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter; ++hitResultIter)
+	{
+		FHitResult currentHitResult = *hitResultIter;
+
+		if (currentHitResult.Component.Get() == this->Body.Get() && currentHitResult.ImpactPoint != FVector::ZeroVector)
+		{
+			rayEnd = currentHitResult.ImpactPoint;
+
+			this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
+
+			for (TArray<FHitResult>::TIterator innerHitResultIter(hitResults); innerHitResultIter; ++innerHitResultIter)
+			{
+				currentHitResult = *innerHitResultIter;
+
+				if ((currentHitResult.Actor->IsA(AVehicleWheelBase::StaticClass()) && this->attachedWheels.Contains(Cast<AVehicleWheelBase>(currentHitResult.Actor.Get()))) || (currentHitResult.Actor->IsA(AVehicleWeightBase::StaticClass()) && this->attachedWeights.Contains(Cast<AVehicleWeightBase>(currentHitResult.Actor.Get()))))
+				{
+					return Cast<AVehiclePartBase>(currentHitResult.Actor.Get());
+				}
+			}
+
+			return nullptr;
+		}
+	}
+
+	return nullptr;
 }
 
 
