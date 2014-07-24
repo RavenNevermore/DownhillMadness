@@ -13,6 +13,8 @@ class AVehicleWheelCapsuleBase : public AVehicleWheelBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
 	void BeginPlay() OVERRIDE;
 	UPrimitiveComponent* GetRigidBody() OVERRIDE;
 

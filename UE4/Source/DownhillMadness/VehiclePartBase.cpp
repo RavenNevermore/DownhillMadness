@@ -14,3 +14,19 @@ AVehiclePartBase::AVehiclePartBase(const class FPostConstructInitializePropertie
 {
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+void AVehiclePartBase::HidePart()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehiclePartBase::ShowPart()
+{
+}
+

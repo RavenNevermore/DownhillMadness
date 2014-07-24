@@ -48,6 +48,24 @@ AVehicleWeightBase::AVehicleWeightBase(const class FPostConstructInitializePrope
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWeightBase::HidePart()
+{
+	this->WeightMesh->SetHiddenInGame(true, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWeightBase::ShowPart()
+{
+	this->WeightMesh->SetHiddenInGame(false, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWeightBase::PrepareAttach()
 {
 	this->PhysicsConstraint->ResetRelativeTransform();

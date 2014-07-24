@@ -14,6 +14,9 @@ class AVehicleWeightBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
+
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;

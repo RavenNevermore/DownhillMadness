@@ -187,6 +187,15 @@ class AVehicleBodyBase : public AVehiclePartBase
 	bool SnapWeight(AVehicleWeightBase* weight, FTransform& newTransform, FVector snapDirection = FVector::ZeroVector);
 
 	/**
+	* @brief	Tries to find vehicle's first vehicle part on a line
+	* @param	startPos	The start position
+	* @param	traceDirection	The direction of the LinceTrace
+	* @returns	The first part found or null otherwise
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	AVehiclePartBase* GetFirstPartInLine(const FVector& startPos, const FVector& traceDirection);
+
+	/**
 	* @brief	Check this vehicle for errors
 	* @returns	All errors found
 	*/

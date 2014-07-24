@@ -23,6 +23,28 @@ AVehicleWheelMeshBase::AVehicleWheelMeshBase(const class FPostConstructInitializ
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWheelMeshBase::HidePart()
+{
+	this->WheelMesh->SetHiddenInGame(true, false);
+	this->AxisMesh->SetHiddenInGame(true, false);
+	this->BrakeMesh->SetHiddenInGame(true, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelMeshBase::ShowPart()
+{
+	this->WheelMesh->SetHiddenInGame(false, false);
+	this->AxisMesh->SetHiddenInGame(false, false);
+	this->BrakeMesh->SetHiddenInGame(false, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 UPrimitiveComponent* AVehicleWheelMeshBase::GetRigidBody()
 {
 	return (UPrimitiveComponent*)(this->WheelMesh.Get());
