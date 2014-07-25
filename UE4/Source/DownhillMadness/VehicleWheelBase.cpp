@@ -19,6 +19,7 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->PhysicsConstraint->ConstraintInstance.AngularSwing2Motion = EAngularConstraintMotion::ACM_Free;
 	this->PhysicsConstraint->ConstraintInstance.AngularTwistMotion = EAngularConstraintMotion::ACM_Locked;
 	this->PhysicsConstraint->bAbsoluteScale = true;
+	this->PhysicsConstraint->ConstraintInstance.bDisableCollision = true;
 	this->PhysicsConstraint->AttachTo(this->FrontArrow);
 
 	this->WheelConstraint = PCIP.CreateDefaultSubobject<UWheelConstraint>(this, FName(TEXT("WheelConstraint")));

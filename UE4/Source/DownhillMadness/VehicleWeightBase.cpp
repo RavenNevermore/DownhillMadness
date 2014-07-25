@@ -19,6 +19,7 @@ AVehicleWeightBase::AVehicleWeightBase(const class FPostConstructInitializePrope
 	this->PhysicsConstraint->ConstraintInstance.AngularSwing2Motion = EAngularConstraintMotion::ACM_Locked;
 	this->PhysicsConstraint->ConstraintInstance.AngularTwistMotion = EAngularConstraintMotion::ACM_Locked;
 	this->PhysicsConstraint->bAbsoluteScale = true;
+	this->PhysicsConstraint->ConstraintInstance.bDisableCollision = true;
 	this->PhysicsConstraint->AttachTo(this->FrontArrow);
 
 	this->SnapPivot = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("SnapPivot")));

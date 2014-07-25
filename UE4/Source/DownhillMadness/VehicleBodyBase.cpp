@@ -21,6 +21,18 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->Body->bGenerateOverlapEvents = true;
 	this->Body->AttachTo(this->FrontArrow);
 
+	this->ComplexBody = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("ComplexBody")));
+	this->ComplexBody->SetVisibility(false);
+	this->ComplexBody->SetHiddenInGame(true);
+	this->ComplexBody->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->ComplexBody->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->ComplexBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	this->ComplexBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	this->ComplexBody->SetSimulatePhysics(false);
+	this->ComplexBody->SetNotifyRigidBodyCollision(true);
+	this->ComplexBody->bGenerateOverlapEvents = true;
+	this->ComplexBody->AttachTo(this->Body);
+
 	this->RaycastBase = PCIP.CreateDefaultSubobject<UBoxComponent>(this, FName(TEXT("RaycastBase")));
 	this->RaycastBase->SetCollisionProfileName(FName(TEXT("Vehicle")));
 	this->RaycastBase->SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
@@ -608,7 +620,7 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 					{
 						FHitResult bodyMeshHitResult = *bodyMeshIther;
 
-						if (bodyMeshHitResult.Component.Get() == this->Body.Get())
+						if (bodyMeshHitResult.Component.Get() == this->ComplexBody.Get())
 						{
 							targetPos = bodyMeshHitResult.ImpactPoint;
 							foundMesh = true;
@@ -654,7 +666,7 @@ AVehiclePartBase* AVehicleBodyBase::GetFirstPartInLine(const FVector& startPos, 
 	TArray<FHitResult> hitResults;
 
 	FVector rayStart = startPos;
-	FVector rayEnd = startPos + (traceDirection * (this->Body->GetComponentLocation() - startPos).Size());
+	FVector rayEnd = startPos + (traceDirection * (this->ComplexBody->GetComponentLocation() - startPos).Size());
 
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
@@ -667,7 +679,7 @@ AVehiclePartBase* AVehicleBodyBase::GetFirstPartInLine(const FVector& startPos, 
 	{
 		FHitResult currentHitResult = *hitResultIter;
 
-		if (currentHitResult.Component.Get() == this->Body.Get())
+		if (currentHitResult.Component.Get() == this->ComplexBody.Get())
 		{
 			return nullptr;
 		}

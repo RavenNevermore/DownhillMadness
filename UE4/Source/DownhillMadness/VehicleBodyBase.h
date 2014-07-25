@@ -212,6 +212,10 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> Body;
 
+	/** Body's complex collision mesh for snapping */
+	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UStaticMeshComponent> ComplexBody;
+
 	/** Base for attach parts by raycast */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UBoxComponent> RaycastBase;
