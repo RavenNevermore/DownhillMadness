@@ -55,6 +55,62 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 // ----------------------------------------------------------------------------
 
 
+void AVehicleBodyBase::HidePart()
+{
+	this->Body->SetHiddenInGame(true, false);
+	this->Body->SetVisibility(false, false);
+
+	if (this->attachedSteering != nullptr)
+		this->attachedSteering->HidePart();
+
+	if (this->attachedBrake != nullptr)
+		this->attachedBrake->HidePart();
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		currentWheel->HidePart();
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->HidePart();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::ShowPart()
+{
+	this->Body->SetHiddenInGame(false, false);
+	this->Body->SetVisibility(true, false);
+
+	if (this->attachedSteering != nullptr)
+		this->attachedSteering->ShowPart();
+
+	if (this->attachedBrake != nullptr)
+		this->attachedBrake->ShowPart();
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		currentWheel->ShowPart();
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->ShowPart();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 FVehicleErrorCheck::FVehicleErrorCheck()
 {
 	this->hasNoWheels = false;
@@ -148,12 +204,13 @@ bool AVehicleBodyBase::AttachWheel(AVehicleWheelBase* wheel)
 
 	wheel->PhysicsConstraint->AttachTo(this->Body, NAME_None, EAttachLocation::KeepWorldPosition);
 	wheel->WheelConstraint->AttachTo(this->Body, NAME_None, EAttachLocation::KeepWorldPosition);
+	rigidBody->AttachTo(wheel->WheelConstraint, NAME_None, EAttachLocation::KeepWorldPosition);
 
 	wheel->PhysicsConstraint->SetConstrainedComponents(rigidBody, NAME_None, this->Body, NAME_None);
 	wheel->PhysicsConstraint->bWantsInitializeComponent = true;
-	wheel->PhysicsConstraint->InitializeComponent();
+	//wheel->PhysicsConstraint->InitializeComponent();
 
-	rigidBody->SetSimulatePhysics(true);
+	//rigidBody->SetSimulatePhysics(true);
 
 	this->attachedWheels.Add(wheel);
 
@@ -182,9 +239,9 @@ bool AVehicleBodyBase::DetachWheel(AVehicleWheelBase* wheel)
 
 	this->attachedWheels.RemoveAtSwap(wheelIndex);
 
-	wheel->PhysicsConstraint->ConstraintInstance.TermConstraint();
+	//wheel->PhysicsConstraint->ConstraintInstance.TermConstraint();
 
-	rigidBody->SetSimulatePhysics(false);
+	//rigidBody->SetSimulatePhysics(false);
 	rigidBody->AttachTo(wheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
 	rigidBody->bAbsoluteLocation = false;
 	rigidBody->bAbsoluteRotation = false;
@@ -215,12 +272,13 @@ bool AVehicleBodyBase::AttachWeight(AVehicleWeightBase* weight)
 	weight->PrepareAttach();
 
 	weight->PhysicsConstraint->AttachTo(this->Body, NAME_None, EAttachLocation::KeepWorldPosition);
+	weight->WeightMesh->AttachTo(weight->PhysicsConstraint, NAME_None, EAttachLocation::KeepWorldPosition);
 
 	weight->PhysicsConstraint->SetConstrainedComponents(weight->WeightMesh, NAME_None, this->Body, NAME_None);
 	weight->PhysicsConstraint->bWantsInitializeComponent = true;
-	weight->PhysicsConstraint->InitializeComponent();
+	//weight->PhysicsConstraint->InitializeComponent();
 
-	weight->WeightMesh->SetSimulatePhysics(true);
+	//weight->WeightMesh->SetSimulatePhysics(true);
 
 	this->attachedWeights.Add(weight);
 
@@ -242,9 +300,9 @@ bool AVehicleBodyBase::DetachWeight(AVehicleWeightBase* weight)
 
 	this->attachedWeights.RemoveAtSwap(weightIndex);
 
-	weight->PhysicsConstraint->ConstraintInstance.TermConstraint();
+	//weight->PhysicsConstraint->ConstraintInstance.TermConstraint();
 
-	weight->WeightMesh->SetSimulatePhysics(false);
+	//weight->WeightMesh->SetSimulatePhysics(false);
 	weight->WeightMesh->AttachTo(weight->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
 	weight->WeightMesh->bAbsoluteLocation = false;
 	weight->WeightMesh->bAbsoluteRotation = false;
@@ -344,6 +402,26 @@ void AVehicleBodyBase::SetBrakeInput(float input)
 
 void AVehicleBodyBase::EnablePhysics()
 {
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		UPrimitiveComponent* rigidBody = currentWheel->GetRigidBody();
+		if (rigidBody != nullptr)
+		{
+			rigidBody->AttachTo(currentWheel->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+			currentWheel->PhysicsConstraint->InitializeComponent();
+			rigidBody->SetSimulatePhysics(true);
+		}
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->WeightMesh->AttachTo(currentWeight->FrontArrow, NAME_None, EAttachLocation::KeepWorldPosition);
+		currentWeight->PhysicsConstraint->InitializeComponent();
+		currentWeight->WeightMesh->SetSimulatePhysics(true);
+	}
+
 	this->Body->SetSimulatePhysics(true);
 }
 
@@ -353,6 +431,26 @@ void AVehicleBodyBase::EnablePhysics()
 
 void AVehicleBodyBase::DisablePhysics()
 {
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		UPrimitiveComponent* rigidBody = currentWheel->GetRigidBody();
+		if (rigidBody != nullptr)
+		{
+			rigidBody->AttachTo(currentWheel->WheelConstraint, NAME_None, EAttachLocation::KeepWorldPosition);
+			currentWheel->PhysicsConstraint->ConstraintInstance.TermConstraint();
+			rigidBody->SetSimulatePhysics(false);
+		}
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->WeightMesh->AttachTo(currentWeight->PhysicsConstraint, NAME_None, EAttachLocation::KeepWorldPosition);
+		currentWeight->PhysicsConstraint->ConstraintInstance.TermConstraint();
+		currentWeight->WeightMesh->SetSimulatePhysics(false);
+	}
+
 	this->Body->SetSimulatePhysics(false);
 }
 

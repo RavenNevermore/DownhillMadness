@@ -14,6 +14,9 @@ class AVehicleBrakeBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
+
 	/**
 	* @brief	Set axis input for brakes
 	* @param	input		Axis input between 0.0f and 1.0f

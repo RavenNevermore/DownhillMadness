@@ -43,11 +43,11 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 
 
 	UGameStateStatics::trackRecords = TArray<float>();
-	UGameStateStatics::trackRecords.Add(90.0f);
-	UGameStateStatics::trackRecords.Add(90.0f);
-	UGameStateStatics::trackRecords.Add(90.0f);
-	UGameStateStatics::trackRecords.Add(90.0f);
-	UGameStateStatics::trackRecords.Add(90.0f);
+	UGameStateStatics::trackRecords.Add(599.999f);
+	UGameStateStatics::trackRecords.Add(599.999f);
+	UGameStateStatics::trackRecords.Add(599.999f);
+	UGameStateStatics::trackRecords.Add(599.999f);
+	UGameStateStatics::trackRecords.Add(599.999f);
 
 	UGameStateStatics::beatenRecords = TArray<bool>();
 	UGameStateStatics::beatenRecords.Add(false);
@@ -221,6 +221,24 @@ uint8 UGameStateStatics::GetMaxVehicleSlots()
 bool UGameStateStatics::GetRatatoskUnlocked()
 {
 	return UGameStateStatics::ratatoskUnlocked;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+FString UGameStateStatics::GetTrackRecordString(uint8 trackIndex)
+{
+	if (trackIndex > 0 && trackIndex < UGameStateStatics::trackRecords.Num())
+	{
+		int minutes = (int)(UGameStateStatics::trackRecords[trackIndex]) / (int)(60);
+		int seconds = (int)(UGameStateStatics::trackRecords[trackIndex]) % (int)(60);
+		int thousands = (int)(UGameStateStatics::trackRecords[trackIndex] * 1000.0f) % (int)(1000);
+
+		return FString::FromInt(minutes) + FString(TEXT(":")) + FString::FromInt(seconds) + FString(TEXT(".")) + FString::FromInt(thousands);
+	}
+
+	return FString(TEXT(""));
 }
 
 

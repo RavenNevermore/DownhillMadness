@@ -14,6 +14,9 @@ class AVehicleSteeringBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
+
 	/**
 	* @brief	Set axis input for steering system
 	* @param	input		Axis input between -1.0f and 1.0f
