@@ -37,6 +37,26 @@ AVehicleSteeringBase::AVehicleSteeringBase(const class FPostConstructInitializeP
 // ----------------------------------------------------------------------------
 
 
+void AVehicleSteeringBase::HidePart()
+{
+	this->SteeringMesh->SetHiddenInGame(true, false);
+	this->SteeringMesh->SetVisibility(false, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleSteeringBase::ShowPart()
+{
+	this->SteeringMesh->SetHiddenInGame(false, false);
+	this->SteeringMesh->SetVisibility(true, false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleSteeringBase::SetInput(float input)
 {
 	this->currentInput = FMath::Clamp<float>(input, -1.0f, 1.0f);

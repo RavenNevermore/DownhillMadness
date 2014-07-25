@@ -52,6 +52,7 @@ AVehicleWeightBase::AVehicleWeightBase(const class FPostConstructInitializePrope
 void AVehicleWeightBase::HidePart()
 {
 	this->WeightMesh->SetHiddenInGame(true, false);
+	this->WeightMesh->SetVisibility(false, false);
 }
 
 
@@ -61,6 +62,7 @@ void AVehicleWeightBase::HidePart()
 void AVehicleWeightBase::ShowPart()
 {
 	this->WeightMesh->SetHiddenInGame(false, false);
+	this->WeightMesh->SetVisibility(true, false);
 }
 
 

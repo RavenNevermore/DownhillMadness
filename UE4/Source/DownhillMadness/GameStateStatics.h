@@ -55,6 +55,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool GetRatatoskUnlocked();
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static FString GetTrackRecordString(uint8 trackIndex);
 	
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static TArray<FSerializedVehicle> GetWorkshopVehicles();

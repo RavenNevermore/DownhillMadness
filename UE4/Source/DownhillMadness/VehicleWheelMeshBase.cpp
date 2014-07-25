@@ -26,8 +26,11 @@ AVehicleWheelMeshBase::AVehicleWheelMeshBase(const class FPostConstructInitializ
 void AVehicleWheelMeshBase::HidePart()
 {
 	this->WheelMesh->SetHiddenInGame(true, false);
+	this->WheelMesh->SetVisibility(false, false);
 	this->AxisMesh->SetHiddenInGame(true, false);
+	this->AxisMesh->SetVisibility(false, false);
 	this->BrakeMesh->SetHiddenInGame(true, false);
+	this->BrakeMesh->SetVisibility(false, false);
 }
 
 
@@ -37,8 +40,11 @@ void AVehicleWheelMeshBase::HidePart()
 void AVehicleWheelMeshBase::ShowPart()
 {
 	this->WheelMesh->SetHiddenInGame(false, false);
+	this->WheelMesh->SetVisibility(true, false);
 	this->AxisMesh->SetHiddenInGame(false, false);
+	this->AxisMesh->SetVisibility(true, false);
 	this->BrakeMesh->SetHiddenInGame(false, false);
+	this->BrakeMesh->SetVisibility(true, false);
 }
 
 

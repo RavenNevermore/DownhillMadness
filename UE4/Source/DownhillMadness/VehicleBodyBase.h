@@ -46,6 +46,9 @@ class AVehicleBodyBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void HidePart() OVERRIDE;
+	void ShowPart() OVERRIDE;
+
 	void BeginPlay() OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;
 
