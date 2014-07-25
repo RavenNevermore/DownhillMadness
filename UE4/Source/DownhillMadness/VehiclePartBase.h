@@ -18,4 +18,10 @@ class AVehiclePartBase : public AActor
 
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
 	virtual void ShowPart();
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	virtual void SelectPart();
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	virtual void DeselectPart();
 };

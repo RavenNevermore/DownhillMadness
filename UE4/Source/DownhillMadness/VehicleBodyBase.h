@@ -48,6 +48,8 @@ class AVehicleBodyBase : public AVehiclePartBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
 
 	void BeginPlay() OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;

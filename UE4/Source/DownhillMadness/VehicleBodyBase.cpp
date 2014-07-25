@@ -111,6 +111,60 @@ void AVehicleBodyBase::ShowPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleBodyBase::SelectPart()
+{
+	this->Body->SetRenderCustomDepth(true);
+
+	if (this->attachedSteering != nullptr)
+		this->attachedSteering->SelectPart();
+
+	if (this->attachedBrake != nullptr)
+		this->attachedBrake->SelectPart();
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		currentWheel->SelectPart();
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->SelectPart();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::DeselectPart()
+{
+	this->Body->SetRenderCustomDepth(false);
+
+	if (this->attachedSteering != nullptr)
+		this->attachedSteering->DeselectPart();
+
+	if (this->attachedBrake != nullptr)
+		this->attachedBrake->DeselectPart();
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		currentWheel->DeselectPart();
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		currentWeight->DeselectPart();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 FVehicleErrorCheck::FVehicleErrorCheck()
 {
 	this->hasNoWheels = false;

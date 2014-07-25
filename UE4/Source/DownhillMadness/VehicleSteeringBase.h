@@ -16,6 +16,8 @@ class AVehicleSteeringBase : public AVehiclePartBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
 
 	/**
 	* @brief	Set axis input for steering system

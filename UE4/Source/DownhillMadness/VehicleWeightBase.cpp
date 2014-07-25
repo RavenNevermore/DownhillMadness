@@ -69,6 +69,24 @@ void AVehicleWeightBase::ShowPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWeightBase::SelectPart()
+{
+	this->WeightMesh->SetRenderCustomDepth(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWeightBase::DeselectPart()
+{
+	this->WeightMesh->SetRenderCustomDepth(false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWeightBase::PrepareAttach()
 {
 	this->PhysicsConstraint->ResetRelativeTransform();

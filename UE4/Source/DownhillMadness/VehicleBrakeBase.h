@@ -16,6 +16,8 @@ class AVehicleBrakeBase : public AVehiclePartBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
 
 	/**
 	* @brief	Set axis input for brakes

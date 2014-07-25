@@ -57,6 +57,24 @@ void AVehicleSteeringBase::ShowPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleSteeringBase::SelectPart()
+{
+	this->SteeringMesh->SetRenderCustomDepth(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleSteeringBase::DeselectPart()
+{
+	this->SteeringMesh->SetRenderCustomDepth(false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleSteeringBase::SetInput(float input)
 {
 	this->currentInput = FMath::Clamp<float>(input, -1.0f, 1.0f);

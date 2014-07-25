@@ -15,6 +15,9 @@ class AVehicleWheelCapsuleBase : public AVehicleWheelBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
+
 	void BeginPlay() OVERRIDE;
 	UPrimitiveComponent* GetRigidBody() OVERRIDE;
 

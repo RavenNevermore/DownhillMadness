@@ -15,6 +15,9 @@ class AVehicleWheelMeshBase : public AVehicleWheelBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
+
 	UPrimitiveComponent* GetRigidBody() OVERRIDE;
 
 	/** Wheel's mesh */

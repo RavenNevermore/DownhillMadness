@@ -16,6 +16,8 @@ class AVehicleWeightBase : public AVehiclePartBase
 
 	void HidePart() OVERRIDE;
 	void ShowPart() OVERRIDE;
+	void SelectPart() OVERRIDE;
+	void DeselectPart() OVERRIDE;
 
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)

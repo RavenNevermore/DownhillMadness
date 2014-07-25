@@ -30,3 +30,19 @@ void AVehiclePartBase::ShowPart()
 {
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+void AVehiclePartBase::SelectPart()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehiclePartBase::DeselectPart()
+{
+}
+

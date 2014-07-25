@@ -32,6 +32,22 @@ void AVehicleBrakeBase::ShowPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleBrakeBase::SelectPart()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBrakeBase::DeselectPart()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleBrakeBase::SetInput(float input)
 {
 	this->currentInput = FMath::Clamp<float>(input, 0.0f, 1.0f);

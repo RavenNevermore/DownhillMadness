@@ -64,6 +64,28 @@ void AVehicleWheelCapsuleBase::ShowPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWheelCapsuleBase::SelectPart()
+{
+	this->WheelMesh->SetRenderCustomDepth(true);
+	this->AxisMesh->SetRenderCustomDepth(true);
+	this->BrakeMesh->SetRenderCustomDepth(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelCapsuleBase::DeselectPart()
+{
+	this->WheelMesh->SetRenderCustomDepth(false);
+	this->AxisMesh->SetRenderCustomDepth(false);
+	this->BrakeMesh->SetRenderCustomDepth(false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWheelCapsuleBase::BeginPlay()
 {
 	Super::BeginPlay();
