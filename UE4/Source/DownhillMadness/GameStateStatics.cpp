@@ -368,6 +368,7 @@ bool UGameStateStatics::SaveVehicle(AVehicleBodyBase* vehicle, uint8 slotIndex)
 	{
 		FSerializedVehicle serializedVehicle;
 		UVehicleSpawnerLibrary::SerializeVehicle(serializedVehicle, vehicle);
+		serializedVehicle.vehicleName = FString(TEXT("Workshop ")) + FString::FromInt(slotIndex) + FString(TEXT(": ")) + UVehicleSpawnerLibrary::GetGeneratedVehicleName(serializedVehicle);
 		UGameStateStatics::savedVehicles[slotIndex] = serializedVehicle;
 
 		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(slotIndex);
@@ -391,14 +392,16 @@ bool UGameStateStatics::SaveSerializedVehicle(const FSerializedVehicle& vehicle,
 {
 	if (slotIndex >= 0 && slotIndex < UGameStateStatics::maxVehicleSlots)
 	{
-		UGameStateStatics::savedVehicles[slotIndex] = vehicle;
+		FSerializedVehicle saveVehicle = vehicle;
+		saveVehicle.vehicleName = FString(TEXT("Workshop ")) + FString::FromInt(slotIndex) + FString(TEXT(": ")) + UVehicleSpawnerLibrary::GetGeneratedVehicleName(saveVehicle);
+		UGameStateStatics::savedVehicles[slotIndex] = saveVehicle;
 
 		FString slotName = FString(TEXT("BuiltVehicle")) + FString::FromInt(slotIndex);
 
 		USavedVehicle* createdVehicleSave = Cast<USavedVehicle>(UGameplayStatics::CreateSaveGameObject(USavedVehicle::StaticClass()));
 		if (createdVehicleSave != nullptr)
 		{
-			createdVehicleSave->SetVehicle(vehicle);
+			createdVehicleSave->SetVehicle(saveVehicle);
 			return UGameplayStatics::SaveGameToSlot(createdVehicleSave, slotName, 0);
 		}
 	}

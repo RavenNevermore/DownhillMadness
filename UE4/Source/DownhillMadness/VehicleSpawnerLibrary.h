@@ -159,6 +159,9 @@ struct FSerializedVehicle
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
+	FString vehicleName;
+
+	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
 	UClass* bodyClass;
 
 	UPROPERTY(Category = VehicleSpawner, BlueprintReadWrite, EditAnywhere)
@@ -208,5 +211,5 @@ class UVehicleSpawnerLibrary : public UBlueprintFunctionLibrary
 	static void LoadStaticVehicle(FSerializedVehicle& outSerializedVehicle, uint8 index);
 
 	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
-	static FString GetVehicleName(const FSerializedVehicle& inSerializedVehicle);
+	static FString GetGeneratedVehicleName(const FSerializedVehicle& inSerializedVehicle);
 };
