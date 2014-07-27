@@ -24,4 +24,7 @@ class AVehiclePartBase : public AActor
 
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
 	virtual void DeselectPart();
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	virtual void SetPartLocationAndRotation(FVector location, FRotator rotation);
 };

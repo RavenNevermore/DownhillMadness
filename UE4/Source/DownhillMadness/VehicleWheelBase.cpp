@@ -29,8 +29,8 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->AxisMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("AxisMesh")));
 	this->AxisMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->AxisMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	this->AxisMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	this->AxisMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->AxisMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	this->AxisMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	this->AxisMesh->SetSimulatePhysics(false);
 	this->AxisMesh->bAbsoluteScale = true;
 	this->AxisMesh->AttachTo(this->WheelConstraint);
@@ -53,8 +53,8 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 	this->BrakeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("BrakeMesh")));
 	this->BrakeMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->BrakeMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	this->BrakeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	this->BrakeMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->BrakeMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	this->BrakeMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	this->BrakeMesh->SetSimulatePhysics(false);
 	this->BrakeMesh->bAbsoluteScale = true;
 	this->BrakeMesh->AttachTo(this->WheelConstraint);
@@ -68,6 +68,24 @@ AVehicleWheelBase::AVehicleWheelBase(const class FPostConstructInitializePropert
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleWheelBase::SetPartLocationAndRotation(FVector location, FRotator rotation)
+{
+	FTransform pivotTransform(rotation, location, FVector(1.0f, 1.0f, 1.0f));
+	pivotTransform = FTransform(-pivotTransform.GetUnitAxis(EAxis::Y), pivotTransform.GetUnitAxis(EAxis::X), pivotTransform.GetUnitAxis(EAxis::Z), location);
+
+	FMatrix pivotMatrix = this->SnapPivot->GetComponenTransform().ToMatrixNoScale();
+	FMatrix rootMatrix = this->RootComponent->GetComponenTransform().ToMatrixNoScale();
+	FMatrix relativeMatrix = rootMatrix * pivotMatrix.InverseSafe();
+
+	FMatrix newRootMatrix = relativeMatrix * pivotTransform.ToMatrixNoScale();
+
+	this->RootComponent->SetWorldLocationAndRotation(newRootMatrix.GetOrigin(), newRootMatrix.Rotator(), false);
 }
 
 

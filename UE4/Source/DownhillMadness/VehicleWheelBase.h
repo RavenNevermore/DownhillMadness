@@ -15,6 +15,8 @@ class AVehicleWheelBase : public AVehiclePartBase
 {
 	GENERATED_UCLASS_BODY()
 
+	void SetPartLocationAndRotation(FVector location, FRotator rotation) OVERRIDE;
+
 	void Tick(float DeltaSeconds) OVERRIDE;
 	void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) OVERRIDE;
 

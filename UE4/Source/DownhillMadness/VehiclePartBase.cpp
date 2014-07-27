@@ -46,3 +46,11 @@ void AVehiclePartBase::DeselectPart()
 {
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+void AVehiclePartBase::SetPartLocationAndRotation(FVector location, FRotator rotation)
+{
+}
+

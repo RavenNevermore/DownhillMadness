@@ -87,6 +87,24 @@ void AVehicleWeightBase::DeselectPart()
 // ----------------------------------------------------------------------------
 
 
+void AVehicleWeightBase::SetPartLocationAndRotation(FVector location, FRotator rotation)
+{
+	FTransform pivotTransform(rotation, location, FVector(1.0f, 1.0f, 1.0f));
+	pivotTransform = FTransform(-pivotTransform.GetUnitAxis(EAxis::Y), pivotTransform.GetUnitAxis(EAxis::X), pivotTransform.GetUnitAxis(EAxis::Z), location);
+
+	FMatrix pivotMatrix = this->SnapPivot->GetComponenTransform().ToMatrixNoScale();
+	FMatrix rootMatrix = this->RootComponent->GetComponenTransform().ToMatrixNoScale();
+	FMatrix relativeMatrix = rootMatrix * pivotMatrix.InverseSafe();
+
+	FMatrix newRootMatrix = relativeMatrix * pivotTransform.ToMatrixNoScale();
+
+	this->RootComponent->SetWorldLocationAndRotation(newRootMatrix.GetOrigin(), newRootMatrix.Rotator(), false);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWeightBase::PrepareAttach()
 {
 	this->PhysicsConstraint->ResetRelativeTransform();

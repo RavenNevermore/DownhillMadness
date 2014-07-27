@@ -707,7 +707,7 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 	TArray<FHitResult> hitResults;
 
 	FVector rayStart = inTransform.GetLocation();
-	FVector rayEnd = this->RaycastBase->GetComponentLocation();
+	FVector rayEnd = this->Body->GetComponentLocation();
 
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
@@ -722,7 +722,7 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 	{
 		FHitResult currentHitResult = *hitResultIter;
 
-		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+		if (currentHitResult.Component.Get() == this->RaycastBase.Get() || currentHitResult.Component.Get()->AttachParent == this->RaycastBase.Get())
 		{
 			foundBox = true;
 			boxHitResult = currentHitResult;
@@ -743,7 +743,7 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 	{
 		FHitResult currentHitResult = *hitResultIter;
 
-		if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+		if (currentHitResult.Component.Get() == this->RaycastBase.Get() || currentHitResult.Component.Get()->AttachParent == this->RaycastBase.Get())
 		{
 			if (snapDirection == FVector::ZeroVector)
 				rayEnd = rayStart + (rayEnd - rayStart).ProjectOnTo(currentHitResult.ImpactNormal);
@@ -762,11 +762,13 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 			{
 				currentHitResult = *innerHitResultIter;
 
-				if (currentHitResult.Component.Get() == this->RaycastBase.Get())
+				if (currentHitResult.Component.Get() == this->RaycastBase.Get() || currentHitResult.Component.Get()->AttachParent == this->RaycastBase.Get())
 				{
 					FVector targetPos = currentHitResult.ImpactPoint;
 
 					// Find actual mesh
+					rayEnd = rayStart + ((rayEnd - rayStart) * 2.0f);
+					this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, ECollisionChannel::ECC_WorldDynamic, queryParams, responseParams);
 					bool foundMesh = false;
 					for (TArray<FHitResult>::TIterator bodyMeshIther(hitResults); bodyMeshIther && !foundMesh; ++bodyMeshIther)
 					{
@@ -786,13 +788,13 @@ bool AVehicleBodyBase::SnapPart(const FTransform& inTransform, FTransform& newTr
 
 					// Get new transform
 					FVector forwardVector;
-					FVector upVector = this->RaycastBase->GetUpVector();
+					FVector upVector = currentHitResult.Component->GetUpVector();
 					float dotProduct = FVector::DotProduct(upVector, rightVector);
 
 					if (dotProduct < -0.75f)
-						upVector = this->RaycastBase->GetForwardVector();
+						upVector = currentHitResult.Component->GetForwardVector();
 					else if (dotProduct > 0.75f)
-						upVector = -this->RaycastBase->GetForwardVector();
+						upVector = -currentHitResult.Component->GetForwardVector();
 
 					forwardVector = FVector::CrossProduct(rightVector, upVector);
 
@@ -835,7 +837,7 @@ AVehiclePartBase* AVehicleBodyBase::GetFirstPartInLine(const FVector& startPos, 
 		{
 			return nullptr;
 		}
-		else if ((currentHitResult.Actor->IsA(AVehicleWheelBase::StaticClass()) && this->attachedWheels.Contains(Cast<AVehicleWheelBase>(currentHitResult.Actor.Get()))) || (currentHitResult.Actor->IsA(AVehicleWeightBase::StaticClass()) && this->attachedWeights.Contains(Cast<AVehicleWeightBase>(currentHitResult.Actor.Get()))))
+		else if (!(currentHitResult.Actor->IsA(AVehicleWheelCapsuleBase::StaticClass()) && currentHitResult.Component.Get() == Cast<AVehicleWheelCapsuleBase>(currentHitResult.Actor.Get())->WheelCapsule) && ((currentHitResult.Actor->IsA(AVehicleWheelBase::StaticClass()) && this->attachedWheels.Contains(Cast<AVehicleWheelBase>(currentHitResult.Actor.Get()))) || (currentHitResult.Actor->IsA(AVehicleWeightBase::StaticClass()) && this->attachedWeights.Contains(Cast<AVehicleWeightBase>(currentHitResult.Actor.Get())))))
 		{
 			return Cast<AVehiclePartBase>(currentHitResult.Actor.Get());
 		}

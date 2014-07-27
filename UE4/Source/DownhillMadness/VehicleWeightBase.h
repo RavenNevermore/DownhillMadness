@@ -18,6 +18,7 @@ class AVehicleWeightBase : public AVehiclePartBase
 	void ShowPart() OVERRIDE;
 	void SelectPart() OVERRIDE;
 	void DeselectPart() OVERRIDE;
+	void SetPartLocationAndRotation(FVector location, FRotator rotation) OVERRIDE;
 
 	/** Arrow component for easier orientation */
 	UPROPERTY(Category = VehicleWeight, BlueprintReadOnly, VisibleDefaultsOnly)

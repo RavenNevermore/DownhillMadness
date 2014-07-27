@@ -25,8 +25,8 @@ AVehicleWheelCapsuleBase::AVehicleWheelCapsuleBase(const class FPostConstructIni
 	this->WheelMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("WheelMesh")));
 	this->WheelMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->WheelMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	this->WheelMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	this->WheelMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->WheelMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	this->WheelMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	this->WheelMesh->SetSimulatePhysics(false);
 	this->WheelMesh->RelativeRotation.Roll = -90.0f;
 	this->WheelMesh->AttachTo(this->WheelCapsule);
