@@ -144,6 +144,10 @@ class ADriverPawn : public APawn
 	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
 	float maxLeaningImpulse;
 
+	/** Particle system used for teleport */
+	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
+	UParticleSystem* teleportParticleSystem;
+
 	/** Driver requested respawn */
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	uint32 bRespawnRequested : 1;

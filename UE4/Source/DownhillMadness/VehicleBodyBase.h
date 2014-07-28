@@ -53,6 +53,13 @@ class AVehicleBodyBase : public AVehiclePartBase
 
 	void BeginPlay() OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;
+	
+	/**
+	* @brief	Set transparency on body
+	* @param	bMakeTransparent	Whether to make transparent or opaque
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	void SetTransparent(bool bMakeTransparent);
 
 	/**
 	* @brief	Update controls of this vehicle
@@ -213,6 +220,18 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	void DestroyVehicle();
 
+	/**
+	* @brief	Get body's audio properties
+	* @param	onGround	Is vehicle touching ground?
+	* @param	currentSpeed	Current vehicle speed
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+	void GetAudioProperties(bool& onGround, float& currentSpeed);
+
+	/** Body's audio component */
+	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UAudioComponent> AudioComponent;
+
 	/** Body's mesh */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> Body;
@@ -245,6 +264,10 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleAnywhere)
 	AVehicleBrakeBase* attachedBrake;
 
+	/** Transparent body material */
+	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, EditDefaultsOnly)
+	UMaterialInterface* transparentMaterial;
+
 private:
 	/**
 	* @brief	Align a vehicle part to vehicle's bounding box and check if it can be attached
@@ -265,4 +288,6 @@ private:
 	*/
 	UFUNCTION()
 	bool SnapPart(const FTransform& inTransform, FTransform& newTransform, const FVector& snapDirection);
+
+	UMaterialInterface* regularMaterial;
 };
