@@ -228,6 +228,20 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				AVehicleBodyBase* newVehicle = UVehicleSpawnerLibrary::SpawnVehicle(this, serializedVehicle, spawnLocation, spawnRotation);
 				ADriverPawn* newDriverPawn = (ADriverPawn*)(this->GetWorld()->SpawnActor(this->GetClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
 
+				if (this->teleportParticleSystem != nullptr)
+				{
+					FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
+					FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
+					AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
+					newEmitter->SetTemplate(this->teleportParticleSystem);
+					newEmitter->bDestroyOnSystemFinish = true;
+					newEmitter->Activate();
+					newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
+					newEmitter->SetTemplate(this->teleportParticleSystem);
+					newEmitter->bDestroyOnSystemFinish = true;
+					newEmitter->Activate();
+				}
+
 				if (newDriverPawn != nullptr && newVehicle != nullptr)
 				{
 					this->Controller->Possess(newDriverPawn);
