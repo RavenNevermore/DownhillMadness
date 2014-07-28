@@ -11,6 +11,8 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->FrontArrow->bAbsoluteScale = true;
 	this->RootComponent = this->FrontArrow;
 
+	this->AudioComponent = PCIP.CreateDefaultSubobject<UAudioComponent>(this, FName(TEXT("AudioComponent")));
+
 	this->Body = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("Body")));
 	this->Body->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->Body->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -182,6 +184,8 @@ FVehicleErrorCheck::FVehicleErrorCheck()
 void AVehicleBodyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	this->regularMaterial = this->Body->GetMaterial(0);
 }
 
 
@@ -200,6 +204,29 @@ void AVehicleBodyBase::Tick(float DeltaSeconds)
 			currentWheel->BrakeMesh->SetHiddenInGame(false);
 		else
 			currentWheel->BrakeMesh->SetHiddenInGame(true);
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::SetTransparent(bool bMakeTransparent)
+{
+	if (bMakeTransparent)
+	{
+		if (this->transparentMaterial != nullptr)
+		{
+			this->regularMaterial = this->Body->GetMaterial(0);
+			this->Body->SetMaterial(0, this->transparentMaterial);
+		}
+	}
+	else
+	{
+		if (this->regularMaterial != nullptr)
+		{
+			this->Body->SetMaterial(0, this->regularMaterial);
+		}
 	}
 }
 
@@ -929,4 +956,24 @@ void AVehicleBodyBase::DestroyVehicle()
 	}
 
 	this->GetWorld()->DestroyActor(this);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::GetAudioProperties(bool& onGround, float& currentSpeed)
+{
+	bool touchingGround = false;
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter && !touchingGround; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		if (currentWheel->isGrounded)
+		{
+			touchingGround = true;
+		}
+	}
+
+	onGround = touchingGround;
+	currentSpeed = this->Body->BodyInstance.GetUnrealWorldVelocity().Size();
 }
