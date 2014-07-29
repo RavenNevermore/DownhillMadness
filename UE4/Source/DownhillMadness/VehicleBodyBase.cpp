@@ -217,7 +217,6 @@ void AVehicleBodyBase::SetTransparent(bool bMakeTransparent)
 	{
 		if (this->transparentMaterial != nullptr)
 		{
-			this->regularMaterial = this->Body->GetMaterial(0);
 			this->Body->SetMaterial(0, this->transparentMaterial);
 		}
 	}
