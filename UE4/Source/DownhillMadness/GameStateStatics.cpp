@@ -214,6 +214,58 @@ void UGameStateStatics::EndNoSplitscreenMultiplayer()
 // ----------------------------------------------------------------------------
 
 
+void UGameStateStatics::StartWorkshopMultiplayer(UObject* WorldContextObject)
+{
+	if (GEngine)
+	{
+		UCustomGameViewportClient* customGameViewportClient = Cast<UCustomGameViewportClient>(GEngine->GameViewport);
+
+		if (customGameViewportClient != nullptr)
+		{
+			customGameViewportClient->bDontUseSplitscreen = false;
+			//if (UGameStateStatics::numberOfPlayers == 3)
+			//	customGameViewportClient->bFourPanels = true;
+		}
+
+		FString outString;
+
+		for (int i = 1; i < UGameStateStatics::numberOfPlayers; i++)
+		{
+			UPlayer* player = GEngine->GameViewport->CreatePlayer(i, outString, true);
+			GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+		}
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::EndWorkshopMultiplayer()
+{
+	if (GEngine)
+	{
+		UCustomGameViewportClient* customGameViewportClient = Cast<UCustomGameViewportClient>(GEngine->GameViewport);
+
+		if (customGameViewportClient != nullptr)
+		{
+			customGameViewportClient->bDontUseSplitscreen = false;
+			customGameViewportClient->bFourPanels = false;
+		}
+
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
+		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+
+		if (customGameViewportClient != nullptr)
+			customGameViewportClient->UpdateActiveSplitscreenType();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 float UGameStateStatics::GetNearClipPlane()
 {
 	if (GEngine)

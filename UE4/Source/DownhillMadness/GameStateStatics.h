@@ -48,6 +48,12 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void EndNoSplitscreenMultiplayer();
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics", meta = (HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static void StartWorkshopMultiplayer(UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void EndWorkshopMultiplayer();
+
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static float GetNearClipPlane();
 
