@@ -27,4 +27,10 @@ class AVehiclePartBase : public AActor
 
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
 	virtual void SetPartLocationAndRotation(FVector location, FRotator rotation);
+
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehiclePart")
+	UClass* GetPartClass(bool bGetSymmetricPart);
+
+	UPROPERTY(Category = VehiclePart, BlueprintReadOnly, EditDefaultsOnly)
+	UClass* symmetricPart;
 };

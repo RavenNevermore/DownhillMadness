@@ -54,3 +54,15 @@ void AVehiclePartBase::SetPartLocationAndRotation(FVector location, FRotator rot
 {
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+UClass* AVehiclePartBase::GetPartClass(bool bGetSymmetricPart)
+{
+	if (!bGetSymmetricPart || this->symmetricPart == nullptr)
+		return this->GetClass();
+	else
+		return this->symmetricPart;
+}
+

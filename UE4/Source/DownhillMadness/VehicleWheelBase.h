@@ -92,6 +92,12 @@ class AVehicleWheelBase : public AVehiclePartBase
 	UFUNCTION(Category = "Physics|CustomVehicle|VehicleWheel")
 	void BrakeWheel(float brakeValue);
 
+	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleWheel")
+	UClass* GetMeshWheelEquivalent();
+
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, EditDefaultsOnly)
+	UClass* meshWheelCounterpart;
+
 private:
 	/* Is grounded for current frame */
 	UPROPERTY()

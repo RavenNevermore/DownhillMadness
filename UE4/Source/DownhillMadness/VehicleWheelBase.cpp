@@ -146,6 +146,18 @@ void AVehicleWheelBase::BrakeWheel(float brakeValue)
 // ----------------------------------------------------------------------------
 
 
+UClass* AVehicleWheelBase::GetMeshWheelEquivalent()
+{
+	if (this->meshWheelCounterpart != nullptr)
+		return this->meshWheelCounterpart;
+	else
+		return this->GetClass();
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
