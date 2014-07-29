@@ -7,6 +7,7 @@
 UCustomGameViewportClient::UCustomGameViewportClient(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	UGameStateStatics::SetViewportSettings(UGameStateStatics::windowWidth, UGameStateStatics::windowHeight, UGameStateStatics::bIsFullscreen);
 }
 
 

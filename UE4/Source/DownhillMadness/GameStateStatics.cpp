@@ -12,6 +12,14 @@ TArray<FSerializedVehicle> UGameStateStatics::savedVehicles = TArray<FSerialized
 TArray<float> UGameStateStatics::trackRecords = TArray<float>();
 TArray<bool> UGameStateStatics::beatenRecords = TArray<bool>();
 bool UGameStateStatics::ratatoskUnlocked = false;
+bool UGameStateStatics::bIsFullscreen = false;
+int32 UGameStateStatics::windowWidth = 1280;
+int32 UGameStateStatics::windowHeight = 720;
+uint8 UGameStateStatics::antiAliasingQuality = 2;
+uint8 UGameStateStatics::graphicsQuality = 2;
+float UGameStateStatics::musicVolume = 1.0f;
+float UGameStateStatics::soundVolume = 1.0f;
+float UGameStateStatics::voicesVolume = 1.0f;
 
 
 // ----------------------------------------------------------------------------
@@ -57,6 +65,17 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 	UGameStateStatics::beatenRecords.Add(false);
 
 	UGameStateStatics::ratatoskUnlocked = false;
+
+
+	UGameStateStatics::bIsFullscreen = false;
+	UGameStateStatics::windowWidth = 1280;
+	UGameStateStatics::windowHeight = 720;
+
+	UGameStateStatics::antiAliasingQuality = 2;
+	UGameStateStatics::graphicsQuality = 2;
+	UGameStateStatics::musicVolume = 1.0f;
+	UGameStateStatics::soundVolume = 1.0f;
+	UGameStateStatics::voicesVolume = 1.0f;
 
 
 	UGameStateStatics::LoadSavedGame();
@@ -331,6 +350,14 @@ bool UGameStateStatics::SaveGameData()
 		createdSaveGame->ratatoskUnlocked = UGameStateStatics::ratatoskUnlocked;
 		createdSaveGame->trackRecords = TArray<float>(UGameStateStatics::trackRecords);
 		createdSaveGame->beatenRecords = TArray<bool>(UGameStateStatics::beatenRecords);
+		createdSaveGame->bIsFullscreen = UGameStateStatics::bIsFullscreen;
+		createdSaveGame->windowWidth = UGameStateStatics::windowWidth;
+		createdSaveGame->windowHeight = UGameStateStatics::windowHeight;
+		createdSaveGame->antiAliasingQuality = UGameStateStatics::antiAliasingQuality;
+		createdSaveGame->graphicsQuality = UGameStateStatics::graphicsQuality;
+		createdSaveGame->musicVolume = UGameStateStatics::musicVolume;
+		createdSaveGame->soundVolume = UGameStateStatics::soundVolume;
+		createdSaveGame->voicesVolume = UGameStateStatics::voicesVolume;
 		return UGameplayStatics::SaveGameToSlot(createdSaveGame, FString(TEXT("GameData")), 0);
 	}
 
@@ -413,6 +440,55 @@ bool UGameStateStatics::SaveSerializedVehicle(const FSerializedVehicle& vehicle,
 // ----------------------------------------------------------------------------
 
 
+void UGameStateStatics::SetViewportSettings(int32 NewSizeX, int32 NewSizeY, bool bIsFullscreen)
+{
+	UGameStateStatics::bIsFullscreen = bIsFullscreen;
+	UGameStateStatics::windowWidth = NewSizeX;
+	UGameStateStatics::windowHeight = NewSizeY;
+	FSystemResolution::RequestResolutionChange(NewSizeX, NewSizeY, bIsFullscreen);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::GetViewportSettings(int32& SizeX, int32& SizeY, bool& bIsFullscreen)
+{
+	bIsFullscreen = UGameStateStatics::bIsFullscreen;
+	SizeX = UGameStateStatics::windowWidth;
+	SizeY = UGameStateStatics::windowHeight;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::SetGameOptions(uint8 antiAliasingQuality, uint8 graphicsQuality, float musicVolume, float soundVolume, float voicesVolume)
+{
+	UGameStateStatics::antiAliasingQuality = antiAliasingQuality;
+	UGameStateStatics::graphicsQuality = graphicsQuality;
+	UGameStateStatics::musicVolume = musicVolume;
+	UGameStateStatics::soundVolume = soundVolume;
+	UGameStateStatics::voicesVolume = voicesVolume;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::GetGameOptions(uint8& antiAliasingQuality, uint8& graphicsQuality, float& musicVolume, float& soundVolume, float& voicesVolume)
+{
+	antiAliasingQuality = UGameStateStatics::antiAliasingQuality;
+	graphicsQuality = UGameStateStatics::graphicsQuality;
+	musicVolume = UGameStateStatics::musicVolume;
+	soundVolume = UGameStateStatics::soundVolume;
+	voicesVolume = UGameStateStatics::voicesVolume;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::LoadAllVehicles()
 {
 	UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();
@@ -450,6 +526,14 @@ void UGameStateStatics::LoadSavedGame()
 			UGameStateStatics::ratatoskUnlocked = loadedSaveGame->ratatoskUnlocked;
 			UGameStateStatics::trackRecords = TArray<float>(loadedSaveGame->trackRecords);
 			UGameStateStatics::beatenRecords = TArray<bool>(loadedSaveGame->beatenRecords);
+			UGameStateStatics::bIsFullscreen = loadedSaveGame->bIsFullscreen;
+			UGameStateStatics::windowWidth = loadedSaveGame->windowWidth;
+			UGameStateStatics::windowHeight = loadedSaveGame->windowHeight;
+			UGameStateStatics::antiAliasingQuality = loadedSaveGame->antiAliasingQuality;
+			UGameStateStatics::graphicsQuality = loadedSaveGame->graphicsQuality;
+			UGameStateStatics::musicVolume = loadedSaveGame->musicVolume;
+			UGameStateStatics::soundVolume = loadedSaveGame->soundVolume;
+			UGameStateStatics::voicesVolume = loadedSaveGame->voicesVolume;
 		}
 	}
 }

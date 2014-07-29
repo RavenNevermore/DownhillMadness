@@ -14,6 +14,16 @@ USavedGameData::USavedGameData(const class FPostConstructInitializeProperties& P
 	this->beatenRecords.Empty();
 
 	this->ratatoskUnlocked = false;
+
+	this->bIsFullscreen = false;
+	this->windowWidth = 1280;
+	this->windowHeight = 720;
+
+	this->antiAliasingQuality = 2;
+	this->graphicsQuality = 2;
+	this->musicVolume = 1.0f;
+	this->soundVolume = 1.0f;
+	this->voicesVolume = 1.0f;
 }
 
 
