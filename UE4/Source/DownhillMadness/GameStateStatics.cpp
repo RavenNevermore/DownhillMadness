@@ -541,6 +541,15 @@ void UGameStateStatics::GetGameOptions(uint8& antiAliasingQuality, uint8& graphi
 // ----------------------------------------------------------------------------
 
 
+void UGameStateStatics::SetCameraBlendables(UCameraComponent* camera, const TArray<UObject*>& blendables)
+{
+	camera->PostProcessSettings.Blendables = TArray<UObject*>(blendables);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::LoadAllVehicles()
 {
 	UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();

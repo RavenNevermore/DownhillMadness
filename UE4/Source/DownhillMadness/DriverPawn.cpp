@@ -151,6 +151,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 	FRotator deltaRotation = this->DriverAnchor->GetComponenTransform().Rotator() - this->driverOldRotation;
 
 	this->cameraAnchor = this->DriverAnchor->GetComponenTransform().GetLocation() + (this->cameraAnchor - this->DriverAnchor->GetComponenTransform().GetLocation()).RotateAngleAxis(deltaRotation.Yaw, FVector(0, 0, 1));
+	//this->cameraAnchor = this->DriverAnchor->GetComponentLocation() - this->DriverAnchor->GetForwardVector() * 275.0f + this->DriverCapsule->GetUpVector() * 225.0f;
 
 	FRotator rootRotation = this->DriverAnchor->GetComponenTransform().Rotator();
 
