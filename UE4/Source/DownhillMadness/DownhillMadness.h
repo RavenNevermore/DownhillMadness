@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Engine.h"
+#include "GameModeStartPosFinder.h"
 #include "DownhillMadnessGameMode.h"
 #include "DownhillMadnessPlayerController.h"
 #include "WorkshopHudBase.h"

@@ -21,4 +21,28 @@ class USavedGameData : public USaveGame
 
 	UPROPERTY()
 	uint32 ratatoskUnlocked: 1;
+
+	UPROPERTY()
+	bool bIsFullscreen;
+
+	UPROPERTY()
+	int32 windowWidth;
+
+	UPROPERTY()
+	int32 windowHeight;
+
+	UPROPERTY()
+	uint8 antiAliasingQuality;
+
+	UPROPERTY()
+	uint8 graphicsQuality;
+
+	UPROPERTY()
+	float musicVolume;
+
+	UPROPERTY()
+	float soundVolume;
+
+	UPROPERTY()
+	float voicesVolume;
 };

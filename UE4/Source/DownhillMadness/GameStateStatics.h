@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "Core.h"
 #include "Kismet/GameplayStatics.h"
 #include "VehicleSpawnerLibrary.h"
 #include "SavedVehicle.h"
@@ -47,6 +48,12 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void EndNoSplitscreenMultiplayer();
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics", meta = (HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static void StartWorkshopMultiplayer(UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void EndWorkshopMultiplayer();
+
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static float GetNearClipPlane();
 
@@ -80,9 +87,24 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static bool SaveSerializedVehicle(const FSerializedVehicle& vehicle, uint8 slotIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void SetViewportSettings(int32 NewSizeX, int32 NewSizeY, bool bIsFullscreen);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void GetViewportSettings(int32& SizeX, int32& SizeY, bool& bIsFullscreen);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void SetGameOptions(uint8 antiAliasingQuality, uint8 graphicsQuality, float musicVolume, float soundVolume, float voicesVolume);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void GetGameOptions(uint8& antiAliasingQuality, uint8& graphicsQuality, float& musicVolume, float& soundVolume, float& voicesVolume);
+
 	static uint8 numberOfPlayers;
 	static TArray<uint8> selectedCharacters;
 	static TArray<FSerializedVehicle> selectedVehicles;
+	static bool bIsFullscreen;
+	static int32 windowWidth;
+	static int32 windowHeight;
 
 private:
 	static bool reloadMenu;
@@ -90,6 +112,11 @@ private:
 	static TArray<float> trackRecords;
 	static TArray<bool> beatenRecords;
 	static bool ratatoskUnlocked;
+	static uint8 antiAliasingQuality;
+	static uint8 graphicsQuality;
+	static float musicVolume;
+	static float soundVolume;
+	static float voicesVolume;
 
 	static const uint8 maxVehicleSlots = 16;
 

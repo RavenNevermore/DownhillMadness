@@ -18,4 +18,8 @@ class UCustomGameViewportClient : public UGameViewportClient
 	/** Whether to use splitscreen or not */
 	UPROPERTY(Category = CustomGameViewportClient, EditInstanceOnly, BlueprintReadWrite)
 	uint32 bDontUseSplitscreen : 1;
+
+	/** Whether to force four panels */
+	UPROPERTY(Category = CustomGameViewportClient, EditInstanceOnly, BlueprintReadWrite)
+	uint32 bFourPanels : 1;
 };
