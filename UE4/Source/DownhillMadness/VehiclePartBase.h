@@ -33,4 +33,7 @@ class AVehiclePartBase : public AActor
 
 	UPROPERTY(Category = VehiclePart, BlueprintReadOnly, EditDefaultsOnly)
 	UClass* symmetricPart;
+
+	UPROPERTY(Category = VehiclePart, BlueprintReadOnly, EditDefaultsOnly)
+	UTexture* partThumbnail;
 };
