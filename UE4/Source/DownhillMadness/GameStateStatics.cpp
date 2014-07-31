@@ -550,6 +550,15 @@ void UGameStateStatics::SetCameraBlendables(UCameraComponent* camera, const TArr
 // ----------------------------------------------------------------------------
 
 
+UObject* UGameStateStatics::GetClassDefaultObject(UClass* inClass)
+{
+	return inClass->GetDefaultObject(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::LoadAllVehicles()
 {
 	UGameStateStatics::savedVehicles = TArray<FSerializedVehicle>();

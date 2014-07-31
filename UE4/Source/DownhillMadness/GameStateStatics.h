@@ -102,6 +102,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void SetCameraBlendables(UCameraComponent* camera, const TArray<UObject*>& blendables);
 
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static UObject* GetClassDefaultObject(UClass* inClass);
+
 	static uint8 numberOfPlayers;
 	static TArray<uint8> selectedCharacters;
 	static TArray<FSerializedVehicle> selectedVehicles;
