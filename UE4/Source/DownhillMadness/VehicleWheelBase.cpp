@@ -162,7 +162,7 @@ void AVehicleWheelBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AAct
 {
 	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
-	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
+	if (Hit.bBlockingHit/*OtherComp->GetCollisionObjectType() == ECC_WorldStatic*/)
 	{
 		this->isGrounded = true;
 		this->isGroundedInternal = true;
