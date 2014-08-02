@@ -83,6 +83,12 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 				GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 			}
 
+			ULocalPlayer* localPlayer = Cast<ULocalPlayer>(player);
+			if (localPlayer != nullptr)
+			{
+				localPlayer->ControllerId = UGameStateStatics::controllerIndexes[currentPlayer];
+			}
+
 			APlayerController* playerController = nullptr;
 
 			for (FConstPlayerControllerIterator iterator = world->GetPlayerControllerIterator(); iterator && playerController == nullptr; ++iterator)
@@ -142,6 +148,12 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 			{
 				player = GEngine->GameViewport->CreatePlayer(currentPlayer, outString, true);
 				GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+			}
+
+			ULocalPlayer* localPlayer = Cast<ULocalPlayer>(player);
+			if (localPlayer != nullptr)
+			{
+				localPlayer->ControllerId = UGameStateStatics::controllerIndexes[3];
 			}
 
 			APlayerController* playerController = nullptr;
