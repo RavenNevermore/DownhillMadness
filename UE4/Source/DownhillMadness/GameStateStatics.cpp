@@ -121,6 +121,15 @@ void UGameStateStatics::SetControllerIndexes(const TArray<uint8>& indexArray)
 // ----------------------------------------------------------------------------
 
 
+TArray<uint8> UGameStateStatics::GetControllerIndexes()
+{
+	return UGameStateStatics::controllerIndexes;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void UGameStateStatics::SetSelectedCharacter(uint8 playerIndex, uint8 selectedCharacter)
 {
 	if (playerIndex >= 0 && playerIndex < 4 && selectedCharacter >= 0 && selectedCharacter < 6)
@@ -323,10 +332,43 @@ FString UGameStateStatics::GetTrackRecordString(uint8 trackIndex)
 		int seconds = (int)(UGameStateStatics::trackRecords[trackIndex]) % (int)(60);
 		int thousands = (int)(UGameStateStatics::trackRecords[trackIndex] * 1000.0f) % (int)(1000);
 
-		return FString::FromInt(minutes) + FString(TEXT(":")) + FString::FromInt(seconds) + FString(TEXT(".")) + FString::FromInt(thousands);
+		FString outputString;
+		outputString = FString::FromInt(minutes) + FString(TEXT(":"));
+		if (seconds < 10)
+			outputString += FString(TEXT("0"));
+		outputString += FString::FromInt(seconds) + FString(TEXT("."));
+		if (thousands < 100)
+			outputString += FString(TEXT("0"));
+		if (thousands < 10)
+			outputString += FString(TEXT("0"));
+		outputString += FString::FromInt(thousands);
+		return outputString;
 	}
 
 	return FString(TEXT(""));
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+FString UGameStateStatics::TrackTimeToString(float trackTime)
+{
+	int minutes = (int)(trackTime) / (int)(60);
+	int seconds = (int)(trackTime) % (int)(60);
+	int thousands = (int)(trackTime * 1000.0f) % (int)(1000);
+
+	FString outputString;
+	outputString = FString::FromInt(minutes) + FString(TEXT(":"));
+	if (seconds < 10)
+		outputString += FString(TEXT("0"));
+	outputString += FString::FromInt(seconds) + FString(TEXT("."));
+	if (thousands < 100)
+		outputString += FString(TEXT("0"));
+	if (thousands < 10)
+		outputString += FString(TEXT("0"));
+	outputString += FString::FromInt(thousands);
+	return outputString;
 }
 
 

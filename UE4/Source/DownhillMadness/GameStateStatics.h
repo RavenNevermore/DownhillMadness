@@ -28,6 +28,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static void SetControllerIndexes(const TArray<uint8>& indexArray);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static TArray<uint8> GetControllerIndexes();
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void SetSelectedCharacter(uint8 playerIndex, uint8 selectedCharacter);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
@@ -68,6 +71,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static FString GetTrackRecordString(uint8 trackIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static FString TrackTimeToString(float trackTime);
 	
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static TArray<FSerializedVehicle> GetWorkshopVehicles();

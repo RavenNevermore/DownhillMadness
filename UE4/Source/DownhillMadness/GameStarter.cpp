@@ -15,6 +15,22 @@ AGameStarter::AGameStarter(const class FPostConstructInitializeProperties& PCIP)
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
+
+	this->rankingArray = TArray<uint8>();
+	this->rankingArray.Empty();
+	this->rankingArray.Add(0);
+	this->rankingArray.Add(1);
+	this->rankingArray.Add(2);
+	this->rankingArray.Add(3);
+
+	this->progressArray = TArray<float>();
+	this->progressArray.Empty();
+	this->progressArray.Add(0.0f);
+	this->progressArray.Add(0.0f);
+	this->progressArray.Add(0.0f);
+	this->progressArray.Add(0.0f);
+
+	this->currentRaceDuration = 0.0f;
 }
 
 
@@ -23,10 +39,27 @@ AGameStarter::AGameStarter(const class FPostConstructInitializeProperties& PCIP)
 
 void AGameStarter::Tick(float DeltaSeconds)
 {
+	if (this->timeRunning)
+	{
+		this->currentRaceDuration += DeltaSeconds;
+	}
+
+	if (this->startingRace)
+	{
+		this->startingRaceTime += DeltaSeconds;
+		if (this->startingRaceTime >= 3.0f)
+		{
+			this->RaceStarted();
+			this->timeRunning = true;
+		}
+	}
+
 	if (this->gameStarted)
 	{
 		this->StartGameInternal(this->numberOfPlayers, this->vehicles, this->drivers);
 		this->gameStarted = false;
+		this->startingRace = true;
+		this->startingRaceTime = 0.0f;
 	}
 }
 
@@ -50,6 +83,8 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 {
 	TActorIterator<ASpawnPoint> spawnPoints = TActorIterator<ASpawnPoint>(this->GetWorld());
 	uint8 currentPlayer = 0;
+	this->driverActors = TArray<ADriverPawn*>();
+	this->driverActors.Empty();
 
 	while (spawnPoints && currentPlayer < numberOfPlayers)
 	{
@@ -75,6 +110,8 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 
 		if (spawnedDriver != nullptr && currentPlayer >= 0 && currentPlayer < vehicles.Num())
 		{
+			this->driverActors.Add(spawnedDriver);
+
 			FString outString;
 			UPlayer* player = world->GetFirstLocalPlayerFromController();
 			if (currentPlayer > 0 && GEngine)

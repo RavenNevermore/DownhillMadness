@@ -40,11 +40,28 @@ class AGameStarter : public AActor
 	UFUNCTION(BlueprintCallable, Category = "Actors|GameStart|GameStarter")
 	void EndGame();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Actors|GameStart|GameStarter")
+	void RaceStarted();
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<uint8> rankingArray;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<float> progressArray;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleInstanceOnly)
+	float currentRaceDuration;
+
+	bool startingRace;
+	bool timeRunning;
+
 private:
 	bool gameStarted;
 	uint8 numberOfPlayers;
 	TArray<FSerializedVehicle> vehicles;
 	TArray<uint8> drivers;
+	TArray<ADriverPawn*> driverActors;
+	float startingRaceTime;
 
 	void StartGameInternal(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
 };
