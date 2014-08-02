@@ -25,6 +25,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static uint8 GetNumberOfPlayers();
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static void SetControllerIndexes(const TArray<uint8>& indexArray);
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static void SetSelectedCharacter(uint8 playerIndex, uint8 selectedCharacter);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
@@ -106,6 +109,7 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static UObject* GetClassDefaultObject(UClass* inClass);
 
 	static uint8 numberOfPlayers;
+	static TArray<uint8> controllerIndexes;
 	static TArray<uint8> selectedCharacters;
 	static TArray<FSerializedVehicle> selectedVehicles;
 	static bool bIsFullscreen;
