@@ -87,6 +87,7 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 			if (localPlayer != nullptr)
 			{
 				localPlayer->ControllerId = UGameStateStatics::controllerIndexes[currentPlayer];
+				spawnedDriver->controllerIndex = localPlayer->ControllerId;
 			}
 
 			APlayerController* playerController = nullptr;

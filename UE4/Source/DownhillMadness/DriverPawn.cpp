@@ -77,6 +77,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->maxLeaningImpulse = 10000.0f;
 	this->bRespawnRequested = false;
 	this->touchedGround = false;
+	this->controllerIndex = 0;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -107,6 +108,13 @@ void ADriverPawn::BeginPlay()
 	this->DriverCapsule->BodyInstance.UpdateMassProperties();
 
 	this->checkpointTransform = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform();
+
+	// Get HUD
+	APlayerController* playerController = Cast<APlayerController>(this->Controller);
+	if (playerController != nullptr)
+	{
+		playerController->ClientSetHUD(this->defaultHUDclass);
+	}
 }
 
 
@@ -116,7 +124,6 @@ void ADriverPawn::BeginPlay()
 void ADriverPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 
 	// Is car standing on ground?
 	bool onGround = false;
@@ -229,24 +236,75 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				AVehicleBodyBase* newVehicle = UVehicleSpawnerLibrary::SpawnVehicle(this, serializedVehicle, spawnLocation, spawnRotation);
 				ADriverPawn* newDriverPawn = (ADriverPawn*)(this->GetWorld()->SpawnActor(this->GetClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
 
-				if (this->teleportParticleSystem != nullptr)
+				switch (this->controllerIndex)
 				{
-					FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
-					FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
-					AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
-					newEmitter->SetTemplate(this->teleportParticleSystem);
-					newEmitter->bDestroyOnSystemFinish = true;
-					newEmitter->Activate();
-					newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
-					newEmitter->SetTemplate(this->teleportParticleSystem);
-					newEmitter->bDestroyOnSystemFinish = true;
-					newEmitter->Activate();
+				case 0:
+					if (this->teleportParticleSystemP1 != nullptr)
+					{
+						FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
+						FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
+						AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP1);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+						newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP1);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+					}
+					break;
+				case 1:
+					if (this->teleportParticleSystemP2 != nullptr)
+					{
+						FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
+						FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
+						AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP2);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+						newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP2);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+					}
+					break;
+				case 2:
+					if (this->teleportParticleSystemP3 != nullptr)
+					{
+						FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
+						FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
+						AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP3);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+						newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP3);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+					}
+					break;
+				case 3:
+					if (this->teleportParticleSystemP4 != nullptr)
+					{
+						FVector oldLocation = this->DriverCapsule->GetComponenTransform().GetLocation();
+						FRotator oldRotation = this->DriverCapsule->GetComponenTransform().GetRotation().Rotator();
+						AEmitter* newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &oldLocation, &oldRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP4);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+						newEmitter = (AEmitter*)(this->GetWorld()->SpawnActor(AEmitter::StaticClass(), &spawnLocation, &spawnRotation, FActorSpawnParameters()));
+						newEmitter->SetTemplate(this->teleportParticleSystemP4);
+						newEmitter->bDestroyOnSystemFinish = true;
+						newEmitter->Activate();
+					}
+					break;
 				}
 
 				if (newDriverPawn != nullptr && newVehicle != nullptr)
 				{
 					this->Controller->Possess(newDriverPawn);
 					newVehicle->EnablePhysics();
+					newDriverPawn->controllerIndex = this->controllerIndex;
 					newDriverPawn->SetVehicle(newVehicle);
 					newDriverPawn->StartRace();
 				}
