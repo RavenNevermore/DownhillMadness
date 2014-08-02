@@ -5,6 +5,7 @@
 
 
 uint8 UGameStateStatics::numberOfPlayers = 1;
+TArray<uint8> UGameStateStatics::controllerIndexes = TArray<uint8>();
 TArray<uint8> UGameStateStatics::selectedCharacters = TArray<uint8>();
 TArray<FSerializedVehicle> UGameStateStatics::selectedVehicles = TArray<FSerializedVehicle>();
 bool UGameStateStatics::reloadMenu = false;
@@ -29,6 +30,12 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 : Super(PCIP)
 {
 	UGameStateStatics::numberOfPlayers = 1;
+
+	UGameStateStatics::controllerIndexes = TArray<uint8>();
+	UGameStateStatics::controllerIndexes.Add(0);
+	UGameStateStatics::controllerIndexes.Add(1);
+	UGameStateStatics::controllerIndexes.Add(2);
+	UGameStateStatics::controllerIndexes.Add(3);
 
 	UGameStateStatics::selectedCharacters = TArray<uint8>();
 	UGameStateStatics::selectedCharacters.Add(0);
@@ -98,6 +105,16 @@ void UGameStateStatics::SetNumberOfPlayers(uint8 numberOfPlayers)
 uint8 UGameStateStatics::GetNumberOfPlayers()
 {
 	return UGameStateStatics::numberOfPlayers;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void UGameStateStatics::SetControllerIndexes(const TArray<uint8>& indexArray)
+{
+	if (indexArray.Num() == 4)
+		UGameStateStatics::controllerIndexes = indexArray;
 }
 
 
