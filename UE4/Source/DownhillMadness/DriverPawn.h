@@ -184,6 +184,8 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	bool unlockControls;
 
+	AActor* gameStarterInstance;
+
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()

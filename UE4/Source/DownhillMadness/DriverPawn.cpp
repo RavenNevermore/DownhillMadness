@@ -1,6 +1,7 @@
 
 
 #include "DownhillMadness.h"
+#include "GameStarter.h"
 #include "DriverPawn.h"
 
 
@@ -309,6 +310,20 @@ void ADriverPawn::Tick(float DeltaSeconds)
 					newDriverPawn->SetVehicle(newVehicle);
 					newDriverPawn->StartRace();
 					newDriverPawn->unlockControls = true;
+					newDriverPawn->gameStarterInstance = this->gameStarterInstance;
+					int32 oldIndex;
+					AGameStarter* asGameStarter = Cast<AGameStarter>(this->gameStarterInstance);
+					if (asGameStarter != nullptr)
+					{
+						if (asGameStarter->driverActors.Find(this, oldIndex))
+							asGameStarter->driverActors[oldIndex] = newDriverPawn;
+					}
+					APlayerController* asPlayerController = Cast<APlayerController>(this->Controller);
+					if (asPlayerController != nullptr)
+					{
+						asPlayerController->ClientSetHUD(AHUD::StaticClass());
+						asPlayerController->ClientSetHUD(this->defaultHUDclass);
+					}
 				}
 
 				this->GetWorld()->DestroyActor(this);

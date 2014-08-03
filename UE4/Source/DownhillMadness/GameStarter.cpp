@@ -118,6 +118,7 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 		if (spawnedDriver != nullptr && currentPlayer >= 0 && currentPlayer < vehicles.Num())
 		{
 			this->driverActors.Add(spawnedDriver);
+			spawnedDriver->gameStarterInstance = this;
 
 			FString outString;
 			UPlayer* player = world->GetFirstLocalPlayerFromController();

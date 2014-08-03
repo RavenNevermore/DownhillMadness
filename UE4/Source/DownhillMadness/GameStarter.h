@@ -54,13 +54,13 @@ class AGameStarter : public AActor
 
 	bool startingRace;
 	bool timeRunning;
+	TArray<ADriverPawn*> driverActors;
 
 private:
 	bool gameStarted;
 	uint8 numberOfPlayers;
 	TArray<FSerializedVehicle> vehicles;
 	TArray<uint8> drivers;
-	TArray<ADriverPawn*> driverActors;
 	float startingRaceTime;
 
 	void StartGameInternal(uint8 numberOfPlayers, const TArray<FSerializedVehicle>& vehicles, const TArray<uint8>& drivers);
