@@ -57,6 +57,7 @@ void AGameStarter::Tick(float DeltaSeconds)
 				currentDriver->unlockControls = true;
 			}
 			this->RaceStarted();
+			this->startingRace = false;
 			this->timeRunning = true;
 		}
 	}
