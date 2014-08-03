@@ -981,3 +981,14 @@ void AVehicleBodyBase::GetAudioProperties(bool& onGround, float& currentSpeed)
 	onGround = touchingGround;
 	currentSpeed = this->Body->BodyInstance.GetUnrealWorldVelocity().Size();
 }
+
+
+// ----------------------------------------------------------------------------
+
+
+void AVehicleBodyBase::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	this->VehicleHitSomething(MyComp, Other, OtherComp, NormalImpulse.Size(), Hit);
+}

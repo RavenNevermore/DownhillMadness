@@ -480,3 +480,14 @@ void ADriverPawn::StartRace()
 {
 	this->driverState = EDriverPawnState::JumpingIntoVehicle;
 }
+
+
+// ----------------------------------------------------------------------------
+
+
+void ADriverPawn::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	this->DriverHitSomething(MyComp, Other, OtherComp, NormalImpulse.Size(), Hit);
+}

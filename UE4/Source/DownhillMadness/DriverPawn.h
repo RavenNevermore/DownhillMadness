@@ -28,6 +28,7 @@ class ADriverPawn : public APawn
 	void BeginPlay() OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;
 	void SetupPlayerInputComponent(class UInputComponent* InputComponent) OVERRIDE;
+	void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) OVERRIDE;
 
 	/**
 	* @brief	Set vehicle to observe/control by this driver
@@ -83,6 +84,9 @@ class ADriverPawn : public APawn
 	*/
 	UFUNCTION()
 	void LeanPlayer(float leanX, float leanY);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|DriverPawn")
+	void DriverHitSomething(class UPrimitiveComponent* ownComponent, class AActor* otherActor, class UPrimitiveComponent* otherComponent, float hitImpulse, const FHitResult& Hit);
 
 	/** The vehicle controlled by this driver */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)

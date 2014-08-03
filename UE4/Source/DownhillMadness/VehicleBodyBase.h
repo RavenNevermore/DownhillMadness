@@ -50,6 +50,7 @@ class AVehicleBodyBase : public AVehiclePartBase
 	void ShowPart() OVERRIDE;
 	void SelectPart() OVERRIDE;
 	void DeselectPart() OVERRIDE;
+	void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) OVERRIDE;
 
 	void BeginPlay() OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;
@@ -227,6 +228,9 @@ class AVehicleBodyBase : public AVehiclePartBase
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	void GetAudioProperties(bool& onGround, float& currentSpeed);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|VehicleBody")
+	void VehicleHitSomething(class UPrimitiveComponent* ownComponent, class AActor* otherActor, class UPrimitiveComponent* otherComponent, float hitImpulse, const FHitResult& Hit);
 
 	/** Body's audio component */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
