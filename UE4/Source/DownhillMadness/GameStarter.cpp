@@ -54,6 +54,7 @@ void AGameStarter::Tick(float DeltaSeconds)
 				ADriverPawn* currentDriver = *driverIter;
 				//currentDriver->controlledVehicle->EnablePhysics();
 				//currentDriver->StartRace();
+				currentDriver->StartingRace();
 				currentDriver->unlockControls = true;
 			}
 			this->RaceStarted();

@@ -88,6 +88,12 @@ class ADriverPawn : public APawn
 	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|DriverPawn")
 	void DriverHitSomething(class UPrimitiveComponent* ownComponent, class AActor* otherActor, class UPrimitiveComponent* otherComponent, float hitImpulse, const FHitResult& Hit);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|DriverPawn")
+	void StartingRace();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|DriverPawn")
+	void FinishedRace(uint8 ranking, uint8 numberOfPlayers);
+
 	/** The vehicle controlled by this driver */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleAnywhere)
 	AVehicleBodyBase* controlledVehicle;
