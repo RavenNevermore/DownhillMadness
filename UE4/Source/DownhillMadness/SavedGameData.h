@@ -20,7 +20,10 @@ class USavedGameData : public USaveGame
 	TArray<bool> beatenRecords;
 
 	UPROPERTY()
-	uint32 ratatoskUnlocked: 1;
+	uint32 ratatoskUnlocked : 1;
+
+	UPROPERTY()
+	uint32 bifrostUnlocked : 1;
 
 	UPROPERTY()
 	bool bIsFullscreen;

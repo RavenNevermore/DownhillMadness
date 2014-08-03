@@ -14,6 +14,7 @@ USavedGameData::USavedGameData(const class FPostConstructInitializeProperties& P
 	this->beatenRecords.Empty();
 
 	this->ratatoskUnlocked = false;
+	this->bifrostUnlocked = false;
 
 	this->bIsFullscreen = false;
 	this->windowWidth = 1280;

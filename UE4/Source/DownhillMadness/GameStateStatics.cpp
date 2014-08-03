@@ -13,6 +13,7 @@ TArray<FSerializedVehicle> UGameStateStatics::savedVehicles = TArray<FSerialized
 TArray<float> UGameStateStatics::trackRecords = TArray<float>();
 TArray<bool> UGameStateStatics::beatenRecords = TArray<bool>();
 bool UGameStateStatics::ratatoskUnlocked = false;
+bool UGameStateStatics::bifrostUnlocked = false;
 bool UGameStateStatics::bIsFullscreen = false;
 int32 UGameStateStatics::windowWidth = 1280;
 int32 UGameStateStatics::windowHeight = 720;
@@ -69,9 +70,10 @@ UGameStateStatics::UGameStateStatics(const class FPostConstructInitializePropert
 	UGameStateStatics::beatenRecords.Add(false);
 	UGameStateStatics::beatenRecords.Add(false);
 	UGameStateStatics::beatenRecords.Add(false);
-	UGameStateStatics::beatenRecords.Add(false);
+	UGameStateStatics::beatenRecords.Add(true);
 
 	UGameStateStatics::ratatoskUnlocked = false;
+	UGameStateStatics::bifrostUnlocked = false;
 
 
 	UGameStateStatics::bIsFullscreen = false;
@@ -324,6 +326,15 @@ bool UGameStateStatics::GetRatatoskUnlocked()
 // ----------------------------------------------------------------------------
 
 
+bool UGameStateStatics::GetBifrostUnlocked()
+{
+	return UGameStateStatics::bifrostUnlocked;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 FString UGameStateStatics::GetTrackRecordString(uint8 trackIndex)
 {
 	if (trackIndex > 0 && trackIndex < UGameStateStatics::trackRecords.Num())
@@ -459,6 +470,7 @@ bool UGameStateStatics::SaveGameData()
 	if (createdSaveGame != nullptr)
 	{
 		createdSaveGame->ratatoskUnlocked = UGameStateStatics::ratatoskUnlocked;
+		createdSaveGame->bifrostUnlocked = UGameStateStatics::bifrostUnlocked;
 		createdSaveGame->trackRecords = TArray<float>(UGameStateStatics::trackRecords);
 		createdSaveGame->beatenRecords = TArray<bool>(UGameStateStatics::beatenRecords);
 		createdSaveGame->bIsFullscreen = UGameStateStatics::bIsFullscreen;
@@ -490,6 +502,9 @@ bool UGameStateStatics::SaveTrackRecord(uint8 trackIndex, float trackRecord)
 		}
 
 		if (!(UGameStateStatics::beatenRecords.Contains(false)))
+			UGameStateStatics::bifrostUnlocked = true;
+
+		if (trackIndex == 3 || UGameStateStatics::beatenRecords[3] == true)
 			UGameStateStatics::ratatoskUnlocked = true;
 	}
 
@@ -653,6 +668,7 @@ void UGameStateStatics::LoadSavedGame()
 		if (loadedSaveGame != nullptr)
 		{
 			UGameStateStatics::ratatoskUnlocked = loadedSaveGame->ratatoskUnlocked;
+			UGameStateStatics::bifrostUnlocked = loadedSaveGame->bifrostUnlocked;
 			UGameStateStatics::trackRecords = TArray<float>(loadedSaveGame->trackRecords);
 			UGameStateStatics::beatenRecords = TArray<bool>(loadedSaveGame->beatenRecords);
 			UGameStateStatics::bIsFullscreen = loadedSaveGame->bIsFullscreen;

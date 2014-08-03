@@ -70,6 +70,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static bool GetRatatoskUnlocked();
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
+	static bool GetBifrostUnlocked();
+
+	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static FString GetTrackRecordString(uint8 trackIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
@@ -128,6 +131,7 @@ private:
 	static TArray<float> trackRecords;
 	static TArray<bool> beatenRecords;
 	static bool ratatoskUnlocked;
+	static bool bifrostUnlocked;
 	static uint8 antiAliasingQuality;
 	static uint8 graphicsQuality;
 	static float musicVolume;
