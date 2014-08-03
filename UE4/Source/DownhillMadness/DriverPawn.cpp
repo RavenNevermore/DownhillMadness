@@ -93,7 +93,7 @@ void ADriverPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	this->cameraAnchor = this->DriverCapsule->GetComponentLocation() - this->DriverCapsule->GetForwardVector() * 200.0f + this->DriverCapsule->GetUpVector() * 300.0f;
+	this->cameraAnchor = this->DriverCapsule->GetComponentLocation() - this->DriverCapsule->GetForwardVector() * 260.0f + this->DriverCapsule->GetUpVector() * 150.0f;
 	this->driverOldRotation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().Rotator();
 	this->driverOldLocation = this->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation();
 
