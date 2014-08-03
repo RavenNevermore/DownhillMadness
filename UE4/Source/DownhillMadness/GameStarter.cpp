@@ -47,8 +47,13 @@ void AGameStarter::Tick(float DeltaSeconds)
 	if (this->startingRace)
 	{
 		this->startingRaceTime += DeltaSeconds;
-		if (this->startingRaceTime >= 3.0f)
+		if (this->startingRaceTime >= 5.0f)
 		{
+			for (TArray<ADriverPawn*>::TIterator driverIter(this->driverActors); driverIter; ++driverIter)
+			{
+				ADriverPawn* currentDriver = *driverIter;
+				currentDriver->controlledVehicle->EnablePhysics();
+			}
 			this->RaceStarted();
 			this->timeRunning = true;
 		}
@@ -149,7 +154,9 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 
 			if (spawnedVehicle != nullptr)
 			{
-				spawnedVehicle->EnablePhysics();
+				//spawnedVehicle->EnablePhysics();
+				//FVector newPos = spawnedVehicle->GetActorLocation() + FVector(0, 0, -500);
+				//spawnedVehicle->SetActorLocation(newPos, true);
 				spawnedDriver->SetVehicle(spawnedVehicle);
 				spawnedDriver->StartRace();
 			}
