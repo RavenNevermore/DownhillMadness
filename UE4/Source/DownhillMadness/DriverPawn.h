@@ -176,6 +176,10 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	FTransform checkpointTransform;
 
+	/* Unlock player's controls */
+	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
+	bool unlockControls;
+
 private:
 	/** Old X axis input for leaning */
 	UPROPERTY()

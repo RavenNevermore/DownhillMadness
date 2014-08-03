@@ -78,6 +78,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->bRespawnRequested = false;
 	this->touchedGround = false;
 	this->controllerIndex = 0;
+	this->unlockControls = false;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -307,6 +308,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 					newDriverPawn->controllerIndex = this->controllerIndex;
 					newDriverPawn->SetVehicle(newVehicle);
 					newDriverPawn->StartRace();
+					newDriverPawn->unlockControls = true;
 				}
 
 				this->GetWorld()->DestroyActor(this);
@@ -351,6 +353,9 @@ void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 void ADriverPawn::OnGetSteeringInput(float axisInput)
 {
+	if (!(this->unlockControls))
+		return;
+
 	this->steeringAxisInput = axisInput;
 }
 
@@ -360,6 +365,9 @@ void ADriverPawn::OnGetSteeringInput(float axisInput)
 
 void ADriverPawn::OnGetBrakeInput(float axisInput)
 {
+	if (!(this->unlockControls))
+		return;
+
 	this->brakeAxisInput = axisInput;
 }
 
@@ -368,7 +376,10 @@ void ADriverPawn::OnGetBrakeInput(float axisInput)
 
 
 void ADriverPawn::OnRespawnRequested()
-{	
+{
+	if (!(this->unlockControls))
+		return;
+
 	if (this->controlledVehicle != nullptr)
 	{
 		this->bRespawnRequested = true;
@@ -381,6 +392,9 @@ void ADriverPawn::OnRespawnRequested()
 
 void ADriverPawn::OnGetLeanX(float axisInput)
 {
+	if (!(this->unlockControls))
+		return;
+
 	this->leaningXInput = axisInput;
 }
 
@@ -390,6 +404,9 @@ void ADriverPawn::OnGetLeanX(float axisInput)
 
 void ADriverPawn::OnGetLeanY(float axisInput)
 {
+	if (!(this->unlockControls))
+		return;
+
 	this->leaningYInput = axisInput;
 }
 
