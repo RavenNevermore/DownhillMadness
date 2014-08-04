@@ -48,6 +48,7 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 
 	this->attachedSteering = nullptr;
 	this->attachedBrake = nullptr;
+	this->isGrounded = false;
 
 	this->PrimaryActorTick.bCanEverTick = true;
 	this->SetActorTickEnabled(true);
@@ -186,6 +187,7 @@ void AVehicleBodyBase::BeginPlay()
 	Super::BeginPlay();
 
 	this->regularMaterial = this->Body->GetMaterial(0);
+	this->isGrounded = false;
 }
 
 
@@ -233,6 +235,23 @@ void AVehicleBodyBase::SetTransparent(bool bMakeTransparent)
 // ----------------------------------------------------------------------------
 
 
+void AVehicleBodyBase::BrakeBody(float brakeValue)
+{
+	this->currentBrake = brakeValue;
+
+	if (this->isGrounded)
+	{
+		FVector negativeVelocity = -(brakeValue * this->Body->BodyInstance.GetUnrealWorldVelocity());
+		FVector downVelocity = -(this->groundNormal * negativeVelocity.Size());
+		this->Body->AddImpulse(negativeVelocity, NAME_None, true);
+		this->Body->AddImpulse(downVelocity, NAME_None, true);
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 {
 	float steeringDegree = 0.0f;
@@ -250,17 +269,25 @@ void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 		else
 			currentWheel->WheelConstraint->UpdateWheel(currentWheel->GetRigidBody(), currentWheel->PhysicsConstraint, currentWheel->relativeWheelTransform, 0.0f);
 
-		if (currentWheel->bHasBrake)
-		{
-			float brakeValue = 0.0f;
-			if (this->attachedBrake != nullptr)
-			{
-				brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds, currentWheel->currentBrake);
-			}
-			currentWheel->currentBrake = brakeValue;
-			currentWheel->BrakeWheel(brakeValue);
-		}
+		//if (currentWheel->bHasBrake)
+		//{
+		//	float brakeValue = 0.0f;
+		//	if (this->attachedBrake != nullptr)
+		//	{
+		//		brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds, currentWheel->currentBrake);
+		//	}
+		//	currentWheel->currentBrake = brakeValue;
+		//	currentWheel->BrakeWheel(brakeValue);
+		//}
 	}
+
+	float brakeValue = 0.0f;
+	if (this->attachedBrake != nullptr)
+	{
+		brakeValue = this->attachedBrake->UpdateBrake(DeltaSeconds, this->currentBrake);
+	}
+	this->currentBrake = brakeValue;
+	this->BrakeBody(brakeValue);
 }
 
 
@@ -968,17 +995,18 @@ void AVehicleBodyBase::DestroyVehicle()
 
 void AVehicleBodyBase::GetAudioProperties(bool& onGround, float& currentSpeed)
 {
-	bool touchingGround = false;
-	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter && !touchingGround; ++wheelIter)
-	{
-		AVehicleWheelBase* currentWheel = *wheelIter;
-		if (currentWheel->isGrounded)
-		{
-			touchingGround = true;
-		}
-	}
+	//bool touchingGround = false;
+	//for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->attachedWheels); wheelIter && !touchingGround; ++wheelIter)
+	//{
+	//	AVehicleWheelBase* currentWheel = *wheelIter;
+	//	if (currentWheel->isGrounded)
+	//	{
+	//		touchingGround = true;
+	//	}
+	//}
 
-	onGround = touchingGround;
+	//onGround = touchingGround;
+	onGround = this->isGrounded;
 	currentSpeed = this->Body->BodyInstance.GetUnrealWorldVelocity().Size();
 }
 

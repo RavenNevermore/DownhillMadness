@@ -129,6 +129,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	// Is car standing on ground?
 	bool onGround = false;
+	FVector groundNormal = FVector::ZeroVector;
 
 	TArray<FHitResult> hitResults;
 
@@ -148,6 +149,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 		if (currentHitResult.Component.Get()->GetCollisionObjectType() == ECollisionChannel::ECC_WorldStatic)
 		{
 			onGround = true;
+			groundNormal = currentHitResult.ImpactNormal;
 			this->touchedGround = true;
 			break;
 		}
@@ -190,6 +192,9 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	if (this->controlledVehicle != nullptr)
 	{
+		this->controlledVehicle->isGrounded = onGround;
+		this->controlledVehicle->groundNormal = groundNormal;
+
 		// Character is mounting car?
 		if (this->driverState == EDriverPawnState::JumpingIntoVehicle)
 		{

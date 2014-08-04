@@ -272,6 +272,13 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, EditDefaultsOnly)
 	UMaterialInterface* transparentMaterial;
 
+	UFUNCTION(Category = "Physics|CustomVehicle|VehicleBody")
+	void BrakeBody(float brakeValue);
+
+	bool isGrounded;
+	float currentBrake;
+	FVector groundNormal;
+
 private:
 	/**
 	* @brief	Align a vehicle part to vehicle's bounding box and check if it can be attached
