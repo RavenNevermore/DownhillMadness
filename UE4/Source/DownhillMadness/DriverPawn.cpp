@@ -75,7 +75,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->leaningXInputOld = 0.0f;
 	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
-	this->maxLeaningImpulse = 5.0f;
+	this->maxLeaningImpulse = 7.5f;
 	this->bRespawnRequested = false;
 	this->touchedGround = false;
 	this->controllerIndex = 0;
@@ -133,25 +133,28 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation();
-	FVector rayEnd = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation() - (this->DriverAnchor->GetComponenTransform().GetUnitAxis(EAxis::Z) * 30.0f);
-	
-	FCollisionQueryParams queryParams(false);
-	queryParams.bFindInitialOverlaps = true;
-
-	FCollisionObjectQueryParams objectQueryParams(ECollisionChannel::ECC_WorldStatic);
-
-	this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, queryParams, objectQueryParams);
-
-	for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter && !onGround; ++hitResultIter)
+	if (this->controlledVehicle != nullptr)
 	{
-		FHitResult currentHitResult = *hitResultIter;
-		if (currentHitResult.Component.Get()->GetCollisionObjectType() == ECollisionChannel::ECC_WorldStatic)
+		FVector rayStart = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation();
+		FVector rayEnd = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation() - (this->DriverAnchor->GetComponenTransform().GetUnitAxis(EAxis::Z) * 30.0f);
+
+		FCollisionQueryParams queryParams(false);
+		queryParams.bFindInitialOverlaps = true;
+
+		FCollisionObjectQueryParams objectQueryParams(ECollisionChannel::ECC_WorldStatic);
+
+		this->GetWorld()->LineTraceMulti(hitResults, rayStart, rayEnd, queryParams, objectQueryParams);
+
+		for (TArray<FHitResult>::TIterator hitResultIter(hitResults); hitResultIter && !onGround; ++hitResultIter)
 		{
-			onGround = true;
-			groundNormal = currentHitResult.ImpactNormal;
-			this->touchedGround = true;
-			break;
+			FHitResult currentHitResult = *hitResultIter;
+			if (currentHitResult.Component.Get()->GetCollisionObjectType() == ECollisionChannel::ECC_WorldStatic)
+			{
+				onGround = true;
+				groundNormal = currentHitResult.ImpactNormal;
+				this->touchedGround = true;
+				break;
+			}
 		}
 	}
 

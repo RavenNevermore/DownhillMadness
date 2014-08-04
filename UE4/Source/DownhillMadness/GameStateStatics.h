@@ -117,6 +117,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "GameStateStatics")
 	static UObject* GetClassDefaultObject(UClass* inClass);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameStateStatics")
+	static APlayerController* GetPlayerControllerFromID(int32 id);
+
 	static uint8 numberOfPlayers;
 	static TArray<uint8> controllerIndexes;
 	static TArray<uint8> selectedCharacters;

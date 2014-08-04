@@ -24,4 +24,6 @@
 #include "SavedGameData.h"
 #include "DriverSpectatorPawn.h"
 #include "CustomGameViewportClient.h"
+#include "TrackSplineComponent.h"
+#include "TrackSplineNode.h"
 #include "GameStarter.h"

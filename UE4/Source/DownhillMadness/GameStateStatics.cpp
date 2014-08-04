@@ -206,13 +206,13 @@ void UGameStateStatics::StartNoSplitscreenMultiplayer(UObject* WorldContextObjec
 		FString outString;
 
 		UPlayer* player = GEngine->GameViewport->CreatePlayer(1, outString, true);
-		GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+		//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 
 		player = GEngine->GameViewport->CreatePlayer(2, outString, true);
-		GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+		//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 
 		player = GEngine->GameViewport->CreatePlayer(3, outString, true);
-		GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+		//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 	}
 }
 
@@ -229,9 +229,8 @@ void UGameStateStatics::EndNoSplitscreenMultiplayer()
 		if (customGameViewportClient != nullptr)
 			customGameViewportClient->bDontUseSplitscreen = false;
 
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+		while (GEngine->GetGamePlayers(GEngine->GameViewport).Num() > 1)
+			GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
 
 		if (customGameViewportClient != nullptr)
 			customGameViewportClient->UpdateActiveSplitscreenType();
@@ -260,7 +259,7 @@ void UGameStateStatics::StartWorkshopMultiplayer(UObject* WorldContextObject)
 		for (int i = 1; i < UGameStateStatics::numberOfPlayers; i++)
 		{
 			UPlayer* player = GEngine->GameViewport->CreatePlayer(i, outString, true);
-			GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+			//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 		}
 	}
 }
@@ -281,9 +280,8 @@ void UGameStateStatics::EndWorkshopMultiplayer()
 			customGameViewportClient->bFourPanels = false;
 		}
 
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+		while (GEngine->GetGamePlayers(GEngine->GameViewport).Num() > 1)
+			GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
 
 		if (customGameViewportClient != nullptr)
 			customGameViewportClient->UpdateActiveSplitscreenType();
@@ -627,6 +625,24 @@ void UGameStateStatics::SetCameraBlendables(UCameraComponent* camera, const TArr
 UObject* UGameStateStatics::GetClassDefaultObject(UClass* inClass)
 {
 	return inClass->GetDefaultObject(true);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+APlayerController* UGameStateStatics::GetPlayerControllerFromID(int32 inID)
+{
+	if (GEngine)
+	{
+		ULocalPlayer* foundPlayer = GEngine->GetLocalPlayerFromControllerId(GEngine->GameViewport, inID);
+		if (foundPlayer != nullptr)
+		{
+			return foundPlayer->PlayerController;
+		}
+	}
+
+	return nullptr;
 }
 
 
