@@ -23,6 +23,9 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 	this->Body->bGenerateOverlapEvents = true;
 	this->Body->AttachTo(this->FrontArrow);
 
+	this->RaycastPivot = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("RaycastPivot")));
+	this->RaycastPivot->AttachTo(this->Body);
+
 	this->ComplexBody = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("ComplexBody")));
 	this->ComplexBody->SetVisibility(false);
 	this->ComplexBody->SetHiddenInGame(true);
@@ -288,6 +291,9 @@ void AVehicleBodyBase::UpdateControls(float DeltaSeconds)
 	}
 	this->currentBrake = brakeValue;
 	this->BrakeBody(brakeValue);
+
+	if (!(this->isGrounded))
+		this->currentBrake = 0.0f;
 }
 
 

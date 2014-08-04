@@ -75,7 +75,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->leaningXInputOld = 0.0f;
 	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
-	this->maxLeaningImpulse = 20.0f;
+	this->maxLeaningImpulse = 5.0f;
 	this->bRespawnRequested = false;
 	this->touchedGround = false;
 	this->controllerIndex = 0;
@@ -133,8 +133,8 @@ void ADriverPawn::Tick(float DeltaSeconds)
 
 	TArray<FHitResult> hitResults;
 
-	FVector rayStart = this->DriverAnchor->GetComponenTransform().GetLocation();
-	FVector rayEnd = this->DriverAnchor->GetComponenTransform().GetLocation() - (this->DriverAnchor->GetComponenTransform().GetUnitAxis(EAxis::Z) * 75.0f);
+	FVector rayStart = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation();
+	FVector rayEnd = this->controlledVehicle->RaycastPivot->GetComponenTransform().GetLocation() - (this->DriverAnchor->GetComponenTransform().GetUnitAxis(EAxis::Z) * 30.0f);
 	
 	FCollisionQueryParams queryParams(false);
 	queryParams.bFindInitialOverlaps = true;
