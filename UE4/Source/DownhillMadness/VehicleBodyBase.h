@@ -236,6 +236,9 @@ class AVehicleBodyBase : public AVehiclePartBase
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UAudioComponent> AudioComponent;
 
+	UPROPERTY(Category = VehicleWheel, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> RaycastPivot;
+
 	/** Body's mesh */
 	UPROPERTY(Category = VehicleBody, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UStaticMeshComponent> Body;
