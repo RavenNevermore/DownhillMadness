@@ -75,7 +75,7 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->leaningXInputOld = 0.0f;
 	this->leaningYInputOld = 0.0f;
 	this->cameraStiffness = 60.0f;
-	this->maxLeaningImpulse = 500.0f;
+	this->maxLeaningImpulse = 20.0f;
 	this->bRespawnRequested = false;
 	this->touchedGround = false;
 	this->controllerIndex = 0;
@@ -343,7 +343,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				leaningVector.Normalize();
 				//this->DriverCapsule->BodyInstance.AddImpulseAtPosition(FVector(0.0, 0.0, -1.0) * this->maxLeaningImpulse * leaningVector.Size() * FMath::Max(0.0f, capsuleHalfWorld.Z), capsuleTop);
 				FVector forceVector = (leaningVector.X * this->DriverCapsule->GetRightVector()) + (-leaningVector.Y * this->DriverCapsule->GetForwardVector());
-				this->DriverCapsule->BodyInstance.AddImpulseAtPosition(forceVector * this->maxLeaningImpulse, capsuleTop);
+				this->DriverCapsule->BodyInstance.AddImpulseAtPosition(forceVector * this->maxLeaningImpulse * this->controlledVehicle->Body->GetMass(), capsuleTop);
 			}
 		}
 	}

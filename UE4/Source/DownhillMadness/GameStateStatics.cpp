@@ -337,7 +337,7 @@ bool UGameStateStatics::GetBifrostUnlocked()
 
 FString UGameStateStatics::GetTrackRecordString(uint8 trackIndex)
 {
-	if (trackIndex > 0 && trackIndex < UGameStateStatics::trackRecords.Num())
+	if (trackIndex >= 0 && trackIndex < UGameStateStatics::trackRecords.Num())
 	{
 		int minutes = (int)(UGameStateStatics::trackRecords[trackIndex]) / (int)(60);
 		int seconds = (int)(UGameStateStatics::trackRecords[trackIndex]) % (int)(60);
