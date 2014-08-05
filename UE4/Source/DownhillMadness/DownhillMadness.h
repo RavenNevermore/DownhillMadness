@@ -26,4 +26,7 @@
 #include "CustomGameViewportClient.h"
 #include "TrackSplineComponent.h"
 #include "TrackSplineNode.h"
+#include "HappyActor.h"
+#include "ResultsPawn.h"
+#include "GoalPodest.h"
 #include "GameStarter.h"

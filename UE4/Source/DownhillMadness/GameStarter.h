@@ -9,6 +9,8 @@
 #include "CustomGameViewportClient.h"
 #include "GameStateStatics.h"
 #include "TrackSplineComponent.h"
+#include "GoalPodest.h"
+#include "ResultsPawn.h"
 #include "GameStarter.generated.h"
 
 /**
@@ -58,6 +60,9 @@ class AGameStarter : public AActor
 
 	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
 	ATrackSplineComponent* playerTracker;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
+	AGoalPodest* playersGoalPodest;
 
 	bool startingRace;
 	bool timeRunning;

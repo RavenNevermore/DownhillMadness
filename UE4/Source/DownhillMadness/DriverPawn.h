@@ -174,6 +174,9 @@ class ADriverPawn : public APawn
 	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
 	UParticleSystem* teleportParticleSystemP4;
 
+	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
+	UClass* happyActorClass;
+
 	/** Driver requested respawn */
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	uint8 controllerIndex;
