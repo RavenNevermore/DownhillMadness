@@ -7,6 +7,10 @@
 AHappyActor::AHappyActor(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	this->FrontArrow = PCIP.CreateDefaultSubobject<UArrowComponent>(this, FName(TEXT("FrontArrow")));
+	this->FrontArrow->bAbsoluteScale = true;
+	this->RootComponent = this->FrontArrow;
+
 	this->DriverSkeletalMesh = PCIP.CreateDefaultSubobject<USkeletalMeshComponent>(this, FName(TEXT("DriverSkeletalMesh")));
 	this->DriverSkeletalMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
 	this->DriverSkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -15,7 +19,7 @@ AHappyActor::AHappyActor(const class FPostConstructInitializeProperties& PCIP)
 	this->DriverSkeletalMesh->bAbsoluteScale = true;
 	this->DriverSkeletalMesh->SetSimulatePhysics(false);
 	this->DriverSkeletalMesh->SetEnableGravity(false);
-	this->RootComponent = this->DriverSkeletalMesh;
+	this->DriverSkeletalMesh->AttachTo(this->FrontArrow);
 
 	this->PlayerMaterialBillboard = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("PlayerMaterialBillboard")));
 	this->PlayerMaterialBillboard->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
@@ -26,7 +30,7 @@ AHappyActor::AHappyActor(const class FPostConstructInitializeProperties& PCIP)
 	this->PlayerMaterialBillboard->bAbsoluteRotation = true;
 	this->PlayerMaterialBillboard->SetSimulatePhysics(false);
 	this->PlayerMaterialBillboard->SetEnableGravity(false);
-	this->PlayerMaterialBillboard->AttachTo(this->DriverSkeletalMesh);
+	this->PlayerMaterialBillboard->AttachTo(this->FrontArrow);
 }
 
 
