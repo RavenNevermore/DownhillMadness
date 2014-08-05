@@ -64,6 +64,27 @@ class AGameStarter : public AActor
 	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
 	AGoalPodest* playersGoalPodest;
 
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditDefaultsOnly)
+	UMaterial* playerOneMaterial;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditDefaultsOnly)
+	UMaterial* playerTwoMaterial;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditDefaultsOnly)
+	UMaterial* playerThreeMaterial;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditDefaultsOnly)
+	UMaterial* playerFourMaterial;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditDefaultsOnly)
+	UClass* resultsHUDclass;
+
+	//UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditInstanceOnly)
+	TArray<TKeyValuePair<float, uint8>> finishedPlayers;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadOnly, EditInstanceOnly)
+	bool raceOver;
+
 	bool startingRace;
 	bool timeRunning;
 	TArray<ADriverPawn*> driverActors;

@@ -122,6 +122,9 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UStaticMeshComponent> PlayerMaterialBillboard;
+
 	/** Camera's rigid body */
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class USphereComponent> CameraSphere;
@@ -193,6 +196,7 @@ class ADriverPawn : public APawn
 	UPROPERTY(Category = DriverPawn, EditInstanceOnly, BlueprintReadWrite)
 	bool unlockControls;
 
+	float calculatedMass;
 	AActor* gameStarterInstance;
 
 private:

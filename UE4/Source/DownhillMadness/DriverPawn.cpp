@@ -24,6 +24,18 @@ ADriverPawn::ADriverPawn(const class FPostConstructInitializeProperties& PCIP)
 
 	this->DriverAnchor = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("DriverAnchor")));
 	this->DriverAnchor->AttachTo(this->FrontArrow);
+	
+	this->PlayerMaterialBillboard = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, FName(TEXT("PlayerMaterialBillboard")));
+	this->PlayerMaterialBillboard->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->PlayerMaterialBillboard->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->PlayerMaterialBillboard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	this->PlayerMaterialBillboard->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->PlayerMaterialBillboard->bAbsoluteScale = true;
+	this->PlayerMaterialBillboard->bAbsoluteRotation = true;
+	this->PlayerMaterialBillboard->SetSimulatePhysics(false);
+	this->PlayerMaterialBillboard->SetEnableGravity(false);
+	this->PlayerMaterialBillboard->SetOwnerNoSee(true);
+	this->PlayerMaterialBillboard->AttachTo(this->DriverAnchor);
 
 	this->DriverSkeletalMesh = PCIP.CreateDefaultSubobject<USkeletalMeshComponent>(this, FName(TEXT("DriverSkeletalMesh")));
 	this->DriverSkeletalMesh->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
@@ -319,6 +331,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 					newDriverPawn->StartRace();
 					newDriverPawn->unlockControls = true;
 					newDriverPawn->gameStarterInstance = this->gameStarterInstance;
+					newDriverPawn->PlayerMaterialBillboard->SetMaterial(0, this->PlayerMaterialBillboard->GetMaterial(0));
 					int32 oldIndex;
 					AGameStarter* asGameStarter = Cast<AGameStarter>(this->gameStarterInstance);
 					if (asGameStarter != nullptr)
@@ -351,7 +364,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				leaningVector.Normalize();
 				//this->DriverCapsule->BodyInstance.AddImpulseAtPosition(FVector(0.0, 0.0, -1.0) * this->maxLeaningImpulse * leaningVector.Size() * FMath::Max(0.0f, capsuleHalfWorld.Z), capsuleTop);
 				FVector forceVector = (leaningVector.X * this->DriverCapsule->GetRightVector()) + (-leaningVector.Y * this->DriverCapsule->GetForwardVector());
-				this->DriverCapsule->BodyInstance.AddImpulseAtPosition(forceVector * this->maxLeaningImpulse * this->controlledVehicle->Body->GetMass(), capsuleTop);
+				this->DriverCapsule->BodyInstance.AddImpulseAtPosition(forceVector * this->maxLeaningImpulse * this->calculatedMass, capsuleTop);
 			}
 		}
 	}
@@ -504,6 +517,20 @@ void ADriverPawn::SetVehicle(AVehicleBodyBase* vehicle)
 void ADriverPawn::StartRace()
 {
 	this->driverState = EDriverPawnState::JumpingIntoVehicle;
+
+	this->calculatedMass = this->controlledVehicle->Body->GetMass();
+
+	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(this->controlledVehicle->attachedWheels); wheelIter; ++wheelIter)
+	{
+		AVehicleWheelBase* currentWheel = *wheelIter;
+		this->calculatedMass += currentWheel->GetRigidBody()->GetMass();
+	}
+
+	for (TArray<AVehicleWeightBase*>::TIterator weightIter(this->controlledVehicle->attachedWeights); weightIter; ++weightIter)
+	{
+		AVehicleWeightBase* currentWeight = *weightIter;
+		this->calculatedMass += currentWeight->WeightMesh->GetMass();
+	}
 }
 
 

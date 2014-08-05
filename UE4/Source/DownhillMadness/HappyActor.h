@@ -14,5 +14,8 @@ class AHappyActor : public AActor
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
-	TSubobjectPtr<class USkeletalMeshComponent> DriverSkeletalMesh;	
+	TSubobjectPtr<class USkeletalMeshComponent> DriverSkeletalMesh;
+
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class UStaticMeshComponent> PlayerMaterialBillboard;
 };

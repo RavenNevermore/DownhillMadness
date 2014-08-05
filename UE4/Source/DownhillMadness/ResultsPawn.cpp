@@ -11,10 +11,18 @@ AResultsPawn::AResultsPawn(const class FPostConstructInitializeProperties& PCIP)
 	this->FrontArrow->bAbsoluteScale = true;
 	this->RootComponent = this->FrontArrow;
 
+	this->CameraSocket = PCIP.CreateDefaultSubobject<USceneComponent>(this, FName(TEXT("CameraSocket")));
+	this->CameraSocket->AttachTo(this->FrontArrow);
+
 	this->RotatingCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, FName(TEXT("RotatingCamera")));
 	this->RotatingCamera->bUseControllerViewRotation = false;
-	this->RotatingCamera->AttachTo(this->FrontArrow);
 	this->RotatingCamera->RelativeRotation.Yaw = 180.0f;
+	this->RotatingCamera->RelativeRotation.Pitch = -15.0f;
+	this->RotatingCamera->RelativeLocation.X = 600.0f;
+	this->RotatingCamera->AttachTo(this->CameraSocket);
+
+	this->PrimaryActorTick.bCanEverTick = true;
+	this->SetActorTickEnabled(true);
 }
 
 
@@ -24,12 +32,6 @@ AResultsPawn::AResultsPawn(const class FPostConstructInitializeProperties& PCIP)
 void AResultsPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
-	APlayerController* playerController = Cast<APlayerController>(this->Controller);
-	if (playerController != nullptr)
-	{
-		playerController->ClientSetHUD(this->defaultHUDclass);
-	}
 }
 
 
@@ -40,7 +42,7 @@ void AResultsPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	this->RotatingCamera->RelativeRotation.Yaw += DeltaSeconds * 90.0f;
+	this->CameraSocket->RelativeRotation.Yaw += (DeltaSeconds * 45.0f);
 }
 
 

@@ -20,8 +20,11 @@ class AResultsPawn : public APawn
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
 	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	TSubobjectPtr<class USceneComponent> CameraSocket;
+
+	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UCameraComponent> RotatingCamera;
 
-	UPROPERTY(EditDefaultsOnly, Category = DriverPawn, BlueprintReadOnly)
-	UClass* defaultHUDclass;
+	float playerTime;
+	uint8 ranking;
 };

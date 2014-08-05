@@ -39,32 +39,124 @@ AGameStarter::AGameStarter(const class FPostConstructInitializeProperties& PCIP)
 
 void AGameStarter::Tick(float DeltaSeconds)
 {
-	if (this->timeRunning || this->startingRace)
+	if ((this->timeRunning || this->startingRace) && !(this->raceOver))
 	{
 		for (TArray<ADriverPawn*>::TIterator driverIter(this->driverActors); driverIter; ++driverIter)
 		{
 			ADriverPawn* currentDriver = *driverIter;
 
-			if (this->playerTracker != nullptr)
+			if (currentDriver != nullptr && this->playerTracker != nullptr)
 			{
 				this->progressArray[currentDriver->controllerIndex] = this->playerTracker->RelativeSplinePosition(currentDriver->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation());
+				if (this->progressArray[currentDriver->controllerIndex] >= 1.0f)
+				{
+					FVector spawnPos = FVector::ZeroVector;
+					FRotator spawnRotation = FRotator::ZeroRotator;
+					if (this->playersGoalPodest != nullptr)
+					{
+						spawnPos = this->playersGoalPodest->GetActorLocation();
+						spawnRotation = this->playersGoalPodest->GetActorRotation();
+					}
+					AResultsPawn* resultsPawn = (AResultsPawn*)(this->GetWorld()->SpawnActor(AResultsPawn::StaticClass(), &spawnPos, &spawnRotation, FActorSpawnParameters()));
+					resultsPawn->ranking = this->finishedPlayers.Num();
+					resultsPawn->playerTime = this->currentRaceDuration;
+					currentDriver->Controller->Possess(resultsPawn);
+
+					APlayerController* playerController = Cast<APlayerController>(resultsPawn->Controller);
+					if (playerController != nullptr)
+					{
+						playerController->ClientSetHUD(this->resultsHUDclass);
+					}
+
+					switch (this->finishedPlayers.Num())
+					{
+					case 0:
+						spawnPos = this->playersGoalPodest->SocketFirst->GetComponentLocation();
+						spawnRotation = this->playersGoalPodest->SocketFirst->GetComponentRotation();
+						break;
+					case 1:
+						spawnPos = this->playersGoalPodest->SocketSecond->GetComponentLocation();
+						spawnRotation = this->playersGoalPodest->SocketSecond->GetComponentRotation();
+						break;
+					case 2:
+						spawnPos = this->playersGoalPodest->SocketThird->GetComponentLocation();
+						spawnRotation = this->playersGoalPodest->SocketThird->GetComponentRotation();
+						break;
+					case 3:
+						spawnPos = this->playersGoalPodest->SocketFourth->GetComponentLocation();
+						spawnRotation = this->playersGoalPodest->SocketFourth->GetComponentRotation();
+						break;
+					}
+					AHappyActor* happyActor = (AHappyActor*)(this->GetWorld()->SpawnActor(currentDriver->happyActorClass, &spawnPos, &spawnRotation, FActorSpawnParameters()));
+
+					switch (this->finishedPlayers.Num())
+					{
+					case 0:
+						happyActor->PlayerMaterialBillboard->SetMaterial(0, this->playerOneMaterial);
+						break;
+					case 1:
+						happyActor->PlayerMaterialBillboard->SetMaterial(0, this->playerTwoMaterial);
+						break;
+					case 2:
+						happyActor->PlayerMaterialBillboard->SetMaterial(0, this->playerThreeMaterial);
+						break;
+					case 3:
+						happyActor->PlayerMaterialBillboard->SetMaterial(0, this->playerFourMaterial);
+						break;
+					}
+
+					currentDriver->FinishedRace(this->finishedPlayers.Num(), this->numberOfPlayers);
+					this->finishedPlayers.Add(TKeyValuePair<float, uint8>(this->currentRaceDuration, currentDriver->controllerIndex));
+					currentDriver->controlledVehicle->DestroyVehicle();
+					this->GetWorld()->DestroyActor(currentDriver);
+					this->driverActors[driverIter.GetIndex()] = nullptr;
+				}
 			}
 		}
 
 		TArray<TKeyValuePair<float, uint8>> newRanking = TArray<TKeyValuePair<float, uint8>>();
 		newRanking.Empty();
 		for (int i = 0; i < this->driverActors.Num(); i++)
+		{
+			if (this->driverActors[i] != nullptr)
 			newRanking.Add(TKeyValuePair<float, uint8>(this->progressArray[this->driverActors[i]->controllerIndex], this->driverActors[i]->controllerIndex));
+		}
 		newRanking.Sort();
-		int currentRankingIndex = 0;
+
+		TArray<uint8> newRankingOrder = TArray<uint8>();
+		newRankingOrder.Empty();
 		for (int i = newRanking.Num() - 1; i >= 0; i--)
 		{
-			this->rankingArray[currentRankingIndex] = newRanking[i].Value;
-			currentRankingIndex++;
+			newRankingOrder.Add(newRanking[i].Value);
+		}
+		for (int i = this->finishedPlayers.Num() - 1; i >= 0; i--)
+			newRankingOrder.Insert(this->finishedPlayers[i].Value, 0);
+
+		for (int i = 0; i < newRankingOrder.Num() && i < this->rankingArray.Num(); i++)
+			this->rankingArray[i] = newRankingOrder[i];
+
+		if ((this->finishedPlayers.Num() >= this->numberOfPlayers - 1 && this->numberOfPlayers > 1) || (this->finishedPlayers.Num() == 1 && this->numberOfPlayers == 1))
+		{
+			for (TArray<ADriverPawn*>::TIterator driverIter(this->driverActors); driverIter; ++driverIter)
+			{
+				ADriverPawn* currentDriver = *driverIter;
+
+				if (currentDriver != nullptr)
+				{
+					currentDriver->FinishedRace(this->finishedPlayers.Num(), this->numberOfPlayers);
+					this->finishedPlayers.Add(TKeyValuePair<float, uint8>(this->currentRaceDuration, currentDriver->controllerIndex));
+					currentDriver->controlledVehicle->DestroyVehicle();
+					this->GetWorld()->DestroyActor(currentDriver);
+					this->driverActors[driverIter.GetIndex()] = nullptr;
+				}
+			}
+
+			UGameStateStatics::SaveTrackRecord(this->currentTrack, this->finishedPlayers[0].Key);
+			this->raceOver = true;
 		}
 	}
 
-	if (this->timeRunning)
+	if (this->timeRunning && !(this->raceOver))
 	{
 		this->currentRaceDuration += DeltaSeconds;
 	}
@@ -119,6 +211,8 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 	uint8 currentPlayer = 0;
 	this->driverActors = TArray<ADriverPawn*>();
 	this->driverActors.Empty();
+	this->finishedPlayers = TArray<TKeyValuePair<float, uint8>>();
+	this->finishedPlayers.Empty();
 
 	while (spawnPoints && currentPlayer < numberOfPlayers)
 	{
@@ -171,6 +265,22 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 				{
 					playerController = currentPlayerController;
 				}
+			}
+
+			switch (spawnedDriver->controllerIndex)
+			{
+			case 0:
+				spawnedDriver->PlayerMaterialBillboard->SetMaterial(0, this->playerOneMaterial);
+				break;
+			case 1:
+				spawnedDriver->PlayerMaterialBillboard->SetMaterial(0, this->playerTwoMaterial);
+				break;
+			case 2:
+				spawnedDriver->PlayerMaterialBillboard->SetMaterial(0, this->playerThreeMaterial);
+				break;
+			case 3:
+				spawnedDriver->PlayerMaterialBillboard->SetMaterial(0, this->playerFourMaterial);
+				break;
 			}
 
 			if (playerController != nullptr)
