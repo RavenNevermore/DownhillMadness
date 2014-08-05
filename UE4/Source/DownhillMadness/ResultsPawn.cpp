@@ -42,7 +42,9 @@ void AResultsPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	this->CameraSocket->RelativeRotation.Yaw += (DeltaSeconds * 45.0f);
+	FRotator updatedRotation = this->CameraSocket->RelativeRotation;
+	updatedRotation.Yaw += (DeltaSeconds * -45.0f);
+	this->CameraSocket->SetRelativeRotation(updatedRotation, false);
 }
 
 
