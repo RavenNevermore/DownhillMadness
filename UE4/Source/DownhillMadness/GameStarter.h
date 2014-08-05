@@ -8,6 +8,7 @@
 #include "DriverSpectatorPawn.h"
 #include "CustomGameViewportClient.h"
 #include "GameStateStatics.h"
+#include "TrackSplineComponent.h"
 #include "GameStarter.generated.h"
 
 /**
@@ -51,6 +52,12 @@ class AGameStarter : public AActor
 
 	UPROPERTY(Category = GameStarter, BlueprintReadOnly, VisibleInstanceOnly)
 	float currentRaceDuration;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
+	int32 currentTrack;
+
+	UPROPERTY(Category = GameStarter, BlueprintReadWrite, EditInstanceOnly)
+	ATrackSplineComponent* playerTracker;
 
 	bool startingRace;
 	bool timeRunning;

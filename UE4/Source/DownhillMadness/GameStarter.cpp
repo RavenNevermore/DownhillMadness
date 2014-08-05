@@ -39,6 +39,31 @@ AGameStarter::AGameStarter(const class FPostConstructInitializeProperties& PCIP)
 
 void AGameStarter::Tick(float DeltaSeconds)
 {
+	if (this->timeRunning || this->startingRace)
+	{
+		for (TArray<ADriverPawn*>::TIterator driverIter(this->driverActors); driverIter; ++driverIter)
+		{
+			ADriverPawn* currentDriver = *driverIter;
+
+			if (this->playerTracker != nullptr)
+			{
+				this->progressArray[currentDriver->controllerIndex] = this->playerTracker->RelativeSplinePosition(currentDriver->DriverCapsule->BodyInstance.GetUnrealWorldTransform().GetLocation());
+			}
+		}
+
+		TArray<TKeyValuePair<float, uint8>> newRanking = TArray<TKeyValuePair<float, uint8>>();
+		newRanking.Empty();
+		for (int i = 0; i < this->driverActors.Num(); i++)
+			newRanking.Add(TKeyValuePair<float, uint8>(this->progressArray[this->driverActors[i]->controllerIndex], this->driverActors[i]->controllerIndex));
+		newRanking.Sort();
+		int currentRankingIndex = 0;
+		for (int i = newRanking.Num() - 1; i >= 0; i--)
+		{
+			this->rankingArray[currentRankingIndex] = newRanking[i].Value;
+			currentRankingIndex++;
+		}
+	}
+
 	if (this->timeRunning)
 	{
 		this->currentRaceDuration += DeltaSeconds;
@@ -127,7 +152,7 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 			if (currentPlayer > 0 && GEngine)
 			{
 				player = GEngine->GameViewport->CreatePlayer(currentPlayer, outString, true);
-				GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+				//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 			}
 
 			ULocalPlayer* localPlayer = Cast<ULocalPlayer>(player);
@@ -195,7 +220,7 @@ void AGameStarter::StartGameInternal(uint8 numberOfPlayers, const TArray<FSerial
 			if (GEngine)
 			{
 				player = GEngine->GameViewport->CreatePlayer(currentPlayer, outString, true);
-				GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
+				//GEngine->AddGamePlayer(GEngine->GameViewport, (ULocalPlayer*)(player));
 			}
 
 			ULocalPlayer* localPlayer = Cast<ULocalPlayer>(player);
@@ -233,9 +258,8 @@ void AGameStarter::EndGame()
 {
 	if (GEngine)
 	{
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 3);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 2);
-		GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
+		while (GEngine->GetGamePlayers(GEngine->GameViewport).Num() > 1)
+			GEngine->RemoveGamePlayer(GEngine->GameViewport, 1);
 	}
 }
 
