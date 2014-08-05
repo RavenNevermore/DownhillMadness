@@ -634,6 +634,7 @@ UObject* UGameStateStatics::GetClassDefaultObject(UClass* inClass)
 FString UGameStateStatics::ReplaceUmlaut(const FString& inString)
 {
 	return inString.Replace(TEXT("ö"), TEXT("o"), ESearchCase::CaseSensitive);
+	return inString.Replace(TEXT("?"), TEXT("o"), ESearchCase::CaseSensitive);
 }
 
 
