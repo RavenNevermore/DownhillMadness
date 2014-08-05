@@ -118,6 +118,9 @@ class UGameStateStatics : public UBlueprintFunctionLibrary
 	static UObject* GetClassDefaultObject(UClass* inClass);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameStateStatics")
+	static FString ReplaceUmlaut(const FString& inString);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameStateStatics")
 	static APlayerController* GetPlayerControllerFromID(int32 id);
 
 	static uint8 numberOfPlayers;
