@@ -3,6 +3,8 @@
 #pragma once
 
 #include "GameFramework/Pawn.h"
+#include "GameStateStatics.h"
+#include "Kismet/GameplayStatics.h"
 #include "ResultsPawn.generated.h"
 
 /**
@@ -33,6 +35,9 @@ class AResultsPawn : public APawn
 
 	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
 	uint8 ranking;
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
+	uint8 controllerIndex;
 
 	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
 	bool raceOver;
