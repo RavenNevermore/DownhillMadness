@@ -21,6 +21,12 @@ ATrackSplineNode::ATrackSplineNode(const class FPostConstructInitializePropertie
 
 	this->pin = PCIP.CreateDefaultSubobject<class USphereComponent>(this, TEXT("Pin"));
 	//this->pin->SetRelativeScale3D(FVector(1, 1, 10));
+	this->pin->SetCollisionProfileName(FName(TEXT("WorldDynamic")));
+	this->pin->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	this->pin->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	this->pin->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	this->pin->SetSimulatePhysics(false);
+	this->pin->SetEnableGravity(false);
 	this->RootComponent = this->pin;
 }
 
