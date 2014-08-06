@@ -14,17 +14,32 @@ class AResultsPawn : public APawn
 	GENERATED_UCLASS_BODY()
 
 	void BeginPlay() OVERRIDE;
+	void SetupPlayerInputComponent(class UInputComponent* InputComponent) OVERRIDE;
 	void Tick(float DeltaSeconds) OVERRIDE;
 
-	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	void EndRaceButton();
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UArrowComponent> FrontArrow;
 
-	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class USceneComponent> CameraSocket;
 
-	UPROPERTY(Category = DriverPawn, BlueprintReadOnly, VisibleDefaultsOnly)
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleDefaultsOnly)
 	TSubobjectPtr<class UCameraComponent> RotatingCamera;
 
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
 	float playerTime;
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
 	uint8 ranking;
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
+	bool raceOver;
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<uint8> rankingArray;
+
+	UPROPERTY(Category = ResultsPawn, BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<float> recordsArray;
 };

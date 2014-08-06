@@ -377,7 +377,6 @@ void ADriverPawn::Tick(float DeltaSeconds)
 void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	check(InputComponent);
-	FInputAxisBinding binding;
 	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
 	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
 	InputComponent->BindAction("PlayerRespawn", EInputEvent::IE_Pressed, this, &ADriverPawn::OnRespawnRequested).bConsumeInput = false;

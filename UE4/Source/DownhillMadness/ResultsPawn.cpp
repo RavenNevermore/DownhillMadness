@@ -38,6 +38,25 @@ void AResultsPawn::BeginPlay()
 // ----------------------------------------------------------------------------
 
 
+void AResultsPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+{
+	check(InputComponent);
+	InputComponent->BindAction("EndRaceButton", EInputEvent::IE_Pressed, this, &AResultsPawn::EndRaceButton).bConsumeInput = false;
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+void AResultsPawn::EndRaceButton()
+{
+
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 void AResultsPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
