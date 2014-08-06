@@ -45,12 +45,12 @@ void ATrackSplineNode::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 }
 
-void ATrackSplineNode::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-{
-	Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
-	//ATrackSplineComponent* parent = ((ATrackSplineComponent*)(this->getactor()));
-	//if (parent) parent->ConstructWaypoints();
-}
+//void ATrackSplineNode::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+//{
+//	Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
+//	//ATrackSplineComponent* parent = ((ATrackSplineComponent*)(this->getactor()));
+//	//if (parent) parent->ConstructWaypoints();
+//}
 
 
 

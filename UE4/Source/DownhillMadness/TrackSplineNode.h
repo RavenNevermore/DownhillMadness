@@ -45,5 +45,5 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) OVERRIDE;
 
-	virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) OVERRIDE;
+	//virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) OVERRIDE;
 };

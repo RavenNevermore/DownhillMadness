@@ -169,11 +169,11 @@ void ATrackSplineComponent::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void ATrackSplineComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	ConstructWaypoints();
-}
+//void ATrackSplineComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+//{
+//	Super::PostEditChangeProperty(PropertyChangedEvent);
+//	ConstructWaypoints();
+//}
 
 //void ATrackSplineComponent::DisplayDebug(UCanvas* Canvas, const class FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos)
 //{

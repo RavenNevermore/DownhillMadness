@@ -71,7 +71,7 @@ public:
 
 	virtual void Tick(float DeltaSeconds) OVERRIDE;
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) OVERRIDE;
+	//virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) OVERRIDE;
 
 	//virtual void DisplayDebug(UCanvas* Canvas, const class FDebugDisplayInfo& DebugDisplay, float& YL, float& YPos) OVERRIDE;
 };
