@@ -50,7 +50,12 @@ void AResultsPawn::SetupPlayerInputComponent(class UInputComponent* InputCompone
 
 void AResultsPawn::EndRaceButton()
 {
-
+	if (this->raceOver)
+	{
+		UGameStateStatics::EndNoSplitscreenMultiplayer();
+		UGameStateStatics::SetReloadMenu(true);
+		UGameplayStatics::OpenLevel(this, FName(TEXT("Menu_Main")), true, FString(TEXT("")));
+	}
 }
 
 
@@ -62,7 +67,7 @@ void AResultsPawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	FRotator updatedRotation = this->CameraSocket->RelativeRotation;
-	updatedRotation.Yaw += (DeltaSeconds * -45.0f);
+	updatedRotation.Yaw += (DeltaSeconds * -10.0f);
 	this->CameraSocket->SetRelativeRotation(updatedRotation, false);
 }
 

@@ -60,6 +60,7 @@ void AGameStarter::Tick(float DeltaSeconds)
 					AResultsPawn* resultsPawn = (AResultsPawn*)(this->GetWorld()->SpawnActor(AResultsPawn::StaticClass(), &spawnPos, &spawnRotation, FActorSpawnParameters()));
 					resultsPawn->ranking = this->finishedPlayers.Num();
 					resultsPawn->playerTime = this->currentRaceDuration;
+					resultsPawn->controllerIndex = currentDriver->controllerIndex;
 					currentDriver->Controller->Possess(resultsPawn);
 
 					APlayerController* playerController = Cast<APlayerController>(resultsPawn->Controller);
@@ -89,7 +90,7 @@ void AGameStarter::Tick(float DeltaSeconds)
 					}
 					AHappyActor* happyActor = (AHappyActor*)(this->GetWorld()->SpawnActor(currentDriver->happyActorClass, &spawnPos, &spawnRotation, FActorSpawnParameters()));
 
-					switch (this->finishedPlayers.Num())
+					switch (currentDriver->controllerIndex)
 					{
 					case 0:
 						happyActor->PlayerMaterialBillboard->SetMaterial(0, this->playerOneMaterial);
@@ -148,6 +149,63 @@ void AGameStarter::Tick(float DeltaSeconds)
 					currentDriver->controlledVehicle->DestroyVehicle();
 					this->GetWorld()->DestroyActor(currentDriver);
 					this->driverActors[driverIter.GetIndex()] = nullptr;
+				}
+			}
+
+			//this->EndGame();
+
+			UCustomGameViewportClient* customGameViewportClient = Cast<UCustomGameViewportClient>(GEngine->GameViewport);
+			if (customGameViewportClient != nullptr)
+			{
+				customGameViewportClient->bDontUseSplitscreen = false;
+				customGameViewportClient->UpdateActiveSplitscreenType();
+				customGameViewportClient->LayoutPlayers();
+				customGameViewportClient->bDontUseSplitscreen = true;
+				customGameViewportClient->LayoutPlayers();
+			}
+
+			for (int i = 0; i < this->numberOfPlayers; i++)
+			{
+				/*FString outString;
+				UPlayer* player = this->GetWorld()->GetFirstLocalPlayerFromController();
+				if (i > 0 && GEngine)
+				{
+					player = GEngine->GameViewport->CreatePlayer(i, outString, true);
+				}
+
+				ULocalPlayer* localPlayer = Cast<ULocalPlayer>(player);
+				if (localPlayer != nullptr)
+				{
+					localPlayer->ControllerId = UGameStateStatics::controllerIndexes[i];
+				}*/
+
+				FVector spawnPos = FVector::ZeroVector;
+				FRotator spawnRotation = FRotator::ZeroRotator;
+				if (this->playersGoalPodest != nullptr)
+				{
+					spawnPos = this->playersGoalPodest->GetActorLocation();
+					spawnRotation = this->playersGoalPodest->GetActorRotation();
+				}
+
+				AResultsPawn* resultsPawn = (AResultsPawn*)(this->GetWorld()->SpawnActor(AResultsPawn::StaticClass(), &spawnPos, &spawnRotation, FActorSpawnParameters()));
+				resultsPawn->controllerIndex = UGameStateStatics::controllerIndexes[i];
+				resultsPawn->raceOver = true;
+				resultsPawn->rankingArray.Empty();
+				resultsPawn->recordsArray.Empty();
+				for (int j = 0; j < this->finishedPlayers.Num(); j++)
+				{
+					resultsPawn->recordsArray.Add(this->finishedPlayers[j].Key);
+					resultsPawn->rankingArray.Add(this->finishedPlayers[j].Value);
+				}
+
+				APlayerController* playerController = UGameStateStatics::GetPlayerControllerFromID(UGameStateStatics::controllerIndexes[i]);
+
+				if (playerController != nullptr)
+				{
+					playerController->AutoReceiveInput = (EAutoReceiveInput::Type)(UGameStateStatics::controllerIndexes[i] + 1);
+					playerController->EnableInput(playerController);
+					playerController->Possess(resultsPawn);
+					playerController->ClientSetHUD(this->resultsHUDclass);
 				}
 			}
 
