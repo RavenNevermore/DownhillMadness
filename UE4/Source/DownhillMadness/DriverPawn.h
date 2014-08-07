@@ -85,6 +85,12 @@ class ADriverPawn : public APawn
 	UFUNCTION()
 	void LeanPlayer(float leanX, float leanY);
 
+    /**
+    * @brief	Respawn requested
+    */
+    UFUNCTION()
+    void OnPushKart();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Physics|CustomVehicle|DriverPawn")
 	void DriverHitSomething(class UPrimitiveComponent* ownComponent, class AActor* otherActor, class UPrimitiveComponent* otherComponent, float hitImpulse, const FHitResult& Hit);
 
@@ -225,5 +231,8 @@ private:
 	FVector cameraAirDifference;
 
 	UPROPERTY()
-	bool touchedGround;
+    bool touchedGround;
+
+    UPROPERTY()
+    bool pushMyKart;
 };

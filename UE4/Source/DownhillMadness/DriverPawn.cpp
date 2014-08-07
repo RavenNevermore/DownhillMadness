@@ -168,6 +168,12 @@ void ADriverPawn::Tick(float DeltaSeconds)
 				break;
 			}
 		}
+
+        if (this->pushMyKart)
+        {
+            this->pushMyKart = false;
+            this->controlledVehicle->PushForward();
+        }
 	}
 
 
@@ -380,6 +386,7 @@ void ADriverPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAxis("X Axis", this, &ADriverPawn::OnGetSteeringInput).bConsumeInput = false;
 	InputComponent->BindAxis("Brakes", this, &ADriverPawn::OnGetBrakeInput).bConsumeInput = false;
 	InputComponent->BindAction("PlayerRespawn", EInputEvent::IE_Pressed, this, &ADriverPawn::OnRespawnRequested).bConsumeInput = false;
+    InputComponent->BindAction("PushKart", EInputEvent::IE_Pressed, this, &ADriverPawn::OnPushKart).bConsumeInput = false;
 	InputComponent->BindAxis("Lean X", this, &ADriverPawn::OnGetLeanX).bConsumeInput = false;
 	InputComponent->BindAxis("Lean Y", this, &ADriverPawn::OnGetLeanY).bConsumeInput = false;
 }
@@ -499,6 +506,16 @@ void ADriverPawn::LeanPlayer(float leanX, float leanY)
 	}
 }
 
+
+// ----------------------------------------------------------------------------
+
+void ADriverPawn::OnPushKart()
+{
+    if (!(this->unlockControls))
+        return;
+
+    this->pushMyKart = true;
+}
 
 // ----------------------------------------------------------------------------
 

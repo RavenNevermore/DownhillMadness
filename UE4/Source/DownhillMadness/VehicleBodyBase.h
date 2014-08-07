@@ -35,6 +35,7 @@ struct FVehicleErrorCheck
 	UPROPERTY(Category = VehicleBody, BlueprintReadWrite, EditAnywhere)
 	bool noErrors;
 
+
 	FVehicleErrorCheck();
 };
 
@@ -61,6 +62,13 @@ class AVehicleBodyBase : public AVehiclePartBase
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
 	void SetTransparent(bool bMakeTransparent);
+
+    /**
+    * @brief	Set transparency on body
+    * @param	bMakeTransparent	Whether to make transparent or opaque
+    */
+    UFUNCTION(BlueprintCallable, Category = "Physics|CustomVehicle|VehicleBody")
+    void PushForward();
 
 	/**
 	* @brief	Update controls of this vehicle
