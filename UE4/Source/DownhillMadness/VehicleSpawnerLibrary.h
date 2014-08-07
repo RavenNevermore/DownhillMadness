@@ -212,4 +212,8 @@ class UVehicleSpawnerLibrary : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "VehicleSpawner")
 	static FString GetGeneratedVehicleName(const FSerializedVehicle& inSerializedVehicle);
+
+	static void AddClassToRootList(UClass* inclass);
+
+	static TArray<TLazyObjectPtr<UClass>> allClasses;
 };

@@ -51,6 +51,10 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 
 	this->attachedSteering = nullptr;
 	this->attachedBrake = nullptr;
+	this->attachedWheels = TArray<AVehicleWheelBase*>();
+	this->attachedWheels.Empty();
+	this->attachedWeights = TArray<AVehicleWeightBase*>();
+	this->attachedWeights.Empty();
 	this->isGrounded = false;
 
 	this->PrimaryActorTick.bCanEverTick = true;

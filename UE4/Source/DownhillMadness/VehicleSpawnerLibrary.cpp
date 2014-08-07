@@ -3,6 +3,8 @@
 #include "DownhillMadness.h"
 #include "VehicleSpawnerLibrary.h"
 
+TArray<TLazyObjectPtr<UClass>> UVehicleSpawnerLibrary::allClasses = TArray<TLazyObjectPtr<UClass>>();
+
 
 FSerializedVehicle::FSerializedVehicle()
 {
@@ -23,6 +25,8 @@ FSerializedVehicle::FSerializedVehicle()
 UVehicleSpawnerLibrary::UVehicleSpawnerLibrary(const class FPostConstructInitializeProperties& PCIP)
 : Super(PCIP)
 {
+	this->allClasses = TArray<TLazyObjectPtr<UClass>>();
+	this->allClasses.Empty();
 }
 
 
@@ -35,6 +39,7 @@ void UVehicleSpawnerLibrary::SerializeVehicle(FSerializedVehicle& outSerializedV
 		return;
 
 	outSerializedVehicle.bodyClass = vehicle->GetClass();
+	UVehicleSpawnerLibrary::AddClassToRootList(outSerializedVehicle.bodyClass);
 	FMatrix bodyMatrix = vehicle->Body->GetComponenTransform().ToMatrixNoScale();
 
 	for (TArray<AVehicleWheelBase*>::TIterator wheelIter(vehicle->attachedWheels); wheelIter; ++wheelIter)
@@ -44,6 +49,7 @@ void UVehicleSpawnerLibrary::SerializeVehicle(FSerializedVehicle& outSerializedV
 		FMatrix relativeMatrix = wheelMatrix * bodyMatrix.InverseSafe();
 
 		outSerializedVehicle.wheelClasses.Add(FWheelClass(currentWheel->GetClass(), currentWheel->bIsSteerable, currentWheel->bHasBrake, relativeMatrix));
+		UVehicleSpawnerLibrary::AddClassToRootList(currentWheel->GetClass());
 	}
 
 	for (TArray<AVehicleWeightBase*>::TIterator weightIter(vehicle->attachedWeights); weightIter; ++weightIter)
@@ -53,13 +59,20 @@ void UVehicleSpawnerLibrary::SerializeVehicle(FSerializedVehicle& outSerializedV
 		FMatrix relativeMatrix = weightMatrix * bodyMatrix.InverseSafe();
 
 		outSerializedVehicle.weightClasses.Add(FWeightClass(currentWeight->GetClass(), relativeMatrix));
+		UVehicleSpawnerLibrary::AddClassToRootList(currentWeight->GetClass());
 	}
 
 	if (vehicle->attachedSteering != nullptr)
+	{
 		outSerializedVehicle.steeringClass = vehicle->attachedSteering->GetClass();
+		UVehicleSpawnerLibrary::AddClassToRootList(vehicle->attachedSteering->GetClass());
+	}
 
 	if (vehicle->attachedBrake != nullptr)
+	{
 		outSerializedVehicle.brakeClass = vehicle->attachedBrake->GetClass();
+		UVehicleSpawnerLibrary::AddClassToRootList(vehicle->attachedBrake->GetClass());
+	}
 }
 
 
@@ -76,60 +89,62 @@ AVehicleBodyBase* UVehicleSpawnerLibrary::SpawnVehicle(UObject* WorldContextObje
 	if (inSerializedVehicle.bodyClass != nullptr)
 	{
 		FActorSpawnParameters spawnParameters;
-
-		AVehicleBodyBase* vehicleBody = (AVehicleBodyBase*)(currentWorld->SpawnActor(inSerializedVehicle.bodyClass, &spawnLocation, &spawnRotation, spawnParameters));
-
-		if (vehicleBody != nullptr)
+		if (currentWorld)
 		{
-			FMatrix bodyMatrix = FRotationTranslationMatrix(spawnRotation, spawnLocation);
+			AVehicleBodyBase* vehicleBody = (AVehicleBodyBase*)(currentWorld->SpawnActor(inSerializedVehicle.bodyClass, &spawnLocation, &spawnRotation, spawnParameters));
 
-			for (TArray<FWheelClass>::TConstIterator wheelIter(inSerializedVehicle.wheelClasses); wheelIter; ++wheelIter)
+			if (vehicleBody != nullptr)
 			{
-				FWheelClass currentWheel = *wheelIter;
-				FMatrix wheelMatrix = currentWheel.relativeWheelMatrix * bodyMatrix;
+				FMatrix bodyMatrix = FRotationTranslationMatrix(spawnRotation, spawnLocation);
 
-				FVector wheelSpawnPos = wheelMatrix.GetOrigin();
-				FRotator wheelSpawnRotation = wheelMatrix.Rotator();
+				for (TArray<FWheelClass>::TConstIterator wheelIter(inSerializedVehicle.wheelClasses); wheelIter; ++wheelIter)
+				{
+					FWheelClass currentWheel = *wheelIter;
+					FMatrix wheelMatrix = currentWheel.relativeWheelMatrix * bodyMatrix;
 
-				AVehicleWheelBase* vehicleWheel = (AVehicleWheelBase*)(currentWorld->SpawnActor(currentWheel.classInstance, &wheelSpawnPos, &wheelSpawnRotation, spawnParameters));
-				if (currentWheel.isSteerable != 0)
-					vehicleWheel->bIsSteerable = true;
-				else
-					vehicleWheel->bIsSteerable = false;
-				if (currentWheel.hasBrake != 0)
-					vehicleWheel->bHasBrake = true;
-				else
-					vehicleWheel->bHasBrake = false;
+					FVector wheelSpawnPos = wheelMatrix.GetOrigin();
+					FRotator wheelSpawnRotation = wheelMatrix.Rotator();
 
-				vehicleBody->AttachWheel(vehicleWheel);
+					AVehicleWheelBase* vehicleWheel = (AVehicleWheelBase*)(currentWorld->SpawnActor(currentWheel.classInstance, &wheelSpawnPos, &wheelSpawnRotation, spawnParameters));
+					if (currentWheel.isSteerable != 0)
+						vehicleWheel->bIsSteerable = true;
+					else
+						vehicleWheel->bIsSteerable = false;
+					if (currentWheel.hasBrake != 0)
+						vehicleWheel->bHasBrake = true;
+					else
+						vehicleWheel->bHasBrake = false;
+
+					vehicleBody->AttachWheel(vehicleWheel);
+				}
+
+				for (TArray<FWeightClass>::TConstIterator weightIter(inSerializedVehicle.weightClasses); weightIter; ++weightIter)
+				{
+					FWeightClass currentWeight = *weightIter;
+					FMatrix weightMatrix = currentWeight.relativeWeightMatrix * bodyMatrix;
+
+					FVector weightSpawnPos = weightMatrix.GetOrigin();
+					FRotator weightSpawnRotation = weightMatrix.Rotator();
+
+					AVehicleWeightBase* vehicleWeight = (AVehicleWeightBase*)(currentWorld->SpawnActor(currentWeight.classInstance, &weightSpawnPos, &weightSpawnRotation, spawnParameters));
+
+					vehicleBody->AttachWeight(vehicleWeight);
+				}
+
+				if (inSerializedVehicle.steeringClass != nullptr)
+				{
+					AVehicleSteeringBase* vehicleSteering = (AVehicleSteeringBase*)(currentWorld->SpawnActor(inSerializedVehicle.steeringClass, &spawnLocation, &spawnRotation, spawnParameters));
+					vehicleBody->AttachSteering(vehicleSteering);
+				}
+
+				if (inSerializedVehicle.brakeClass != nullptr)
+				{
+					AVehicleBrakeBase* vehicleBrake = (AVehicleBrakeBase*)(currentWorld->SpawnActor(inSerializedVehicle.brakeClass, &spawnLocation, &spawnRotation, spawnParameters));
+					vehicleBody->AttachBrake(vehicleBrake);
+				}
+
+				return vehicleBody;
 			}
-
-			for (TArray<FWeightClass>::TConstIterator weightIter(inSerializedVehicle.weightClasses); weightIter; ++weightIter)
-			{
-				FWeightClass currentWeight = *weightIter;
-				FMatrix weightMatrix = currentWeight.relativeWeightMatrix * bodyMatrix;
-
-				FVector weightSpawnPos = weightMatrix.GetOrigin();
-				FRotator weightSpawnRotation = weightMatrix.Rotator();
-
-				AVehicleWeightBase* vehicleWeight = (AVehicleWeightBase*)(currentWorld->SpawnActor(currentWeight.classInstance, &weightSpawnPos, &weightSpawnRotation, spawnParameters));
-
-				vehicleBody->AttachWeight(vehicleWeight);
-			}
-
-			if (inSerializedVehicle.steeringClass != nullptr)
-			{
-				AVehicleSteeringBase* vehicleSteering = (AVehicleSteeringBase*)(currentWorld->SpawnActor(inSerializedVehicle.steeringClass, &spawnLocation, &spawnRotation, spawnParameters));
-				vehicleBody->AttachSteering(vehicleSteering);
-			}
-
-			if (inSerializedVehicle.brakeClass != nullptr)
-			{
-				AVehicleBrakeBase* vehicleBrake = (AVehicleBrakeBase*)(currentWorld->SpawnActor(inSerializedVehicle.brakeClass, &spawnLocation, &spawnRotation, spawnParameters));
-				vehicleBody->AttachBrake(vehicleBrake);
-			}
-
-			return vehicleBody;
 		}
 	}
 
@@ -494,9 +509,41 @@ FString UVehicleSpawnerLibrary::GetGeneratedVehicleName(const FSerializedVehicle
 // ----------------------------------------------------------------------------
 
 
+void UVehicleSpawnerLibrary::AddClassToRootList(UClass* inClass)
+{
+	if (inClass == nullptr)
+		return;
+
+	bool foundClass = false;
+	for (int i = 0; i < UVehicleSpawnerLibrary::allClasses.Num() && !foundClass; i++)
+	{
+		if (inClass == UVehicleSpawnerLibrary::allClasses[i].Get())
+			foundClass = true;
+	}
+
+	if (!foundClass)
+	{
+		UVehicleSpawnerLibrary::allClasses.Add(TLazyObjectPtr<UClass>(inClass));
+		inClass->AddToRoot();
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+
+
 UClass* FObjectReaderFix::FindClass(const FString& className)
 {
-	UClass* foundClass = FindObject<UClass>(ANY_PACKAGE, *className);
+	UClass* foundClass = nullptr;
+
+	for (int i = 0; i < UVehicleSpawnerLibrary::allClasses.Num() && foundClass == nullptr; i++)
+	{
+		if (className == UVehicleSpawnerLibrary::allClasses[i].Get()->GetFName().ToString() || (UVehicleSpawnerLibrary::allClasses[i].Get()->ClassGeneratedBy != nullptr && className == UVehicleSpawnerLibrary::allClasses[i].Get()->ClassGeneratedBy->GetFName().ToString()))
+			foundClass = UVehicleSpawnerLibrary::allClasses[i].Get();
+	}
+
+	if (foundClass != nullptr)
+		return foundClass;
 
 	if (foundClass == nullptr)
 	{
@@ -510,6 +557,8 @@ UClass* FObjectReaderFix::FindClass(const FString& className)
 		if (foundBlueprint != nullptr)
 			foundClass = foundBlueprint->GeneratedClass;
 	}
+
+	UVehicleSpawnerLibrary::AddClassToRootList(foundClass);
 
 	return foundClass;
 }
