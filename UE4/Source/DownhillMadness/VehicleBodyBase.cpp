@@ -69,14 +69,10 @@ void AVehicleBodyBase::PushForward()
     float speed = this->Body->BodyInstance.GetUnrealWorldVelocity().Size();
     if (speed < 280)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("This is the log!"));
-
         this->Body->AddImpulse(
             this->GetActorForwardVector() * 85,
             NAME_None,
             true);
-    } else {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Nope!"));
     }
 }
 
