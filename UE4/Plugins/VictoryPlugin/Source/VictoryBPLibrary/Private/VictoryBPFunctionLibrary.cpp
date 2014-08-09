@@ -14,7 +14,7 @@ void UVictoryBPFunctionLibrary::OperatingSystem__GetCurrentPlatform(
 	bool& Windows_, 		//some weird bug of making it all caps engine-side
 	bool& Mac,
 	bool& Linux, 
-	bool& iOS, 
+	bool& iOS,
 	bool& Android,
 	bool& PS4,
 	bool& XBoxOne,
