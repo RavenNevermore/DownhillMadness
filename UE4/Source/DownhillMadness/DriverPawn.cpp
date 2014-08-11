@@ -172,7 +172,7 @@ void ADriverPawn::Tick(float DeltaSeconds)
         if (this->pushMyKart)
         {
             this->pushMyKart = false;
-            this->controlledVehicle->PushForward();
+			this->controlledVehicle->PushForward(this->calculatedMass);
         }
 	}
 

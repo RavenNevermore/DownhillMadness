@@ -64,13 +64,13 @@ AVehicleBodyBase::AVehicleBodyBase(const class FPostConstructInitializePropertie
 
 // ----------------------------------------------------------------------------
 
-void AVehicleBodyBase::PushForward()
+void AVehicleBodyBase::PushForward(float calculatedMass)
 {
     float speed = this->Body->BodyInstance.GetUnrealWorldVelocity().Size();
     if (speed < 280)
     {
         this->Body->AddImpulse(
-            this->GetActorForwardVector() * 85,
+            this->GetActorForwardVector() * 0.96f * calculatedMass,
             NAME_None,
             true);
     }
